@@ -31,10 +31,9 @@ public class JarBundleLoader implements BundleLoader {
 			logger.error("bundle directory [{}] not exists", bundleDir.toAbsolutePath().toString());
 			return new ArrayList<Bundle>();
 		}
-		Set<String> names = bundles.stream().map(b -> b.getFileName()).collect(Collectors.toSet());
 		Set<String> idSet = bundles.stream().map(b -> b.getId()).collect(Collectors.toSet());
-		List<Path> bundleFiles = Files.list(bundleDir).filter(f -> f.endsWith(".jar"))
-				.filter(f -> !names.contains(f.getFileName().toString())).collect(Collectors.toList());
+		List<Path> bundleFiles = Files.list(bundleDir).filter(f -> f.getFileName().toString().endsWith(".jar"))
+				.collect(Collectors.toList());
 		if (bundleFiles.isEmpty())
 			return new ArrayList<Bundle>();
 
