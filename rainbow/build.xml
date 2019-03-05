@@ -26,8 +26,8 @@
 			<fileset dir="build/bin" />
 		</copy>
 		
-		<zip destfile="${dist}/dev.zip" basedir="${dist}" includes="dev/**" />
-		<zip destfile="${dist}/deploy.zip" basedir="${dist}" includes="deploy/**" />
+		<zip destfile="${dist}/dev.zip" basedir="${dist}/dev" />
+		<zip destfile="${dist}/deploy.zip" basedir="${dist}/deploy" />
 		<delete dir="${dist}/dev" />
 		<delete dir="${dist}/deploy" />
 	</target>
