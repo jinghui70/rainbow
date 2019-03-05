@@ -1,0 +1,111 @@
+<project name="base" basedir=".">
+	<property name="dist.dev" location="${dist}/dev" />
+	<property name="dist.deploy" location="${dist}/deploy" />	
+	<property name="report" location="${dist}/report" />
+
+	<target name="clean">
+		<delete dir="${dist}" />
+		<mkdir dir="${dist}" />
+	</target>
+	<target name="init">
+		<script language="javascript"> <![CDATA[
+			var echo = project.createTask("echo");
+			// 解析所有预置bundle
+			var presets = {};
+			var bundleDir = new java.io.File("bundle");
+			if (bundleDir) {
+				var presetFiles = bundleDir.list();
+				for (i = 0; i<presets.length;i++) {
+					filename = presetFiles[i];
+					if (filename.slice(-4)==".jar")
+						presets[filename.slice(0, -4)] = true;
+				}
+			}
+			// 分析一个bundle的依赖
+			var bundles = [];
+			var initBundle = function(file, bundle) {
+				echo.setMessage("find bundle: " + bundle);
+				echo.perform();
+				var content = java.nio.file.Files.readAllLines(file.toPath());
+				var id = "";
+				var parents = {};
+				content.forEach(function(line){
+					line = line.trim();
+					if (line.slice(0,4)=="<id>") {
+						id = line.slice(4, -5);
+						if (id!=bundle) throw Error("Bad id [" + id + "] of bundle [" + bundle + "]!");
+					} else if (line.slice(0,8)=="<parent>") {
+						parent = line.slice(8, -9);
+						if (!presets[parent]) parents[parent] = true;
+					}
+				});
+				bundles.push({id: id, parents: parents});
+			}
+			// 寻找所有的bundle.xml文件并逐一分析
+		    var basedir  = new java.io.File("..");
+			fs = project.createDataType("fileset");
+			fs.setDir(basedir);
+			fs.setIncludes("*/src/bundle.xml");
+			ds = fs.getDirectoryScanner(project);
+			files = ds.getIncludedFiles();
+			for(var i=0;i<files.length;i++) {
+				var bundle = files[i].slice(0, -15);
+				file = new java.io.File(basedir, files[i]);
+				initBundle(file, bundle);
+			}
+			bundles.reverse();
+			var ordered = [];
+			var left = 0
+			while(bundles.length>0) {
+				if (bundles.length==left) {
+					var err = bundles.map(function(b){return b.id;}).join();
+					throw Error("cycle dependent found![" + err + "]");
+				}
+				left = bundles.length;
+				for (i=bundles.length-1;i>=0;i--) {
+					var bundle = bundles[i];
+					if (Object.keys(bundle.parents).length==0) {
+						ordered.push(bundle.id);
+						bundles.splice(i, 1);
+						bundles.forEach(function(b) {
+							delete b.parents[bundle.id];
+						});
+					}
+				}
+			}
+			echo.setMessage("bundle ordered: " + ordered.join());
+			echo.perform();
+			var filelist = project.createDataType("filelist");
+			filelist.setDir(basedir);
+			filelist.setFiles(ordered.join());
+			project.addReference("bundles", filelist);
+			]]>
+		</script>			
+	</target>
+
+	<macrodef name="build">
+		<attribute name="flag" />
+		<sequential>
+			<mkdir dir="${dist}/@{flag}/lib" />
+			<mkdir dir="${dist}/@{flag}/bundle" />
+			<unzip src="@{flag}.zip" dest="${dist}/@{flag}" encoding="GBK" />
+			<subant target="build_@{flag}" genericantfile="build/common.xml" inheritall="true" failonerror="@{failonerror}">
+				<property name="root" location="${dist}/@{flag}" />
+				<filelist refid="bundles" />
+			</subant>
+			<echo file="${dist}/@{flag}/version.txt" encoding="UTF-8">${application-name} Version:${version}</echo>
+			<delete dir="${build}" />
+		</sequential>
+	</macrodef>
+
+	<target name="build_dev" depends="init">
+		<mkdir dir="${report}/junit" />
+		<build flag="dev" />
+	</target>
+
+	<target name="build_deploy" depends="init">
+		<build flag="deploy" />
+	</target>
+	
+	<target name="build" depends="clean, init, build_dev, build_deploy" />
+</project>

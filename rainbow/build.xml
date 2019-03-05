@@ -1,0 +1,40 @@
+<project name="rainbow" default="build" basedir=".">
+	<property name="application-name" value="RAINBOW" />
+	<tstamp>
+		<format property="BUILD_TIME" pattern="yyyyMMdd-HHmm" />
+	</tstamp>
+	<property name="version" value="4.0_${BUILD_TIME}" />
+	<property name="dist" location="../dist" />
+
+	<target name="build" description="build dev version">
+		<ant antfile="../core/build.xml" target="build" useNativeBaseDir="true" />
+		
+		<ant antfile="build/build_bundle.xml" target="clean" />		
+		
+		<ant antfile="build/build_bundle.xml" target="build_dev" />
+		<copy todir="${dist}/dev/build" includeEmptyDirs="false">
+			<fileset dir="build" includes="*.*" />
+		</copy>
+
+		<ant antfile="build/build_bundle.xml" target="build_deploy" />
+		<ant antfile="build/common.xml" target="build_deploy">
+			<property name="root" location="${dist}/deploy" />
+			<property name="dest" value="lib" />
+			<property name="basedir" value="../bootstrap" />
+		</ant>		
+		<copy todir="${dist}/deploy/bin">
+			<fileset dir="build/bin" />
+		</copy>
+		
+		<zip destfile="${dist}/dev.zip" basedir="${dist}" includes="dev/**" />
+		<zip destfile="${dist}/deploy.zip" basedir="${dist}" includes="deploy/**" />
+	</target>
+	<target name="ff" >
+		<ant antfile="build/build_bundle.xml" target="clean" />		
+		<ant antfile="build/common.xml" target="build_deploy">
+			<property name="root" location="${dist}/deploy" />
+			<property name="dest" value="lib" />
+			<property name="basedir" value="../bootstrap" />
+		</ant>		
+	</target>
+</project>

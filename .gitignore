@@ -1,0 +1,15 @@
+# Compiled class file
+*.class
+
+dist
+log
+bin
+bin-test
+
+# Log file
+*.log
+
+.DS_Store
+.metadata
+.settings
+.recommenders

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://www.icitic.com/core/db/model">
+	<name>OK</name>
+	<entities>
+		<entity>
+			<name>TestObj</name>
+			<dbName>T_TEST</dbName>
+			<cnName>方言测试</cnName>
+			<tableSpace>OK_TS</tableSpace>
+			<indexSpace>OK_INDEX_TS</indexSpace>
+			<columns>
+				<column>
+					<name>id</name>
+					<dbName>ID</dbName>
+					<cnName>ID</cnName>
+					<type>INT</type>
+					<length>0</length>
+					<precision>0</precision>
+					<key>true</key>
+					<mandatory>true</mandatory>
+				</column>
+				<column>
+					<name>name</name>
+					<dbName>NAME</dbName>
+					<cnName>NAME</cnName>
+					<type>VARCHAR</type>
+					<length>20</length>
+					<precision>0</precision>
+					<key>false</key>
+					<mandatory>true</mandatory>
+				</column>
+			</columns>
+			<indexes/>
+		</entity>
+	</entities>
+</model>

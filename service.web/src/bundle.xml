@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bundle>
+	<id>service.web</id>
+	<desc>通过web调用服务插件</desc>
+	<parent>service</parent>
+</bundle>

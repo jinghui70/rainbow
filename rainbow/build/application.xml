@@ -1,0 +1,12 @@
+<project name="application" basedir=".">
+	<property name="application-name" value="XXXXXX" />
+	<tstamp>
+		<format property="BUILD_TIME" pattern="yyyyMMdd-HHmm" />
+	</tstamp>
+	<property name="version" value="4.0_${BUILD_TIME}" />
+	<property name="dist" location="../dist" />
+		
+	<target name="build" description="build dev version">
+		<ant antfile="build/build_bundle.xml" target="build" />
+	</target>
+</project>

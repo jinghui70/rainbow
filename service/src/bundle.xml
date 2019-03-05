@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bundle>
+	<id>service</id>
+	<desc>提供服务支持的核心包</desc>
+</bundle>

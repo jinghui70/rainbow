@@ -1,0 +1,61 @@
+<project name="core" default="build" basedir=".">
+
+	<property name="src" location="src" />
+	<property name="test" location="test" />
+	<property name="output" location="output" />
+	<property name="build" location="output/build" />
+	<property name="deploy" location="output/deploy" />
+	<property name="rainbow" location="../rainbow" />
+
+	<path id="compile.classpath">
+		<pathelement path="${build}" />
+		<fileset dir="${rainbow}/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<delete dir="${output}" />
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="build_deploy">
+		<antcall target="clean" />
+		<delete file="${rainbow}/deploy.zip" />
+		<javac srcdir="${src}" destdir="${build}" encoding="UTF-8" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<compilerarg value="-Xlint:deprecation" />
+		</javac>
+		<copy todir="${build}">
+			<fileset dir="${src}" excludes="**/*.java" />
+		</copy>
+		<jar jarfile="${deploy}/lib/core.jar" basedir="${build}" />
+		<zip destfile="${rainbow}/deploy.zip" basedir="${deploy}" />
+	</target>
+
+	<target name="build_dev">
+		<antcall target="clean" />
+		<delete file="${rainbow}/dev.zip" />
+		<javac srcdir="${src}" destdir="${build}" encoding="UTF-8" debug="on" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<compilerarg value="-Xlint:deprecation" />
+		</javac>
+		<copy todir="${build}">
+			<fileset dir="${src}" />
+		</copy>
+		<javac srcdir="${test}" destdir="${build}" encoding="UTF-8" debug="on" includeAntRuntime="no">
+			<classpath refid="compile.classpath" />
+			<compilerarg value="-Xlint:deprecation" />
+		</javac>
+		<copy todir="${build}">
+			<fileset dir="${test}" />
+		</copy>
+		<jar jarfile="${deploy}/lib/core.jar" basedir="${build}" />
+		<zip destfile="${rainbow}/dev.zip" basedir="${deploy}" />
+	</target>
+	
+	<target name="build" depends="build_deploy, build_dev" description="build all">
+		<delete dir="${output}" />
+	</target>
+
+</project>

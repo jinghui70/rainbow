@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<bundle>
+	<id>cache</id>
+	<desc></desc>
+	<parent>db</parent>
+</bundle>

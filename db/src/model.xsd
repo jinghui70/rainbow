@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema elementFormDefault="qualified" version="1.0" targetNamespace="http://rainbow/db/model" xmlns:tns="http://rainbow/db/model" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="model">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="name" type="xs:string" minOccurs="0"/>
+        <xs:element name="entities">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="entity" type="tns:Entity" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="Column">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="dbName" type="xs:string"/>
+      <xs:element name="cnName" type="xs:string"/>
+      <xs:element name="type" type="tns:ColumnType"/>
+      <xs:element name="javaType" type="tns:JavaType"/>
+      <xs:element name="format" type="xs:string" minOccurs="0"/>
+      <xs:element name="length" type="xs:int"/>
+      <xs:element name="precision" type="xs:int"/>
+      <xs:element name="key" type="xs:boolean"/>
+      <xs:element name="mandatory" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Entity">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="dbName" type="xs:string"/>
+      <xs:element name="cnName" type="xs:string"/>
+      <xs:element name="columns" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="column" type="tns:Column" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="ColumnType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SMALLINT"/>
+      <xs:enumeration value="INT"/>
+      <xs:enumeration value="LONG"/>
+      <xs:enumeration value="DOUBLE"/>
+      <xs:enumeration value="NUMERIC"/>
+      <xs:enumeration value="DATE"/>
+      <xs:enumeration value="TIME"/>
+      <xs:enumeration value="TIMESTAMP"/>
+      <xs:enumeration value="CHAR"/>
+      <xs:enumeration value="VARCHAR"/>
+      <xs:enumeration value="NCHAR"/>
+      <xs:enumeration value="NVARCHAR"/>
+      <xs:enumeration value="CLOB"/>
+      <xs:enumeration value="NCLOB"/>
+      <xs:enumeration value="BLOB"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="JavaType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="INT"/>
+      <xs:enumeration value="BOOL"/>
+      <xs:enumeration value="LONG"/>
+      <xs:enumeration value="DOUBLE"/>
+      <xs:enumeration value="BIGDECIMAL"/>
+      <xs:enumeration value="STRING"/>
+      <xs:enumeration value="DATE"/>
+      <xs:enumeration value="BYTEARRAY"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+

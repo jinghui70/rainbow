@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="library" basedir=".">
+
+	<property name="MavenServer" value="http://central.maven.org/maven2/" />
+	<property name="libfile" value="../lib/rainbow.userlibraries" />
+	<property name="lib" location="../lib" />
+
+	<target name="init">
+		<delete dir="${lib}" />
+		<mkdir dir="${lib}"/>
+		<mkdir dir="${lib}/src"/>
+		<mkdir dir="${lib}/test"/>
+	</target>
+	<target name="download-lib" description="download lib">
+		<script language="javascript"> <![CDATA[
+			var echo = project.createTask("echo");
+		    var file = new java.io.File("library.json");
+		    var br = new java.io.BufferedReader(new java.io.FileReader(file));
+		    var json = "";
+			while(line = br.readLine()) {
+				json = json + line;
+			}
+		    var struct = eval("(" + json + ")");
+			var getName = function(item) {
+				url = item.group.split('.');
+				url.push(item.name);
+				url.push(item.version);
+				url.push(item.name + "-" + item.version + ".jar");
+				return MavenServer + url.join("/");
+			}
+			var getSrcName = function(item) {
+				url = item.group.split('.');
+				url.push(item.name);
+				url.push(item.version);
+				url.push(item.name + "-" + item.version + "-sources.jar");
+				return MavenServer + url.join("/");
+			}
+			var libDir = new java.io.File(lib);
+			var srcDir = new java.io.File(libDir, "src");
+			var testDir = new java.io.File(libDir, "test");
+			for (key in struct) {
+				echo.setMessage("downloading " + key + " jars ...");
+				echo.perform();
+				items = struct[key];
+				items.forEach(function(item){
+					if (!item.ignore) {
+						var getter = project.createTask("get");
+						getter.setSkipExisting(true);
+						getter.setDest(key=='test' ? testDir : libDir);
+						getter.setSrc(new java.net.URL(getName(item)));
+						getter.execute();
+						if (item.source) {
+							var getter = project.createTask("get");
+							getter.setDest(srcDir);
+							getter.setSrc(new java.net.URL(getSrcName(item)));
+							getter.execute();
+						}
+					}
+				});
+			}
+		]]>
+		</script>			
+	</target>
+	<target name="download-rainbow">
+		<delete file="dev.zip" />
+		<delete file="deploy.zip" />
+		<get dest="build" src="http:///dev.zip" httpusecaches="false" />
+		<get dest="build" src="http:///deploy.zip" httpusecaches="false" />
+	</target>
+	<target name="refresh-rainbow" description="init rainbow">
+		<delete dir="bundle" />
+		<delete file="lib/core.jar" />
+		<unzip src="../dev.zip" dest=".." encoding="GBK" />
+	</target>
+	<target name="library-file" description="make eclipse library file">
+		<delete file="${libfile}" />
+		<script language="javascript"> <![CDATA[
+	        echo = project.createTask("echo");
+			echo.setFile(new java.io.File(libfile));
+			echo.setAppend(true);
+			echo.addText('<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n');
+			echo.addText('<eclipse-userlibraries version="2">\n');
+			echo.addText('\t<library name="Rainbow Library" systemlibrary="false">\n');
+			var libDir = new java.io.File(lib);
+			var srcDir = new java.io.File(libDir, "src");
+			fs = project.createDataType("fileset");
+			fs.setDir(libDir);
+			fs.setIncludes("**/*.jar");
+			fs.setExcludes("src/*.jar");
+		    ds = fs.getDirectoryScanner(project);
+		    files = ds.getIncludedFiles();
+			for (i=0;i<files.length;i++) {
+				file = files[i];
+				if (file=='core.jar')
+					echo.addText('\t\t<archive path="/rainbow/lib/core.jar" source="/rainbow/lib/core.jar" />\n');
+				else {
+					srcFile = file.slice(0, -4) + '-sources.jar';
+					if ((new java.io.File(srcDir, srcFile)).exists()) {
+		        		echo.addText('\t\t<archive path="/rainbow/lib/' + file);
+		        		echo.addText('" source="/rainbow/lib/src/' + srcFile + '" />\n');
+					} else {
+		        		echo.addText('\t\t<archive path="/rainbow/lib/' + file + '" />\n');
+					}
+				}
+			}
+			echo.addText('\t</library>\n');
+			echo.addText('</eclipse-userlibraries>\n');
+	        echo.perform();
+		]]>
+		</script>			
+		<echo>rainbow.userlibraries已生成在lib目录下，请刷新目录后导入</echo>
+	</target>
+	<target name="all" depends="init, download-lib, refresh-rainbow, library-file" description="do all ßlib things"/>
+</project>

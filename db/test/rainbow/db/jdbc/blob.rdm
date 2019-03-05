@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model xmlns="http://rainbow/db/model">
+	<name>TEST</name>
+	<entities>
+		<entity>
+			<name>TestBlob</name>
+			<dbName>TEST_BLOB</dbName>
+			<cnName>新数据表</cnName>
+			<columns>
+				<column>
+					<name>id</name>
+					<dbName>ID</dbName>
+					<cnName>ID</cnName>
+					<type>INT</type>
+					<length>0</length>
+					<precision>0</precision>
+					<key>true</key>
+					<mandatory>true</mandatory>
+				</column>
+				<column>
+					<name>content</name>
+					<dbName>NR</dbName>
+					<cnName>内容</cnName>
+					<type>BLOB</type>
+					<length>0</length>
+					<precision>0</precision>
+					<key>false</key>
+					<mandatory>false</mandatory>
+				</column>
+			</columns>
+			<indexes/>
+		</entity>
+	</entities>
+</model>
