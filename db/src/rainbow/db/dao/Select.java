@@ -1,11 +1,13 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.google.common.base.Function;
 import com.google.common.base.Joiner;
@@ -13,7 +15,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import rainbow.core.model.exception.AppException;
-import rainbow.core.util.Consumer;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.EmptyCondition;
@@ -287,7 +288,7 @@ public class Select {
 			sql.append(" GROUP BY ");
 			Utils.join(sql, Arrays.asList(groupBy), new Consumer<String>() {
 				@Override
-				public void consume(String groupBy) {
+				public void accept(String groupBy) {
 					for (Field field : fields) {
 						String sqlPart = field.match(groupBy);
 						if (sqlPart != null) {
@@ -303,7 +304,7 @@ public class Select {
 			sql.append(" ORDER BY ");
 			Utils.join(sql, orderBy, new Consumer<OrderBy>() {
 				@Override
-				public void consume(OrderBy orderBy) {
+				public void accept(OrderBy orderBy) {
 					for (Field field : fields) {
 						String sqlPart = field.match(orderBy.getProperty());
 						if (sqlPart != null) {
@@ -380,7 +381,7 @@ public class Select {
 		if (select == null || select.length == 0) {
 			Utils.join(sql, tableAliases, new Consumer<String>() {
 				@Override
-				public void consume(String tableAlias) {
+				public void accept(String tableAlias) {
 					Entity entity = entityMap.get(tableAlias);
 					addAllField(tableAlias, entity);
 					sql.append(tableAlias).append(".*");
@@ -389,7 +390,7 @@ public class Select {
 		} else {
 			Utils.join(sql, Arrays.asList(select), new Consumer<String>() {
 				@Override
-				public void consume(String s) {
+				public void accept(String s) {
 					if (s.endsWith(".*")) {
 						final String tableAlias = s.substring(0, s.length() - 2);
 						Entity entity = entityMap.get(tableAlias);
@@ -410,7 +411,7 @@ public class Select {
 		sql.append(" FROM ");
 		Utils.join(sql, tableAliases, new Consumer<String>() {
 			@Override
-			public void consume(String tableAlias) {
+			public void accept(String tableAlias) {
 				Entity entity = entityMap.get(tableAlias);
 				sql.append(entity.getDbName()).append(' ').append(tableAlias);
 			}
