@@ -1,6 +1,8 @@
 package rainbow.core.util;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -9,10 +11,12 @@ import java.util.Map;
 import java.util.RandomAccess;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.google.common.base.Predicate;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.io.BaseEncoding;
@@ -45,8 +49,7 @@ public abstract class Utils {
 	/**
 	 * 检查输入的容器对象是不是为 null或者为空
 	 * 
-	 * @param c
-	 *            检查用的容器对象
+	 * @param c 检查用的容器对象
 	 * @return {@code true} 如果==null or isEmpty()
 	 */
 	public static boolean isNullOrEmpty(Collection<?> c) {
@@ -113,30 +116,11 @@ public abstract class Utils {
 	/**
 	 * 返回 {@code true} 当输入的字符串有内容时
 	 * 
-	 * @param string
-	 *            检查用的字符串
+	 * @param string 检查用的字符串
 	 * @return {@code true} 如果不为空且去掉头尾的空格和TAB后还有内容
 	 */
 	public static boolean hasContent(String string) {
 		return string != null && !string.trim().isEmpty();
-	}
-
-	public static Predicate<String> startWith(final String prefix) {
-		return new Predicate<String>() {
-			@Override
-			public boolean apply(String input) {
-				return input.startsWith(prefix);
-			}
-		};
-	}
-
-	public static Predicate<String> endsWith(final String suffix) {
-		return new Predicate<String>() {
-			@Override
-			public boolean apply(String input) {
-				return input.endsWith(suffix);
-			}
-		};
 	}
 
 	/**
@@ -179,10 +163,8 @@ public abstract class Utils {
 	/**
 	 * 用一个字符来分割字符串，返回一个分割好的字符串数组
 	 * 
-	 * @param str
-	 *            待处理字符串
-	 * @param delimiter
-	 *            分隔符
+	 * @param str       待处理字符串
+	 * @param delimiter 分隔符
 	 * @return 分割好的字符串数组
 	 */
 	public static String[] split(String str, char delimiter) {
@@ -254,7 +236,7 @@ public abstract class Utils {
 	public static String randomUUID64() {
 		return BaseEncoding.base64().omitPadding().encode(UUID2Byte(UUID.randomUUID()));
 	}
-	
+
 	/**
 	 * 把一个UUID转为字节数组
 	 * 
@@ -305,14 +287,14 @@ public abstract class Utils {
 	// -----------------------------------------------------------------------
 	/**
 	 * <p>
-	 * Gets the substring before the first occurrence of a separator. The
-	 * separator is not returned.
+	 * Gets the substring before the first occurrence of a separator. The separator
+	 * is not returned.
 	 * </p>
 	 * 
 	 * <p>
-	 * A {@code null} string input will return {@code null}. An empty ("")
-	 * string input will return the empty string. A {@code null} separator will
-	 * return the input string.
+	 * A {@code null} string input will return {@code null}. An empty ("") string
+	 * input will return the empty string. A {@code null} separator will return the
+	 * input string.
 	 * </p>
 	 * 
 	 * <p>
@@ -330,10 +312,8 @@ public abstract class Utils {
 	 * StringUtils.substringBefore("abc", null)  = "abc"
 	 * </pre>
 	 * 
-	 * @param str
-	 *            the String to get a substring from, may be null
-	 * @param separator
-	 *            the String to search for, may be null
+	 * @param str       the String to get a substring from, may be null
+	 * @param separator the String to search for, may be null
 	 * @return the substring before the first occurrence of the separator,
 	 *         {@code null} if null String input
 	 * @since 2.0
@@ -354,14 +334,14 @@ public abstract class Utils {
 
 	/**
 	 * <p>
-	 * Gets the substring after the first occurrence of a separator. The
-	 * separator is not returned.
+	 * Gets the substring after the first occurrence of a separator. The separator
+	 * is not returned.
 	 * </p>
 	 * 
 	 * <p>
-	 * A {@code null} string input will return {@code null}. An empty ("")
-	 * string input will return the empty string. A {@code null} separator will
-	 * return the empty string if the input string is not {@code null}.
+	 * A {@code null} string input will return {@code null}. An empty ("") string
+	 * input will return the empty string. A {@code null} separator will return the
+	 * empty string if the input string is not {@code null}.
 	 * </p>
 	 * 
 	 * <p>
@@ -379,10 +359,8 @@ public abstract class Utils {
 	 * StringUtils.substringAfter("abc", "")    = "abc"
 	 * </pre>
 	 * 
-	 * @param str
-	 *            the String to get a substring from, may be null
-	 * @param separator
-	 *            the String to search for, may be null
+	 * @param str       the String to get a substring from, may be null
+	 * @param separator the String to search for, may be null
 	 * @return the substring after the first occurrence of the separator,
 	 *         {@code null} if null String input
 	 * @since 2.0
@@ -403,13 +381,12 @@ public abstract class Utils {
 
 	/**
 	 * <p>
-	 * Gets the String that is nested in between two instances of the same
-	 * String.
+	 * Gets the String that is nested in between two instances of the same String.
 	 * </p>
 	 * 
 	 * <p>
-	 * A {@code null} input String returns {@code null}. A {@code null} tag
-	 * returns {@code null}.
+	 * A {@code null} input String returns {@code null}. A {@code null} tag returns
+	 * {@code null}.
 	 * </p>
 	 * 
 	 * <pre>
@@ -421,10 +398,8 @@ public abstract class Utils {
 	 * StringUtils.substringBetween("tagabctag", "tag") = "abc"
 	 * </pre>
 	 * 
-	 * @param str
-	 *            the String containing the substring, may be null
-	 * @param tag
-	 *            the String before and after the substring, may be null
+	 * @param str the String containing the substring, may be null
+	 * @param tag the String before and after the substring, may be null
 	 * @return the substring, {@code null} if no match
 	 * @since 2.0
 	 */
@@ -434,14 +409,14 @@ public abstract class Utils {
 
 	/**
 	 * <p>
-	 * Gets the String that is nested in between two Strings. Only the first
-	 * match is returned.
+	 * Gets the String that is nested in between two Strings. Only the first match
+	 * is returned.
 	 * </p>
 	 * 
 	 * <p>
-	 * A {@code null} input String returns {@code null}. A {@code null}
-	 * open/close returns {@code null} (no match). An empty ("") open and close
-	 * returns an empty string.
+	 * A {@code null} input String returns {@code null}. A {@code null} open/close
+	 * returns {@code null} (no match). An empty ("") open and close returns an
+	 * empty string.
 	 * </p>
 	 * 
 	 * <pre>
@@ -457,12 +432,9 @@ public abstract class Utils {
 	 * StringUtils.substringBetween("yabczyabcz", "y", "z")   = "abc"
 	 * </pre>
 	 * 
-	 * @param str
-	 *            the String containing the substring, may be null
-	 * @param open
-	 *            the String before the substring, may be null
-	 * @param close
-	 *            the String after the substring, may be null
+	 * @param str   the String containing the substring, may be null
+	 * @param open  the String before the substring, may be null
+	 * @param close the String after the substring, may be null
 	 * @return the substring, {@code null} if no match
 	 * @since 2.0
 	 */
@@ -528,8 +500,7 @@ public abstract class Utils {
 	/**
 	 * 处理一些比较复杂的字符串连接
 	 * 
-	 * @param sep
-	 *            分隔符
+	 * @param sep      分隔符
 	 * @param sb
 	 * @param list
 	 * @param consumer
@@ -550,4 +521,22 @@ public abstract class Utils {
 		}
 	}
 
+	/**
+	 * 读取json配置文件（支持//注释）
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static JSONObject loadConfigFile(Path path) {
+		if (!Files.exists(path))
+			return null;
+		try {
+			String text = Files.lines(path).map(s -> Utils.substringBefore(s, "//")).collect(Collectors.joining());
+			return JSON.parseObject(text);
+		} catch (JSONException je) {
+			throw new RuntimeException("fail to parse config file:" + path.toString(), je);
+		} catch (IOException e) {
+			throw new RuntimeException("fail to read config file:" + path.toString(), e);
+		}
+	}
 }

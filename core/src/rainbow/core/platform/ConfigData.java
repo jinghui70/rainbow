@@ -2,17 +2,12 @@ package rainbow.core.platform;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 
@@ -40,11 +35,11 @@ public class ConfigData {
 	public ConfigData(String bundleId, boolean checkExist) {
 		if (Platform.isDev()) {
 			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json.dev");
-			root = loadConfigFile(path);
+			root = Utils.loadConfigFile(path);
 		}
 		if (root == null) {
 			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json");
-			root = loadConfigFile(path);
+			root = Utils.loadConfigFile(path);
 		}
 		if (checkExist)
 			checkNotNull(root, "config file [%s] not found", path.getFileName());
@@ -52,19 +47,6 @@ public class ConfigData {
 
 	public ConfigData(String bundleId) {
 		this(bundleId, false);
-	}
-
-	private JSONObject loadConfigFile(Path path) {
-		if (!Files.exists(path))
-			return null;
-		try {
-			String text = Files.lines(path).map(s -> Utils.substringBefore(s, "//")).collect(Collectors.joining());
-			return JSON.parseObject(text);
-		} catch (JSONException je) {
-			throw new RuntimeException("fail to parse config file:" + path.toString(), je);
-		} catch (IOException e) {
-			throw new RuntimeException("fail to read config file:" + path.toString(), e);
-		}
 	}
 
 	/**
