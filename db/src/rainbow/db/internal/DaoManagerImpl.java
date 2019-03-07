@@ -1,6 +1,6 @@
 package rainbow.db.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -36,6 +36,7 @@ import rainbow.core.model.IAdaptable;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
+import rainbow.core.util.XmlBinder;
 import rainbow.core.util.encrypt.EncryptUtils;
 import rainbow.core.util.ioc.ActivatorAwareObject;
 import rainbow.core.util.ioc.DisposableBean;
@@ -49,6 +50,7 @@ import rainbow.db.config.Property;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.model.Model;
 
 @Bean(extension = InjectProvider.class)
 public class DaoManagerImpl extends ActivatorAwareObject
@@ -175,21 +177,21 @@ public class DaoManagerImpl extends ActivatorAwareObject
 		if (rdmFiles == null || rdmFiles.length == 0)
 			return ImmutableMap.of();
 		Map<String, Map<String, Entity>> entityMaps = Maps.newHashMap();
-//		XmlBinder<Model> binder = Model.getXmlBinder();
-//		for (Path modelFile : rdmFiles) {
-//			Model model = binder.unmarshal(modelFile);
-//			String modelName = model.getName();
-//			Map<String, Entity> map = entityMaps.get(modelName);
-//			if (map == null) {
-//				map = Maps.newHashMap();
-//				entityMaps.put(modelName, map);
-//			}
-//			for (rainbow.db.model.Entity src : model.getEntities()) {
-//				checkState(!map.containsKey(src.getName()), "Entity [%s] is duplicated in model file [%s]",
-//						src.getName(), modelFile.getName(-1));
-//				map.put(src.getName(), new Entity(src));
-//			}
-//		}
+		XmlBinder<Model> binder = Model.getXmlBinder();
+		for (Path modelFile : rdmFiles) {
+			Model model = binder.unmarshal(modelFile);
+			String modelName = model.getName();
+			Map<String, Entity> map = entityMaps.get(modelName);
+			if (map == null) {
+				map = Maps.newHashMap();
+				entityMaps.put(modelName, map);
+			}
+			for (rainbow.db.model.Entity src : model.getEntities()) {
+				checkState(!map.containsKey(src.getName()), "Entity [%s] is duplicated in model file [%s]",
+						src.getName(), modelFile.getName(-1));
+				map.put(src.getName(), new Entity(src));
+			}
+		}
 		return entityMaps;
 	}
 

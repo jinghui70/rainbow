@@ -12,10 +12,12 @@
     { "group":"ch.qos.logback","name":"logback-classic","version":"1.2.3" }
   ],
   "poi": [
-    { "group":"org.apache.poi","name":"poi","version":"4.0.0" },
-    { "group":"org.apache.poi","name":"poi-ooxml","version":"4.0.0" },
-    { "group":"org.apache.xmlbeans","name":"xmlbeans","version":"3.0.1" },
-    { "group":"org.apache.poi","name":"poi-ooxml-schemas","version":"4.0.0" }
+    { "group":"org.apache.poi","name":"poi","version":"4.0.1" },
+    { "group":"org.apache.poi","name":"poi-ooxml","version":"4.0.1" },
+    { "group":"org.apache.poi","name":"poi-ooxml-schemas","version":"4.0.1" },
+    { "group":"org.apache.xmlbeans","name":"xmlbeans","version":"3.0.2" },
+    { "group":"org.apache.commons", "name":"commons-compress", "version":"1.18" },
+    { "group":"org.apache.commons", "name":"commons-collections4", "version":"4.3" }
   ],
   "web": [
     { "group":"javax.servlet","name":"javax.servlet-api","version":"3.1.0" },

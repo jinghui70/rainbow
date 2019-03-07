@@ -228,7 +228,8 @@ public abstract class BundleActivator {
 	 */
 	public final Path[] getConfigureFiles(final String suffix) {
 		try {
-			return Files.list(getConfigurePath()).filter(f -> f.endsWith(suffix)).toArray(Path[]::new);
+			return Files.list(getConfigurePath()).filter(f -> f.getFileName().toString().endsWith(suffix))
+					.toArray(Path[]::new);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
