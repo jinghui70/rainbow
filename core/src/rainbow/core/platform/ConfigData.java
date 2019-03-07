@@ -32,7 +32,24 @@ public class ConfigData {
 
 	private Path path;
 
+	private boolean standalone = true;
+
 	public ConfigData(String bundleId, boolean checkExist) {
+		init(bundleId);
+		if (checkExist)
+			checkNotNull(root, "config file [%s] not found", path.getFileName());
+		if (root == null) {
+			standalone = false;
+			init("core");
+			root = root.getJSONObject(bundleId);
+		}
+	}
+
+	public ConfigData(String bundleId) {
+		this(bundleId, false);
+	}
+
+	private void init(String bundleId) {
 		if (Platform.isDev()) {
 			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json.dev");
 			root = Utils.loadConfigFile(path);
@@ -41,12 +58,10 @@ public class ConfigData {
 			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json");
 			root = Utils.loadConfigFile(path);
 		}
-		if (checkExist)
-			checkNotNull(root, "config file [%s] not found", path.getFileName());
 	}
 
-	public ConfigData(String bundleId) {
-		this(bundleId, false);
+	public boolean isStandalone() {
+		return standalone;
 	}
 
 	/**
@@ -82,7 +97,7 @@ public class ConfigData {
 		int value = getInt(key);
 		return value == 0 ? defaultValue : value;
 	}
-	
+
 	/**
 	 * 获取bundle配置单项内容,并转为布尔
 	 * 

@@ -20,9 +20,7 @@ import rainbow.db.dao.Select;
 import rainbow.db.dao.U;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.internal.ObjectNameRule;
 import rainbow.db.model.Column;
-import rainbow.db.object.ObjectManager;
 
 /**
  * 封装一个具体对象的数据库操作类
@@ -59,16 +57,6 @@ public class ObjectDao<T> implements InitializingBean {
 
 	protected Entity entity;
 
-	/**
-	 * 对象管理器
-	 */
-	protected ObjectManager objectManager;
-
-	/**
-	 * 名字翻译规则
-	 */
-	protected List<ObjectNameRule> nameRules;
-
 	protected void setClass(Class<T> clazz) {
 		this.clazz = clazz;
 		this.classInfo = new ClassInfo<T>(clazz);
@@ -97,16 +85,6 @@ public class ObjectDao<T> implements InitializingBean {
 			this.curd = curd;
 		else
 			this.curd = this.curd.add(curd);
-	}
-
-	@Inject(obliged = false)
-	public void setObjectManager(ObjectManager objectManager) {
-		this.objectManager = objectManager;
-		if (objectManager != null) {
-			nameRules = objectManager.getObjectNameRule(clazz);
-			if (nameRules.isEmpty())
-				nameRules = null;
-		}
 	}
 
 	/**
@@ -214,9 +192,6 @@ public class ObjectDao<T> implements InitializingBean {
 		if (neo == null)
 			return null;
 		T result = neo.bianShen(clazz);
-		if (result != null) {
-			decorateItem(result);
-		}
 		if (curd != null)
 			curd.afterFetch(dao, result);
 		return result;
@@ -284,7 +259,7 @@ public class ObjectDao<T> implements InitializingBean {
 			return result;
 		if (curd != null)
 			curd.afterQuery(dao, result);
-		return decorateList(result);
+		return result;
 	}
 
 	/**
@@ -407,14 +382,4 @@ public class ObjectDao<T> implements InitializingBean {
 		return dao.delete(entityName, cnd);
 	}
 
-	protected void decorateItem(T obj) {
-		if (nameRules != null)
-			objectManager.setName(obj, nameRules);
-	}
-
-	protected List<T> decorateList(List<T> list) {
-		for (T obj : list)
-			decorateItem(obj);
-		return list;
-	}
 }

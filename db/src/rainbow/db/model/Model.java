@@ -36,6 +36,6 @@ public class Model {
 	}
 
 	public static XmlBinder<Model> getXmlBinder() {
-		return new XmlBinder<Model>("rainbow.db.model", Model.class.getClassLoader());
+		return new XmlBinder<Model>(Model.class);
 	}
 }

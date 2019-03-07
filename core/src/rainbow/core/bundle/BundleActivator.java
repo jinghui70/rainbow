@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -217,7 +218,7 @@ public abstract class BundleActivator {
 	 * @return
 	 */
 	public Path getConfigureFile(String fileName) {
-		return getConfigurePath().resolve(bundleId).resolve(fileName);
+		return getConfigurePath().resolve(fileName);
 	}
 
 	/**
@@ -226,10 +227,10 @@ public abstract class BundleActivator {
 	 * @param suffix
 	 * @return
 	 */
-	public final Path[] getConfigureFiles(final String suffix) {
+	public final List<Path> getConfigureFiles(final String suffix) {
 		try {
 			return Files.list(getConfigurePath()).filter(f -> f.getFileName().toString().endsWith(suffix))
-					.toArray(Path[]::new);
+					.collect(Collectors.toList());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -243,16 +244,6 @@ public abstract class BundleActivator {
 	 */
 	public final ConfigData getConfig() {
 		return new ConfigData(bundleId);
-	}
-
-	/**
-	 * 返回配置, 配置文件必须存在
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public final ConfigData needConfig() {
-		return new ConfigData(bundleId, true);
 	}
 
 	/**

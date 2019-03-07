@@ -41,13 +41,13 @@ public class XmlBinder<T> {
 	 * 
 	 * @param contextPath
 	 */
-	public XmlBinder(String contextPath, ClassLoader classLoader) {
-		try {
-			context = JAXBContext.newInstance(contextPath, classLoader);
-		} catch (JAXBException e) {
-			throw new RuntimeException(e);
-		}
-	}
+//	public XmlBinder(String contextPath, ClassLoader classLoader) {
+//		try {
+//			context = JAXBContext.newInstance(contextPath, classLoader);
+//		} catch (JAXBException e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
 
 	/**
 	 * 构造一个指定上下文路径及Schema的XmlBinder
@@ -55,10 +55,10 @@ public class XmlBinder<T> {
 	 * @param contextPath
 	 * @param url
 	 */
-	public XmlBinder(String contextPath, ClassLoader classLoader, URL url) {
-		this(contextPath, classLoader);
-		schema = createSchema(url);
-	}
+//	public XmlBinder(String contextPath, ClassLoader classLoader, URL url) {
+//		this(contextPath, classLoader);
+//		schema = createSchema(url);
+//	}
 
 	/**
 	 * 根据一个类定义构造一个简单的XmlBinder

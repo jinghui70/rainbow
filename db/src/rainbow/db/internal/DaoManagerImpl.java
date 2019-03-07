@@ -1,6 +1,7 @@
 package rainbow.db.internal;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -13,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -173,8 +175,8 @@ public class DaoManagerImpl extends ActivatorAwareObject
 	 * @throws IOException
 	 */
 	private Map<String, Map<String, Entity>> procRDMs() throws JAXBException, IOException {
-		Path[] rdmFiles = activator.getConfigureFiles(".rdm");
-		if (rdmFiles == null || rdmFiles.length == 0)
+		List<Path> rdmFiles = activator.getConfigureFiles(".rdm");
+		if (Utils.isNullOrEmpty(rdmFiles))
 			return ImmutableMap.of();
 		Map<String, Map<String, Entity>> entityMaps = Maps.newHashMap();
 		XmlBinder<Model> binder = Model.getXmlBinder();
@@ -188,7 +190,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 			}
 			for (rainbow.db.model.Entity src : model.getEntities()) {
 				checkState(!map.containsKey(src.getName()), "Entity [%s] is duplicated in model file [%s]",
-						src.getName(), modelFile.getName(-1));
+						src.getName(), modelFile.getFileName());
 				map.put(src.getName(), new Entity(src));
 			}
 		}

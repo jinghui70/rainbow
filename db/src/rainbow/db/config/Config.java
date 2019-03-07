@@ -33,7 +33,7 @@ public class Config {
 	}
 
 	public static XmlBinder<Config> getXmlBinder() {
-		return new XmlBinder<Config>("rainbow.db.config", Config.class.getClassLoader());
+		return new XmlBinder<Config>(Config.class);
 	}
 
 }

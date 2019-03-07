@@ -7,11 +7,7 @@ import java.lang.reflect.Type;
 
 import com.google.common.base.Function;
 
-import rainbow.core.model.IAdaptable;
-import rainbow.core.model.object.INameObject;
 import rainbow.db.dao.Dao;
-import rainbow.db.object.ObjectType;
-import rainbow.db.object.ObjectTypeAdapter;
 
 /**
  * 封装一个具体对象的数据库操作类，该对象对应的数据表只有一个主键字段，如果对应多个字段，可以派生此类
@@ -23,7 +19,7 @@ import rainbow.db.object.ObjectTypeAdapter;
  * @param <T>
  *            对象类型
  */
-public class KeyObjectDao<I, T> extends ObjectDao<T> implements Function<I, T>, IAdaptable {
+public class KeyObjectDao<I, T> extends ObjectDao<T> implements Function<I, T> {
 
 	protected Class<I> keyClazz;
 
@@ -78,37 +74,4 @@ public class KeyObjectDao<I, T> extends ObjectDao<T> implements Function<I, T>, 
 		return fetch(input);
 	}
 	
-	@Override
-	public Object getAdapter(Class<?> adapter) {
-		if (adapter == ObjectType.class) {
-			return getObjectType();
-		}
-		return null;
-	}
-
-	/**
-	 * 返回ObjectType适配对象
-	 * 
-	 * @return
-	 */
-	protected ObjectType getObjectType() {
-		if (INameObject.class.isAssignableFrom(clazz)) {
-			return new ObjectTypeAdapter() {
-				@Override
-				public String getName() {
-					return entityName;
-				}
-
-				@SuppressWarnings("unchecked")
-				@Override
-				public String getObjectName(Object key) {
-					T obj = fetch((I) key);
-					return ((INameObject) obj).getName();
-				}
-
-			};
-		}
-		return null;
-	}
-
 }
