@@ -51,6 +51,7 @@
 						getter.execute();
 						if (item.source) {
 							var getter = project.createTask("get");
+							getter.setSkipExisting(true);
 							getter.setDest(srcDir);
 							getter.setSrc(new java.net.URL(getSrcName(item)));
 							getter.execute();
