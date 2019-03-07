@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -18,7 +19,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.model.object.SimpleNameObject;
-import rainbow.core.util.Consumer;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.EmptyCondition;
@@ -272,7 +272,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 		final Sql updateSql = new Sql(list.size()).append("update ").append(entity.getDbName()).append(" set ");
 		Utils.join(updateSql.getStringBuilder(), list, new Consumer<Column>() {
 			@Override
-			public void consume(Column column) {
+			public void accept(Column column) {
 				updateSql.append(column.getDbName()).append("=").append(column.getDbName()).append(add ? '+' : '-')
 						.append(neo.getObject(column));
 			}

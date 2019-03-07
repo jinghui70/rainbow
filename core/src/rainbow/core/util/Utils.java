@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.RandomAccess;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -508,16 +509,14 @@ public abstract class Utils {
 	public static <T> void join(CharSequence sep, Appendable sb, Collection<T> list, Consumer<T> consumer) {
 		boolean first = true;
 		for (T t : list) {
-			if (consumer.accept(t)) {
-				if (first)
-					first = false;
-				else
-					try {
-						sb.append(sep);
-					} catch (IOException neverHappen) {
-					}
-				consumer.consume(t);
-			}
+			if (first)
+				first = false;
+			else
+				try {
+					sb.append(sep);
+				} catch (IOException neverHappen) {
+				}
+			consumer.accept(t);
 		}
 	}
 
@@ -531,7 +530,8 @@ public abstract class Utils {
 		if (!Files.exists(path))
 			return null;
 		try {
-			String text = Files.lines(path).map(s -> Utils.substringBefore(s, "//")).collect(Collectors.joining());
+			String text = Files.lines(path).map(String::trim).filter(s -> !s.startsWith("//"))
+					.collect(Collectors.joining());
 			return JSON.parseObject(text);
 		} catch (JSONException je) {
 			throw new RuntimeException("fail to parse config file:" + path.toString(), je);

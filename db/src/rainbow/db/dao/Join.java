@@ -5,10 +5,10 @@ import static com.google.common.base.Preconditions.*;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 
-import rainbow.core.util.Consumer;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.model.Column;
@@ -77,7 +77,7 @@ public class Join {
 			
 			Utils.join(" AND ", sql, t.getCnd(), new Consumer<JoinCnd>() {
 				@Override
-				public void consume(JoinCnd cnd) {
+				public void accept(JoinCnd cnd) {
 					Column left = entity.getColumn(cnd.getLeft());
 					checkNotNull(left, "column [%s] not found in entity [%s]", cnd.getLeft(), master);
 					Column right = targetEntity.getColumn(cnd.getRight());

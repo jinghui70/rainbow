@@ -4,10 +4,10 @@ import static com.google.common.base.Preconditions.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.google.common.base.Function;
 
-import rainbow.core.util.Consumer;
 import rainbow.core.util.Utils;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.condition.C;
@@ -107,7 +107,7 @@ public class Sql implements Appendable {
 		checkArgument(entity.getKeyCount() > 0, "entity[%s] has no key", entity.getName());
 		Utils.join(" AND ", sb, entity.getKeys(), new Consumer<Column>() {
 			@Override
-			public void consume(Column column) {
+			public void accept(Column column) {
 				append(column.getDbName()).append("=?").addParam(neo.getObject(column));
 			}
 		});
