@@ -1,19 +1,15 @@
 package rainbow.service.web;
 
-import java.util.EnumSet;
 import java.util.List;
 
-import javax.servlet.DispatcherType;
-
+import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.google.common.collect.ImmutableList;
 
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.BundleException;
 import rainbow.core.platform.ConfigData;
-import rainbow.core.web.RainbowFilter;
 
 public class Activator extends BundleActivator {
 
@@ -32,11 +28,7 @@ public class Activator extends BundleActivator {
 		if (port == 0)
 			return;
 		Server server = new Server(port);
-		WebAppContext webapp = new WebAppContext();
-		webapp.setContextPath("/");
-		webapp.addFilter(RainbowFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST, DispatcherType.FORWARD));
-		webapp.setBaseResource(new DummyResource("/"));
-		server.setHandler(webapp);
+		server.setHandler(getBean("serviceHandler", Handler.class));
 		try {
 			server.start();
 			logger.info("start service jetty server at port {}", port);
