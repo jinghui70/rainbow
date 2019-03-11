@@ -7,9 +7,8 @@ branches:
   only:
     - master
 
-before_install:
-  - echo $(ant -version)
-
 script:
+  - ant -version
+  - ant -f rainbow/build/library.xml init
   - ant -f rainbow/build/library.xml download-lib
   - ant -f rainbow/build.xml

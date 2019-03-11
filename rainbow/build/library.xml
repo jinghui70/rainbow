@@ -4,6 +4,7 @@
 	<property name="MavenServer" value="http://218.241.210.54:11188/nexus/content/repositories/central/" />
 	<property name="libfile" value="../lib/rainbow.userlibraries" />
 	<property name="lib" location="../lib" />
+	<property name="libjson" location="library.json" />
 
 	<target name="init">
 		<delete dir="${lib}" />
@@ -11,10 +12,10 @@
 		<mkdir dir="${lib}/src"/>
 		<mkdir dir="${lib}/dev"/>
 	</target>
-	<target name="download-lib" depends="init" description="download lib">
+	<target name="download-lib" description="download lib">
 		<script language="javascript"> <![CDATA[
 			var echo = project.createTask("echo");
-		    var file = new java.io.File("library.json");
+		    var file = new java.io.File(libjson);
 		    var br = new java.io.BufferedReader(new java.io.FileReader(file));
 		    var json = "";
 			while(line = br.readLine()) {
