@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="library" basedir=".">
 
-	<property name="MavenServer" value="http://central.maven.org/maven2/" />
+	<property name="MavenServer" value="http://218.241.210.54:11188/nexus/content/repositories/central/" />
 	<property name="libfile" value="../lib/rainbow.userlibraries" />
 	<property name="lib" location="../lib" />
 
@@ -9,9 +9,9 @@
 		<delete dir="${lib}" />
 		<mkdir dir="${lib}"/>
 		<mkdir dir="${lib}/src"/>
-		<mkdir dir="${lib}/test"/>
+		<mkdir dir="${lib}/dev"/>
 	</target>
-	<target name="download-lib" description="download lib">
+	<target name="download-lib" depends="init" description="download lib">
 		<script language="javascript"> <![CDATA[
 			var echo = project.createTask("echo");
 		    var file = new java.io.File("library.json");
@@ -37,7 +37,7 @@
 			}
 			var libDir = new java.io.File(lib);
 			var srcDir = new java.io.File(libDir, "src");
-			var testDir = new java.io.File(libDir, "test");
+			var devDir = new java.io.File(libDir, "dev");
 			for (key in struct) {
 				echo.setMessage("downloading " + key + " jars ...");
 				echo.perform();
@@ -46,7 +46,7 @@
 					if (!item.ignore) {
 						var getter = project.createTask("get");
 						getter.setSkipExisting(true);
-						getter.setDest(key=='test' ? testDir : libDir);
+						getter.setDest(key=='dev' ? devDir : libDir);
 						getter.setSrc(new java.net.URL(getName(item)));
 						getter.execute();
 						if (item.source) {
