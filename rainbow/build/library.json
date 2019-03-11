@@ -25,10 +25,10 @@
     { "group":"org.eclipse.jetty","name":"jetty-http","version":"9.4.12.v20180830" },
     { "group":"org.eclipse.jetty","name":"jetty-io","version":"9.4.12.v20180830" },
     { "group":"org.eclipse.jetty","name":"jetty-security","version":"9.4.12.v20180830" },
-    { "group":"org.eclipse.jetty","name":"jetty-server","version":"9.4.12.v20180830" },
+    { "group":"org.eclipse.jetty","name":"jetty-server","version":"9.4.12.v20180830", "source": true},
     { "group":"org.eclipse.jetty","name":"jetty-servlet","version":"9.4.12.v20180830" },
-    { "group":"org.eclipse.jetty","name":"jetty-util","version":"9.4.12.v20180830" },
-    { "group":"org.eclipse.jetty","name":"jetty-webapp","version":"9.4.12.v20180830" },
+    { "group":"org.eclipse.jetty","name":"jetty-util","version":"9.4.12.v20180830", "source": true },
+    { "group":"org.eclipse.jetty","name":"jetty-webapp","version":"9.4.12.v20180830", "source": true },
     { "group":"org.eclipse.jetty","name":"jetty-xml","version":"9.4.12.v20180830" }
   ],
   "db": [

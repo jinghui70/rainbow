@@ -13,12 +13,14 @@
 			// 解析所有预置bundle
 			var presets = {};
 			var bundleDir = new java.io.File("bundle");
-			if (bundleDir) {
+			if (bundleDir.exists()) {
 				var presetFiles = bundleDir.list();
-				for (i = 0; i<presets.length;i++) {
-					filename = presetFiles[i];
-					if (filename.slice(-4)==".jar")
-						presets[filename.slice(0, -4)] = true;
+				if (presetFiles) {
+					for (i = 0; i<presetFiles.length;i++) {
+						filename = presetFiles[i];
+						if (filename.slice(-4)==".jar")
+							presets[filename.slice(0, -4)] = true;
+					}
 				}
 			}
 			// 分析一个bundle的依赖

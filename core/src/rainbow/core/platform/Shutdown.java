@@ -13,8 +13,6 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.naming.ServiceUnavailableException;
 
-import rainbow.core.util.Utils;
-
 public class Shutdown {
 
 	public static void main(String[] args) {
@@ -26,13 +24,19 @@ public class Shutdown {
 		Path configFile = Paths.get(homeStr, "conf", "core.json");
 		int jmxPort = 1109;
 		try {
-			Optional<String> portStr = Files.lines(configFile).filter(s -> s.contains("jmxPort"))
-					.map(s -> Utils.substringBefore(s, "//")).findFirst();
+			Optional<String> portStr = Files.lines(configFile).map(String::trim).filter(s -> !s.startsWith("//"))
+					.filter(s -> s.contains("jmxPort")).findFirst();
 			if (portStr.isPresent()) {
-				jmxPort = Integer.parseInt(Utils.substringAfter(portStr.get(), ":").trim());
+				String s = portStr.get();
+				int inx = s.indexOf(':');
+				if (inx > 0) {
+					if (s.charAt(s.length() - 1) == ',')
+						s = s.substring(0, s.length() - 1).trim();
+					jmxPort = Integer.parseInt(s);
+				}
 			}
 		} catch (Throwable e) {
-			System.out.println("load core.json failed:" + e.getMessage());
+			e.printStackTrace();
 			return;
 		}
 		System.out.println("Shutting down rainbow platform ...");
