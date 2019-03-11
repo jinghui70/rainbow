@@ -20,7 +20,7 @@
 		<ant antfile="build/common.xml" target="build_deploy">
 			<property name="root" location="${dist}/deploy" />
 			<property name="dest" value="lib" />
-			<property name="basedir" value="../bootstrap" />
+			<property name="basedir" location="../bootstrap" />
 		</ant>		
 		<copy todir="${dist}/deploy/bin">
 			<fileset dir="build/bin" />
