@@ -11,5 +11,5 @@ before_install:
   - echo $(ant -version)
 
 script:
-  - ant -f rainbow/build/library.xml
+  - ant -f rainbow/build/library.xml download-lib
   - ant -f rainbow/build.xml
