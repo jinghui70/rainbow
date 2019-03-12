@@ -66,8 +66,8 @@
 	<target name="download-rainbow">
 		<delete file="dev.zip" />
 		<delete file="deploy.zip" />
-		<get dest="build" src="http:///dev.zip" httpusecaches="false" />
-		<get dest="build" src="http:///deploy.zip" httpusecaches="false" />
+		<get dest="build" src="http://10.10.1.184:8080/jenkins/job/rainbow/lastSuccessfulBuild/artifact/dist/dev.zip" httpusecaches="false" />
+		<get dest="build" src="http://10.10.1.184:8080/jenkins/job/rainbow/lastSuccessfulBuild/artifact/dist/deploy.zip" httpusecaches="false" />
 	</target>
 	<target name="refresh-rainbow" description="init rainbow">
 		<delete dir="bundle" />

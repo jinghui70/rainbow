@@ -1,0 +1,13 @@
+{
+	id: 1,
+ 	jmxPort: 1109,
+ 	
+ 	// 用于加密的类
+	encryption: "", 
+	
+	// 启用命令行工作台
+ 	// "console": true, 
+	product: {
+    	//rdm: "rainbow.rdm"
+	}
+}
