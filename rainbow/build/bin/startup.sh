@@ -37,8 +37,8 @@ echo $RAINBOW_HOME
 
 MEM_ARG="-Xms512m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.country=CN"
 CLASS_PATH="$RAINBOW_HOME/lib/bootstrap.jar"
-RAINBOWCMD="java $MEM_ARG  -classpath $CLASS_PATH rainbow.Launcher $1 $2 $3 $4" 
+RAINBOWCMD="java $MEM_ARG -classpath $CLASS_PATH rainbow.Launcher" 
 echo $RAINBOWCMD
 
-nohup exec $RAINBOWCMD  &
+nohup java $MEM_ARG -classpath $CLASS_PATH rainbow.Launcher  &
 
