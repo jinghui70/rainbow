@@ -1,4 +1,4 @@
-<project name="application" basedir=".">
+<project name="application" default="build" basedir=".">
 	<property name="application-name" value="XXXXXX" />
 	<tstamp>
 		<format property="BUILD_TIME" pattern="yyyyMMdd-HHmm" />
@@ -6,7 +6,20 @@
 	<property name="version" value="4.0_${BUILD_TIME}" />
 	<property name="dist" location="../dist" />
 		
-	<target name="build" description="build dev version">
+	<target name="refresh-rainbow" description="init rainbow">
+		<delete file="dev.zip" />
+		<delete file="deploy.zip" />
+		<get dest="." src="http://10.10.1.184/download/dev.zip" httpusecaches="false" />
+		<get dest="." src="http://10.10.1.184/download/deploy.zip" httpusecaches="false" />
+		<delete dir="build" />
+		<delete dir="bundle" />
+		<delete file="lib/core.jar" />
+		<unzip src="dev.zip" dest="." encoding="GBK" />
+	</target>
+
+	<target name="build" depends="refresh-rainbow" description="build dev version">
+		<ant antfile="build/library.xml" target="download-jar" />
 		<ant antfile="build/build_bundle.xml" target="build" />
 	</target>
+	
 </project>

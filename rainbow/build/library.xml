@@ -9,10 +9,10 @@
 	<target name="init">
 		<delete dir="${lib}" />
 		<mkdir dir="${lib}"/>
-		<mkdir dir="${lib}/src"/>
-		<mkdir dir="${lib}/dev"/>
 	</target>
 	<target name="download-lib" description="download lib">
+		<mkdir dir="${lib}/src"/>
+		<mkdir dir="${lib}/dev"/>
 		<script language="javascript"> <![CDATA[
 			var echo = project.createTask("echo");
 		    var file = new java.io.File(libjson);
@@ -63,17 +63,6 @@
 		]]>
 		</script>			
 	</target>
-	<target name="download-rainbow">
-		<delete file="../dev.zip" />
-		<delete file="../deploy.zip" />
-		<get dest=".." src="http://10.10.1.184/download/dev.zip" httpusecaches="false" />
-		<get dest=".." src="http://10.10.1.184/download/deploy.zip" httpusecaches="false" />
-	</target>
-	<target name="refresh-rainbow" description="init rainbow">
-		<delete dir="bundle" />
-		<delete file="lib/core.jar" />
-		<unzip src="../dev.zip" dest=".." encoding="GBK" />
-	</target>
 	<target name="library-file" description="make eclipse library file">
 		<delete file="${libfile}" />
 		<script language="javascript"> <![CDATA[
@@ -111,6 +100,14 @@
 		]]>
 		</script>			
 		<echo>rainbow.userlibraries已生成在lib目录下，请刷新目录后导入</echo>
+	</target>
+	<target name="refresh-rainbow" description="init rainbow">
+		<delete file="lib/core.jar" />
+		<unzip src="../dev.zip" dest="..">
+		    <patternset>
+		        <include name="**/core.jar"/>
+		    </patternset>
+		</unzip>
 	</target>
 	<target name="all" depends="init, download-lib, refresh-rainbow, library-file" description="do all ßlib things"/>
 </project>
