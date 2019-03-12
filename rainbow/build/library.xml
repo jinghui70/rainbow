@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="library" basedir=".">
+<project name="library" basedir="." default="all">
 
 	<property name="MavenServer" value="http://218.241.210.54:11188/nexus/content/repositories/central/" />
 	<property name="libfile" value="../lib/rainbow.userlibraries" />
@@ -10,7 +10,7 @@
 		<delete dir="${lib}" />
 		<mkdir dir="${lib}"/>
 	</target>
-	<target name="download-lib" description="download lib">
+	<target name="download-lib">
 		<mkdir dir="${lib}/src"/>
 		<mkdir dir="${lib}/dev"/>
 		<script language="javascript"> <![CDATA[
@@ -63,7 +63,7 @@
 		]]>
 		</script>			
 	</target>
-	<target name="library-file" description="make eclipse library file">
+	<target name="library-file">
 		<delete file="${libfile}" />
 		<script language="javascript"> <![CDATA[
 	        echo = project.createTask("echo");
@@ -101,7 +101,7 @@
 		</script>			
 		<echo>rainbow.userlibraries已生成在lib目录下，请刷新目录后导入</echo>
 	</target>
-	<target name="refresh-rainbow" description="init rainbow">
+	<target name="refresh-rainbow">
 		<delete file="lib/core.jar" />
 		<unzip src="../dev.zip" dest="..">
 		    <patternset>
@@ -109,5 +109,6 @@
 		    </patternset>
 		</unzip>
 	</target>
-	<target name="all" depends="init, download-lib, refresh-rainbow, library-file" description="do all ßlib things"/>
+	<target name="all" depends="init, download-lib, refresh-rainbow, library-file" description="do all lib things" />
+	<target name="jenkins" depends="init, download-lib, refresh-rainbow" />
 </project>
