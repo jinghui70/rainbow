@@ -7,7 +7,8 @@
 	
 	// 启用命令行工作台
  	// "console": true, 
-	product: {
-    	//rdm: "rainbow.rdm"
+ 	
+	"web.gate": {
+		port: 8888
 	}
 }
