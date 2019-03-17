@@ -1,10 +1,11 @@
 package rainbow.core.util.ioc;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -12,9 +13,7 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.CaseFormat;
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableList;
+import rainbow.core.util.Utils;
 
 /**
  * 这是一个简单实现的IOC容器类，IOC配置在名为beans的Map中。注入的顺序是先匹配参数，再匹配Context中配置的Bean
@@ -134,13 +133,13 @@ public class Context {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> List<T> getBeans(Class<T> clazz) {
-		ImmutableList.Builder<T> builder = ImmutableList.builder();
+		List<T> result = new ArrayList<T>();
 		for (Entry<String, Bean> entry : beans.entrySet()) {
 			Bean bean = entry.getValue();
 			if (!bean.isPrototype() && clazz.isAssignableFrom(bean.getClazz()))
-				builder.add((T) getSingletonBean(entry.getKey(), bean));
+				result.add((T) getSingletonBean(entry.getKey(), bean));
 		}
-		return builder.build();
+		return result;
 	}
 
 	/**
@@ -213,12 +212,12 @@ public class Context {
 				continue;
 			Class<?> injectType = field.getType();
 			injectName = inject.value();
-			if (Strings.isNullOrEmpty(injectName))
+			if (Utils.isNullOrEmpty(injectName))
 				injectName = field.getName();
 			// 注入
 			Object injectBean = getInjectBean(injectName, injectType, clazz.getName());
 			if (inject.obliged())
-				checkNotNull(injectBean, "inject bean [%s-%s] of type [%s] not found", object.getClass().getName(),
+				checkNotNull(injectBean, "inject bean [{}-{}] of type [{}] not found", object.getClass().getName(),
 						injectName, injectType.getName());
 			field.setAccessible(true);
 			field.set(object, injectBean);
@@ -235,12 +234,12 @@ public class Context {
 			Class<?> injectType = paramTypes[0];
 			// 获取注入名称
 			injectName = inject.value();
-			if (Strings.isNullOrEmpty(injectName))
-				injectName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, method.getName().substring(3));
+			if (Utils.isNullOrEmpty(injectName))
+				injectName = Utils.lowerFirstChar(method.getName().substring(3));
 			// 注入
 			Object injectBean = getInjectBean(injectName, injectType, clazz.getName());
 			if (inject.obliged())
-				checkNotNull(injectBean, "inject bean [%s-%s] of type [%s] not found", object.getClass().getName(),
+				checkNotNull(injectBean, "inject bean [{}-{}] of type [{}] not found", object.getClass().getName(),
 						injectName, injectType.getName());
 			method.invoke(object, injectBean);
 		}

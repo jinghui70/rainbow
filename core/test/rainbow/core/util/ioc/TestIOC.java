@@ -91,7 +91,7 @@ public class TestIOC {
 		}
 		container.setBean("depend", Double.valueOf(2011.10));
 		TObject main = container.getBean(TObject.class);
-		assertEquals(2011.1, main.getDepend(), 0);
+		assertEquals(2011.1, main.getDepend(), 0.00001);
 		assertEquals(now, main.getTimestamp().longValue());
 	}
 

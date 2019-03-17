@@ -1,6 +1,6 @@
 package rainbow.core.platform;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.nio.file.Path;
 import java.util.Collections;
@@ -37,7 +37,7 @@ public class ConfigData {
 	public ConfigData(String bundleId, boolean checkExist) {
 		init(bundleId);
 		if (checkExist)
-			checkNotNull(root, "config file [%s] not found", path.getFileName());
+			checkNotNull(root, "config file [{}] not found", path.getFileName());
 		if (root == null) {
 			standalone = false;
 			init("core");

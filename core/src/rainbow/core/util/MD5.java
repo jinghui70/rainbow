@@ -1,10 +1,10 @@
 package rainbow.core.util;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import com.google.common.primitives.Bytes;
 
 /**
  * MD5计算器
@@ -56,9 +56,12 @@ public abstract class MD5 {
 		try {
 			byte[] first = calc(password.getBytes("UTF8"));
 			byte[] saltBytes = salt.getBytes("UTF8");
-			byte[] result = calc(Bytes.concat(first, saltBytes));
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			outputStream.write(first);
+			outputStream.write(saltBytes);
+			byte[] result = calc(outputStream.toByteArray());
 			return Utils.byteToHex(result);
-		} catch (UnsupportedEncodingException e) {
+		} catch (IOException e) {
 			return null;
 		}
 	}

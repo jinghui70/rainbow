@@ -1,13 +1,12 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -37,7 +36,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 
 	private static Logger logger = LoggerFactory.getLogger(DaoImpl.class);
 
-	protected Map<String, Entity> entityMap = ImmutableMap.<String, Entity> of();
+	protected Map<String, Entity> entityMap = ImmutableMap.<String, Entity>of();
 
 	private Dialect dialect;
 
@@ -71,7 +70,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	}
 
 	public void setEntityMap(Map<String, Entity> entityMap) {
-		this.entityMap = (entityMap == null) ? ImmutableMap.<String, Entity> of() : entityMap;
+		this.entityMap = (entityMap == null) ? ImmutableMap.<String, Entity>of() : entityMap;
 	}
 
 	public String getSchema() {
@@ -91,7 +90,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	}
 
 	private Dialect initDatabaseDialect(DataSource dataSource) {
-		try(Connection conn = dataSource.getConnection()) {
+		try (Connection conn = dataSource.getConnection()) {
 			return DialectManager.getDialect(conn.getMetaData());
 		} catch (SQLException e) {
 			logger.error("failed to init database dialect", e);
@@ -112,7 +111,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	@Override
 	public Entity getEntity(String entityName) {
 		checkNotNull(entityName);
-		return checkNotNull(entityMap.get(entityName), "entity [%s] not defined", entityName);
+		return checkNotNull(entityMap.get(entityName), "entity [{}] not defined", entityName);
 	}
 
 	@Override
@@ -179,7 +178,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 		for (Column column : entity.getColumns()) {
 			Object v = neo.getObject(column);
 			if (v == null) {
-				checkArgument(!column.isMandatory(), "property %s cannot be null", column.getName());
+				checkArgument(!column.isMandatory(), "property {} cannot be null", column.getName());
 			} else {
 				if (i == 0) {
 					i++;
@@ -261,22 +260,21 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 			}
 		} else {
 			for (String field : fields) {
-				Column column = checkNotNull(entity.getColumn(field), "column [%s] not found", field);
-				checkArgument(!column.isKey(), "column [%s] is key", field);
-				checkArgument(Number.class.isAssignableFrom(column.getType().dataClass()), "column[%s] type invalid",
+				Column column = checkNotNull(entity.getColumn(field), "column [{}] not found", field);
+				checkArgument(!column.isKey(), "column [{}] is key", field);
+				checkArgument(Number.class.isAssignableFrom(column.getType().dataClass()), "column[{}] type invalid",
 						field);
 				builder.add(column);
 			}
 		}
 		List<Column> list = builder.build();
 		final Sql updateSql = new Sql(list.size()).append("update ").append(entity.getDbName()).append(" set ");
-		Utils.join(updateSql.getStringBuilder(), list, new Consumer<Column>() {
-			@Override
-			public void accept(Column column) {
-				updateSql.append(column.getDbName()).append("=").append(column.getDbName()).append(add ? '+' : '-')
-						.append(neo.getObject(column));
-			}
-		});
+		updateSql.prepareJoin();
+		for (Column column : list) {
+			updateSql.appendComma().append(column.getDbName()).append("=").append(column.getDbName())
+					.append(add ? '+' : '-').append(neo.getObject(column));
+
+		}
 		updateSql.whereKey(neo);
 		execSql(updateSql);
 	}
@@ -313,7 +311,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	public int update(Object obj) {
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
-		checkArgument(entity.getKeyCount() > 0, "cann't update 0 key entity [%s]", entity.getName());
+		checkArgument(entity.getKeyCount() > 0, "cann't update 0 key entity [{}]", entity.getName());
 		Sql sql = new Sql(entity.getKeyCount()).append("update ").append(entity.getDbName()).append(" set ");
 		C cnd = EmptyCondition.INSTANCE;
 		boolean first = true;
@@ -342,13 +340,9 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	public int update(String entityName, C cnd, U... items) {
 		Entity entity = getEntity(entityName);
 		Sql sql = new Sql("UPDATE ").append(entity.getDbName()).append(" SET ");
-		boolean first = true;
+		sql.prepareJoin();
 		for (U item : items) {
-			if (first) {
-				first = false;
-			} else {
-				sql.append(',');
-			}
+			sql.appendComma();
 			item.toSql(entity, sql);
 		}
 		sql.whereCnd(entity, cnd);
@@ -379,7 +373,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	public List<NeoBean> queryForList(Select select) {
 		Sql sql = select.build(this);
 		Entity entity = select.getEntity();
-		checkNotNull(entity, "entity not defined->%s", select);
+		checkNotNull(entity, "entity not defined->{}", select);
 		return queryForList(sql, new NeoBeanMapper(entity));
 	}
 

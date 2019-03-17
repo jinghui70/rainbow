@@ -50,7 +50,7 @@ public class TestQuery {
 		assertEquals(1, s.getPerson());
 		assertEquals(1, s.getGoods());
 		assertEquals(1, s.getQty());
-		assertEquals(100d, s.getMoney(), 0);
+		assertEquals(100d, s.getMoney());
 
 		List<_SaleRecord> list = dao.queryForList(
 				new Select().from("_SaleRecord").where("goods", 3).orderBy("qty desc, money"), _SaleRecord.class);
@@ -58,7 +58,7 @@ public class TestQuery {
 		s = list.get(0);
 		assertEquals(2, s.getPerson());
 		assertEquals(10, s.getQty());
-		assertEquals(10d, s.getMoney(), 0);
+		assertEquals(10d, s.getMoney());
 
 		PageData<_SaleRecord> page = dao.pageQuery(new Select().from("_SaleRecord").orderBy("id").paging(1, 5),
 				_SaleRecord.class);

@@ -5,8 +5,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Function;
-import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 import rainbow.core.util.Utils;
@@ -24,12 +22,7 @@ public class MapRowMapper implements RowMapper<Map<String, Object>> {
 	}
 
 	public MapRowMapper(Entity entity) {
-		this.fields = Utils.transform(entity.getColumns(), new Function<Column, Field>() {
-			@Override
-			public Field apply(Column input) {
-				return new Field(null, input);
-			}
-		});
+		this.fields = Utils.transform(entity.getColumns(), column -> new Field(null, column));
 	}
 
 	@Override
@@ -39,7 +32,7 @@ public class MapRowMapper implements RowMapper<Map<String, Object>> {
 			Column column = field.getColumn();
 			String propertyName = field.getAlias();
 			String fieldName = field.getAlias();
-			if (Strings.isNullOrEmpty(propertyName)) {
+			if (Utils.isNullOrEmpty(propertyName)) {
 				propertyName = column.getName();
 				fieldName = column.getDbName();
 			}

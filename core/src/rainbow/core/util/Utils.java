@@ -1,16 +1,20 @@
 package rainbow.core.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.RandomAccess;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -18,14 +22,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.io.BaseEncoding;
-
-import rainbow.core.model.exception.AppException;
 
 /**
- * 通用工具，弥补guava没有提供的常用工具类
+ * 通用工具类
  * 
  * @author lijinghui
  * 
@@ -46,6 +45,13 @@ public abstract class Utils {
 	 * 空字符串常量
 	 */
 	public static final String NULL_STR = "";
+
+	/**
+	 * 检查一个字符串是不是为 null或者为空
+	 */
+	public static boolean isNullOrEmpty(String str) {
+		return str == null ? true : str.isEmpty();
+	}
 
 	/**
 	 * 检查输入的容器对象是不是为 null或者为空
@@ -96,8 +102,11 @@ public abstract class Utils {
 	 * @return
 	 */
 	public static String trimString(String string, char... chars) {
-		if (Strings.isNullOrEmpty(string) || chars.length == 0)
+		Objects.requireNonNull(string);
+		if (string.isEmpty())
 			return NULL_STR;
+		if (chars.length == 0)
+			return string;
 		StringBuilder sb = new StringBuilder(string.length());
 		for (int i = 0; i < string.length(); i++) {
 			char c = string.charAt(i);
@@ -169,7 +178,7 @@ public abstract class Utils {
 	 * @return 分割好的字符串数组
 	 */
 	public static String[] split(String str, char delimiter) {
-		if (Strings.isNullOrEmpty(str))
+		if (str == null || str.isEmpty())
 			return new String[0];
 		char[] buf = str.toCharArray();
 		int count = 1;
@@ -235,7 +244,7 @@ public abstract class Utils {
 	 * @return
 	 */
 	public static String randomUUID64() {
-		return BaseEncoding.base64().omitPadding().encode(UUID2Byte(UUID.randomUUID()));
+		return Base64.getEncoder().withoutPadding().encodeToString(UUID2Byte(UUID.randomUUID()));
 	}
 
 	/**
@@ -255,34 +264,6 @@ public abstract class Utils {
 			lsb = lsb >> 8;
 		}
 		return data;
-	}
-
-	/**
-	 * 把一个异常转为字符串
-	 * 
-	 * @param e
-	 * @return
-	 */
-	public static String toString(Throwable e) {
-		return toString(e, 0);
-	}
-
-	/**
-	 * 把一个异常转为字符串,不能超过指定长度
-	 * 
-	 * @param e
-	 * @param length
-	 * @return
-	 */
-	public static String toString(Throwable e, int length) {
-		String result;
-		if (e instanceof AppException)
-			result = e.getMessage();
-		else
-			result = Throwables.getStackTraceAsString(e);
-		if (length > 0 && result.length() > length)
-			return result.substring(0, length);
-		return result;
 	}
 
 	// -----------------------------------------------------------------------
@@ -320,7 +301,8 @@ public abstract class Utils {
 	 * @since 2.0
 	 */
 	public static String substringBefore(final String str, final String separator) {
-		if (Strings.isNullOrEmpty(str) || separator == null) {
+		Objects.requireNonNull(str);
+		if (str.isEmpty() || separator == null) {
 			return str;
 		}
 		if (separator.isEmpty()) {
@@ -367,12 +349,11 @@ public abstract class Utils {
 	 * @since 2.0
 	 */
 	public static String substringAfter(final String str, final String separator) {
-		if (Strings.isNullOrEmpty(str)) {
+		Objects.requireNonNull(str);
+		if (str.isEmpty())
 			return str;
-		}
-		if (separator == null) {
+		else if (separator == null)
 			return NULL_STR;
-		}
 		final int pos = str.indexOf(separator);
 		if (pos == -1) {
 			return NULL_STR;
@@ -454,7 +435,61 @@ public abstract class Utils {
 	}
 
 	/**
-	 * 根据函数转换一组列表，替代Guava中的Lists.transform
+	 * 用{}做占位符，格式化字符串
+	 * 
+	 * @param template
+	 * @param args
+	 * @return
+	 */
+	public static String format(String template, Object... args) {
+		template = String.valueOf(template); // null -> "null"
+
+		// start substituting the arguments into the '{}' placeholders
+		StringBuilder builder = new StringBuilder(template.length() + 16 * args.length);
+		int templateStart = 0;
+		int i = 0;
+		while (i < args.length) {
+			int placeholderStart = template.indexOf("{}", templateStart);
+			if (placeholderStart == -1) {
+				break;
+			}
+			builder.append(template.substring(templateStart, placeholderStart));
+			builder.append(args[i++]);
+			templateStart = placeholderStart + 2;
+		}
+		builder.append(template.substring(templateStart));
+
+		// if we run out of placeholders, append the extra args in square braces
+		if (i < args.length) {
+			builder.append(" [");
+			builder.append(args[i++]);
+			while (i < args.length) {
+				builder.append(", ");
+				builder.append(args[i++]);
+			}
+			builder.append(']');
+		}
+
+		return builder.toString();
+	}
+
+	/**
+	 * 字符串首字母小写
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public static String lowerFirstChar(String str) {
+		if (isNullOrEmpty(str))
+			return str;
+		char ch = str.charAt(0);
+		if (Character.isLowerCase(ch))
+			return str;
+		return Character.toLowerCase(ch) + str.substring(1);
+	}
+
+	/**
+	 * 根据函数转换一组列表
 	 * 
 	 * @param fromList
 	 * @param function
@@ -488,39 +523,6 @@ public abstract class Utils {
 	}
 
 	/**
-	 * 处理一些比较复杂的字符串连接,分隔符为逗号
-	 * 
-	 * @param sb
-	 * @param list
-	 * @param consumer
-	 */
-	public static <T> void join(Appendable sb, Collection<T> list, Consumer<T> consumer) {
-		join(",", sb, list, consumer);
-	}
-
-	/**
-	 * 处理一些比较复杂的字符串连接
-	 * 
-	 * @param sep      分隔符
-	 * @param sb
-	 * @param list
-	 * @param consumer
-	 */
-	public static <T> void join(CharSequence sep, Appendable sb, Collection<T> list, Consumer<T> consumer) {
-		boolean first = true;
-		for (T t : list) {
-			if (first)
-				first = false;
-			else
-				try {
-					sb.append(sep);
-				} catch (IOException neverHappen) {
-				}
-			consumer.accept(t);
-		}
-	}
-
-	/**
 	 * 读取json配置文件（支持//注释）
 	 * 
 	 * @param path
@@ -539,4 +541,22 @@ public abstract class Utils {
 			throw new RuntimeException("fail to read config file:" + path.toString(), e);
 		}
 	}
+
+	/**
+	 * 流转为字符串
+	 * 
+	 * @param inputStream
+	 * @return
+	 * @throws IOException
+	 */
+	public static String streamToString(InputStream inputStream) throws IOException {
+		ByteArrayOutputStream result = new ByteArrayOutputStream();
+		byte[] buffer = new byte[1024];
+		int length;
+		while ((length = inputStream.read(buffer)) != -1) {
+			result.write(buffer, 0, length);
+		}
+		return result.toString(StandardCharsets.UTF_8.name());
+	}
+
 }

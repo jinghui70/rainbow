@@ -7,8 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 
-import com.google.common.base.Throwables;
-
 /**
  * This class starts frame with a console for development use.
  * 
@@ -56,7 +54,7 @@ public class Console implements Runnable {
             try {
                 cmdline = in.readLine();
             } catch (IOException ioe) {
-                out.print(Throwables.getStackTraceAsString(ioe));
+            	ioe.printStackTrace(out);
             }
             if (cmdline == null) {
                 break;

@@ -17,8 +17,6 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.CaseFormat;
-
 import rainbow.core.extension.Extension;
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.ConfigData;
@@ -159,7 +157,7 @@ public abstract class BundleActivator {
 					return;
 				String beanName = beandef.name();
 				if (beanName.isEmpty()) {
-					beanName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, clazz.getSimpleName());
+					beanName = Utils.lowerFirstChar(clazz.getSimpleName());
 					if (beanName.endsWith("Impl"))
 						beanName = Utils.substringBefore(beanName, "Impl");
 				}

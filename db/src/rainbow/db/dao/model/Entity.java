@@ -1,10 +1,10 @@
 package rainbow.db.dao.model;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.*;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -51,10 +51,10 @@ public class Entity implements INameObject, Function<String, Field> {
 		ImmutableList.Builder<Column> listBuilder = ImmutableList.builder();
 		ImmutableMap.Builder<String, Column> mapBuilder = ImmutableMap.builder();
 		ImmutableList.Builder<Column> keyBuilder = ImmutableList.builder();
-		checkState(!Utils.isNullOrEmpty(src.getColumns()), "Entity %s has no column", src.getName());
+		checkState(!Utils.isNullOrEmpty(src.getColumns()), "Entity {} has no column", src.getName());
 
 		for (Column column : src.getColumns()) {
-			checkNotNull(column.getName(), "Entity %s has a null name column", column);
+			checkNotNull(column.getName(), "Entity {} has a null name column", column);
 			listBuilder.add(column);
 			mapBuilder.put(column.getName(), column);
 			if (column.isKey())

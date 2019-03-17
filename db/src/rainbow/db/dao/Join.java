@@ -1,11 +1,10 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.*;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 
@@ -18,12 +17,12 @@ public class Join {
 	private String alias;
 
 	private String master;
-	
+
 	private LinkedList<JoinTarget> targets = Lists.newLinkedList();
 
 	private Join(String master) {
 		String[] s = Utils.splitTrim(master, ' ');
-		checkArgument(s.length == 2, "[%s] need table alias", master);
+		checkArgument(s.length == 2, "[{}" + "] need table alias", master);
 		this.master = s[0];
 		this.alias = s[1];
 	}
@@ -60,7 +59,7 @@ public class Join {
 		targets.getLast().on(left, right);
 		return this;
 	}
-	
+
 	private Join addTarget(JoinTarget target) {
 		targets.add(target);
 		return this;
@@ -71,21 +70,19 @@ public class Join {
 		sql.append(" FROM ").append(entity.getDbName()).append(' ').append(alias);
 		for (final JoinTarget t : targets) {
 			final Entity targetEntity = entityMap.get(t.getAlias());
-			checkNotNull(targetEntity, "join target entity [%s] not found", t.getTarget());
+			checkNotNull(targetEntity, "join target entity [{}] not found", t.getTarget());
 			sql.append(' ').append(t.getType().getText()).append(' ').append(targetEntity.getDbName()).append(' ')
 					.append(t.getAlias()).append(" ON(");
-			
-			Utils.join(" AND ", sql, t.getCnd(), new Consumer<JoinCnd>() {
-				@Override
-				public void accept(JoinCnd cnd) {
-					Column left = entity.getColumn(cnd.getLeft());
-					checkNotNull(left, "column [%s] not found in entity [%s]", cnd.getLeft(), master);
-					Column right = targetEntity.getColumn(cnd.getRight());
-					checkNotNull(right, "column [%s] not found in entity [%s]", cnd.getRight(), t.getTarget());
-					sql.append(alias).append('.').append(left.getDbName()).append("=").append(t.getAlias()).append('.')
-					.append(right.getDbName());
-				}
-			});
+			sql.prepareJoin();
+			for (JoinCnd cnd : t.getCnd()) {
+				sql.appendJoin(" AND ");
+				Column left = entity.getColumn(cnd.getLeft());
+				checkNotNull(left, "column [{}] not found in entity [{}]", cnd.getLeft(), master);
+				Column right = targetEntity.getColumn(cnd.getRight());
+				checkNotNull(right, "column [{}] not found in entity [{}]", cnd.getRight(), t.getTarget());
+				sql.append(alias).append('.').append(left.getDbName()).append("=").append(t.getAlias()).append('.')
+						.append(right.getDbName());
+			}
 			sql.append(")");
 		}
 	}

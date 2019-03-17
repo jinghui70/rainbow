@@ -1,6 +1,6 @@
 package rainbow.db;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,7 +62,7 @@ public final class DBTest {
 
 	public static InputStream getClasspathFile(String file) {
 		InputStream is = DBTest.class.getResourceAsStream(file);
-		checkNotNull(is, "file %s not found", file);
+		checkNotNull(is, "file {} not found", file);
 		return is;
 	}
 

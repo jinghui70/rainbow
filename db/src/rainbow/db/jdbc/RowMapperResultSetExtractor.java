@@ -1,11 +1,11 @@
 package rainbow.db.jdbc;
 
+import static rainbow.core.util.Preconditions.*;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Adapter implementation of the ResultSetExtractor interface that delegates
@@ -35,7 +35,7 @@ public class RowMapperResultSetExtractor<T> implements ResultSetExtractor<List<T
 	 * (just used for optimized collection handling)
 	 */
 	public RowMapperResultSetExtractor(RowMapper<T> rowMapper, int rowsExpected) {
-		Preconditions.checkNotNull(rowMapper, "RowMapper is required");
+		checkNotNull(rowMapper, "RowMapper is required");
 		this.rowMapper = rowMapper;
 		this.rowsExpected = rowsExpected;
 	}

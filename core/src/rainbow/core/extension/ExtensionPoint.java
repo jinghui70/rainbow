@@ -1,7 +1,6 @@
 package rainbow.core.extension;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.*;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -53,7 +52,7 @@ public class ExtensionPoint {
 				eo = object;
 			}
 		}
-		checkNotNull(eo, "invalid extension object[%s], register Extension[%s] failed", object.getClass().getName(),
+		checkNotNull(eo, "invalid extension object[{}], register Extension[{}] failed", object.getClass().getName(),
 				clazz.getSimpleName());
 
 		if (name == null) {
@@ -64,7 +63,7 @@ public class ExtensionPoint {
 			}
 		}
 		for (Extension e : extensions) {
-			checkArgument(!name.equals(e.getName()), "duplicated extension name[%s] of [%s]", name,
+			checkArgument(!name.equals(e.getName()), "duplicated extension name[{}] of [{}]", name,
 					clazz.getSimpleName());
 		}
 		Extension extension = new Extension(bundle, this, eo);

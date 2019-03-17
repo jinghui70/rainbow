@@ -1,9 +1,9 @@
 package rainbow.db.jdbc;
 
+import static rainbow.core.util.Preconditions.checkNotNull;
+
 import java.util.LinkedList;
 import java.util.List;
-
-import com.google.common.base.Preconditions;
 
 /**
  * Object to represent a SQL parameter definition.
@@ -24,8 +24,8 @@ public class SqlParameter {
 	private final int sqlType;
 
 	/**
-	 * Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT,
-	 * named array types
+	 * Used for types that are user-named like: STRUCT, DISTINCT, JAVA_OBJECT, named
+	 * array types
 	 */
 	private String typeName;
 
@@ -35,9 +35,8 @@ public class SqlParameter {
 	/**
 	 * Create a new anonymous SqlParameter, supplying the SQL type.
 	 * 
-	 * @param sqlType
-	 *            SQL type of the parameter according to
-	 *            <code>java.sql.Types</code>
+	 * @param sqlType SQL type of the parameter according to
+	 *                <code>java.sql.Types</code>
 	 */
 	public SqlParameter(int sqlType) {
 		this.sqlType = sqlType;
@@ -46,11 +45,9 @@ public class SqlParameter {
 	/**
 	 * Create a new anonymous SqlParameter, supplying the SQL type.
 	 * 
-	 * @param sqlType
-	 *            SQL type of the parameter according to
-	 *            <code>java.sql.Types</code>
-	 * @param typeName
-	 *            the type name of the parameter (optional)
+	 * @param sqlType  SQL type of the parameter according to
+	 *                 <code>java.sql.Types</code>
+	 * @param typeName the type name of the parameter (optional)
 	 */
 	public SqlParameter(int sqlType, String typeName) {
 		this.sqlType = sqlType;
@@ -60,12 +57,10 @@ public class SqlParameter {
 	/**
 	 * Create a new anonymous SqlParameter, supplying the SQL type.
 	 * 
-	 * @param sqlType
-	 *            SQL type of the parameter according to
-	 *            <code>java.sql.Types</code>
-	 * @param scale
-	 *            the number of digits after the decimal point (for DECIMAL and
-	 *            NUMERIC types)
+	 * @param sqlType SQL type of the parameter according to
+	 *                <code>java.sql.Types</code>
+	 * @param scale   the number of digits after the decimal point (for DECIMAL and
+	 *                NUMERIC types)
 	 */
 	public SqlParameter(int sqlType, int scale) {
 		this.sqlType = sqlType;
@@ -75,11 +70,9 @@ public class SqlParameter {
 	/**
 	 * Create a new SqlParameter, supplying name and SQL type.
 	 * 
-	 * @param name
-	 *            name of the parameter, as used in input and output maps
-	 * @param sqlType
-	 *            SQL type of the parameter according to
-	 *            <code>java.sql.Types</code>
+	 * @param name    name of the parameter, as used in input and output maps
+	 * @param sqlType SQL type of the parameter according to
+	 *                <code>java.sql.Types</code>
 	 */
 	public SqlParameter(String name, int sqlType) {
 		this.name = name;
@@ -89,13 +82,10 @@ public class SqlParameter {
 	/**
 	 * Create a new SqlParameter, supplying name and SQL type.
 	 * 
-	 * @param name
-	 *            name of the parameter, as used in input and output maps
-	 * @param sqlType
-	 *            SQL type of the parameter according to
-	 *            <code>java.sql.Types</code>
-	 * @param typeName
-	 *            the type name of the parameter (optional)
+	 * @param name     name of the parameter, as used in input and output maps
+	 * @param sqlType  SQL type of the parameter according to
+	 *                 <code>java.sql.Types</code>
+	 * @param typeName the type name of the parameter (optional)
 	 */
 	public SqlParameter(String name, int sqlType, String typeName) {
 		this.name = name;
@@ -106,14 +96,11 @@ public class SqlParameter {
 	/**
 	 * Create a new SqlParameter, supplying name and SQL type.
 	 * 
-	 * @param name
-	 *            name of the parameter, as used in input and output maps
-	 * @param sqlType
-	 *            SQL type of the parameter according to
-	 *            <code>java.sql.Types</code>
-	 * @param scale
-	 *            the number of digits after the decimal point (for DECIMAL and
-	 *            NUMERIC types)
+	 * @param name    name of the parameter, as used in input and output maps
+	 * @param sqlType SQL type of the parameter according to
+	 *                <code>java.sql.Types</code>
+	 * @param scale   the number of digits after the decimal point (for DECIMAL and
+	 *                NUMERIC types)
 	 */
 	public SqlParameter(String name, int sqlType, int scale) {
 		this.name = name;
@@ -124,11 +111,10 @@ public class SqlParameter {
 	/**
 	 * Copy constructor.
 	 * 
-	 * @param otherParam
-	 *            the SqlParameter object to copy from
+	 * @param otherParam the SqlParameter object to copy from
 	 */
 	public SqlParameter(SqlParameter otherParam) {
-		Preconditions.checkNotNull(otherParam, "SqlParameter object must not be null");
+		checkNotNull(otherParam, "SqlParameter object must not be null");
 		this.name = otherParam.name;
 		this.sqlType = otherParam.sqlType;
 		this.typeName = otherParam.typeName;
@@ -164,8 +150,8 @@ public class SqlParameter {
 	}
 
 	/**
-	 * Return whether this parameter holds input values that should be set
-	 * before execution even if they are <code>null</code>.
+	 * Return whether this parameter holds input values that should be set before
+	 * execution even if they are <code>null</code>.
 	 * <p>
 	 * This implementation always returns <code>true</code>.
 	 */
@@ -174,9 +160,8 @@ public class SqlParameter {
 	}
 
 	/**
-	 * Return whether this parameter is an implicit return parameter used during
-	 * the results preocessing of the
-	 * CallableStatement.getMoreResults/getUpdateCount.
+	 * Return whether this parameter is an implicit return parameter used during the
+	 * results preocessing of the CallableStatement.getMoreResults/getUpdateCount.
 	 * <p>
 	 * This implementation always returns <code>false</code>.
 	 */
@@ -185,8 +170,8 @@ public class SqlParameter {
 	}
 
 	/**
-	 * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>,
-	 * to a List of SqlParameter objects as used in this package.
+	 * Convert a list of JDBC types, as defined in <code>java.sql.Types</code>, to a
+	 * List of SqlParameter objects as used in this package.
 	 */
 	public static List<SqlParameter> sqlTypesToAnonymousParameterList(int[] types) {
 		List<SqlParameter> result = new LinkedList<SqlParameter>();

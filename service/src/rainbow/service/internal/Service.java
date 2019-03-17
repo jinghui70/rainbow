@@ -1,7 +1,7 @@
 package rainbow.service.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static rainbow.core.util.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkState;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -68,7 +68,7 @@ public class Service implements InvocationHandler {
 	}
 
 	public Object getServiceImpl() {
-		checkNotNull(serviceImpl, "[%s] serviceImpl not registered", serviceId);
+		checkNotNull(serviceImpl, "[{}] serviceImpl not registered", serviceId);
 		return serviceImpl;
 	}
 
@@ -77,7 +77,7 @@ public class Service implements InvocationHandler {
 			this.serviceImpl = null;
 		} else {
 			checkState(getServiceClass().isAssignableFrom(serviceImpl.getClass()),
-					"wrong service implement [%s] of service [%s]", serviceImpl.getClass().getName(), serviceId);
+					"wrong service implement [{}] of service [{}]", serviceImpl.getClass().getName(), serviceId);
 			this.serviceImpl = serviceImpl;
 		}
 	}
@@ -128,7 +128,7 @@ public class Service implements InvocationHandler {
 				map.put(name, method);
 			else if (method.getDeclaringClass() == serviceClass) { // 不相等表示上级接口中的函数，忽略之
 				Method old = map.get(name);
-				checkState(old.getDeclaringClass() != serviceClass, "service[%s] has duplicated method[%s]", serviceId,
+				checkState(old.getDeclaringClass() != serviceClass, "service[{}] has duplicated method[{}]", serviceId,
 						name);
 				map.put(name, method);
 			}

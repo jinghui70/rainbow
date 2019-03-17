@@ -1,6 +1,7 @@
 package rainbow.core.bundle;
 
-import com.google.common.collect.ImmutableList;
+import java.util.Collections;
+import java.util.List;
 
 public class Bundle {
 
@@ -16,12 +17,12 @@ public class Bundle {
 	/**
 	 * 所有的前辈
 	 */
-	private ImmutableList<Bundle> ancestors = ImmutableList.of();
+	private List<Bundle> ancestors = Collections.emptyList();
 
 	/**
 	 * 父辈
 	 */
-	private ImmutableList<Bundle> parents = ImmutableList.of();
+	private List<Bundle> parents = Collections.emptyList();
 
 	/**
 	 * Bundle入口类
@@ -66,23 +67,23 @@ public class Bundle {
 		return classLoader.getFileName();
 	}
 
-	public ImmutableList<Bundle> getAncestors() {
+	public List<Bundle> getAncestors() {
 		if (ancestors == null)
-			return ImmutableList.of();
+			return Collections.emptyList();
 		return ancestors;
 	}
 
-	void setAncestors(ImmutableList<Bundle> ancestors) {
+	void setAncestors(List<Bundle> ancestors) {
 		this.ancestors = ancestors;
 	}
 
-	public ImmutableList<Bundle> getParents() {
+	public List<Bundle> getParents() {
 		return parents;
 	}
 
-	void setParents(ImmutableList<Bundle> parents) {
+	void setParents(List<Bundle> parents) {
 		if (parents == null)
-			this.parents = ImmutableList.of();
+			this.parents = Collections.emptyList();
 		else
 			this.parents = parents;
 	}

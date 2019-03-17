@@ -1,11 +1,10 @@
 package rainbow.core.bundle;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static rainbow.core.util.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkState;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
@@ -164,7 +163,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	}
 
 	public boolean startBundle(String id) throws BundleException {
-		Bundle bundle = Objects.requireNonNull(get(id), () -> String.format("bundle [%s] not found", id));
+		Bundle bundle = checkNotNull(get(id), "bundle [{}] not found", id);
 		synchronized (this) {
 			return startBundle(bundle);
 		}
@@ -206,11 +205,11 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		int i = 0;
 		for (String id : ids) {
 			Bundle contextBundle = get(id);
-			checkNotNull(contextBundle, "can not find parent bundle [%s]", id);
-			checkState(bundle.getAncestors().contains(contextBundle), "[%s] isn't parent bundle",
+			checkNotNull(contextBundle, "can not find parent bundle [{}]", id);
+			checkState(bundle.getAncestors().contains(contextBundle), "[{}] isn't parent bundle",
 					id);
 			Context parentContext = contextBundle.activator.getContext();
-			checkNotNull(parentContext, "parent bundle [%s] doesn't have a context", id);
+			checkNotNull(parentContext, "parent bundle [{}] doesn't have a context", id);
 			parentContexts[i++] = parentContext;
 		}
 		bundle.setActivator(activator);
@@ -227,10 +226,10 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 			try {
 				activatorClass = bundle.getClassLoader().loadClass(className);
 			} catch (ClassNotFoundException e) {
-				className = String.format("rainbow.%s.Activator", bundle.getId());
+				className = String.format("rainbow.{}.Activator", bundle.getId());
 				activatorClass = bundle.getClassLoader().loadClass(className);
 			}
-			checkState(BundleActivator.class.isAssignableFrom(activatorClass), "wrong activator class %s",
+			checkState(BundleActivator.class.isAssignableFrom(activatorClass), "wrong activator class {}",
 					activatorClass);
 			BundleActivator activator = (BundleActivator) activatorClass.newInstance();
 			activator.setBundleId(bundle.getId());
@@ -242,7 +241,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 
 	public void stopBundle(String id) throws BundleException {
 		Bundle bundle = get(id);
-		checkNotNull(bundle, "bundle [%s] not found", id);
+		checkNotNull(bundle, "bundle [{}] not found", id);
 		synchronized (this) {
 			stopBundle(bundle);
 		}
@@ -312,9 +311,8 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 					else
 						listener.bundleStop(bundle.getId());
 				} catch (Throwable e) {
-					String msg = String.format("when bundle[%s] %s, listener [%s:%s] encounter an error",
-							bundle.getId(), active ? "start" : "stop", extensionBundle.getId(), listener.getClass());
-					logger.error(msg, e);
+					logger.error("when bundle[{}] {}, listener [{}:{}] encounter an error",
+							bundle.getId(), active ? "start" : "stop", extensionBundle.getId(), listener.getClass(), e);
 				}
 			}
 		}

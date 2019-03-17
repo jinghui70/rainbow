@@ -1,7 +1,7 @@
 package rainbow.db.internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static rainbow.core.util.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkState;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -156,7 +156,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 							boolean value = property.getValue().equalsIgnoreCase("true");
 							pd.getWriteMethod().invoke(dataSource, value);
 						} else
-							throw new AppException("错误的数据库参数配置[%s]", property.toString());
+							throw new AppException("错误的数据库参数配置[{}]", property.toString());
 					}
 					logger.info("read datasource [{}] property: {}", physic.getId(), property.toString());
 				}
@@ -189,7 +189,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 				entityMaps.put(modelName, map);
 			}
 			for (rainbow.db.model.Entity src : model.getEntities()) {
-				checkState(!map.containsKey(src.getName()), "Entity [%s] is duplicated in model file [%s]",
+				checkState(!map.containsKey(src.getName()), "Entity [{}] is duplicated in model file [{}]",
 						src.getName(), modelFile.getFileName());
 				map.put(src.getName(), new Entity(src));
 			}
@@ -212,7 +212,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 				model = logic.getId();
 			Map<String, Entity> entityMap = entityMaps.get(model);
 			DataSource dataSource = getDataSource(logic.getPhysic());
-			checkNotNull(dataSource, "physic datasource[%s] of logic source[%s] not defined", logic.getPhysic(),
+			checkNotNull(dataSource, "physic datasource[{}] of logic source[{}] not defined", logic.getPhysic(),
 					logic.getId());
 			DaoImpl dao = new DaoImpl(dataSource, entityMap);
 			dao.setName(logic.getId());

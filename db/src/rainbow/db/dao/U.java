@@ -1,6 +1,6 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.*;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -22,7 +22,7 @@ public final class U {
 	}
 
 	public static U set(String property, char calc, Object value) {
-		checkArgument(calcSet.contains(calc), "unknown calc [%s]", calc);
+		checkArgument(calcSet.contains(calc), "unknown calc [{}]", calc);
 		U item = new U();
 		item.property = property;
 		item.calc = calc;

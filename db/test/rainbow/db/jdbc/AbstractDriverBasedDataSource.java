@@ -1,11 +1,12 @@
 package rainbow.db.jdbc;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
-import com.google.common.base.Strings;
+import rainbow.core.util.Utils;
 
 /**
  * Abstract base class for JDBC {@link javax.sql.DataSource} implementations
@@ -28,7 +29,7 @@ public abstract class AbstractDriverBasedDataSource extends AbstractDataSource {
 	 * @see java.sql.Driver#connect(String, java.util.Properties)
 	 */
 	public void setUrl(String url) {
-		checkArgument(!Strings.isNullOrEmpty(url), "Property 'url' must not be empty");
+		checkArgument(!Utils.isNullOrEmpty(url), "Property 'url' must not be empty");
 		this.url = url.trim();
 	}
 

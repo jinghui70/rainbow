@@ -1,6 +1,6 @@
 package rainbow.core.util.encrypt;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.*;
 import rainbow.core.extension.ExtensionRegistry;
 
 public class EncryptUtils {
@@ -14,7 +14,7 @@ public class EncryptUtils {
 	 */
 	public static String encrypt(String type, String source) {
 		Encryption cipher = ExtensionRegistry.getExtensionObject(Encryption.class, type);
-		checkNotNull(cipher, "no encrypt cipher defined for [%s]", type);
+		checkNotNull(cipher, "no encrypt cipher defined for [{}]", type);
 		return cipher.encode(source);
 	}
 

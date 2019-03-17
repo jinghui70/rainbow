@@ -1,6 +1,6 @@
 package rainbow.db.jdbc;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.sql.Connection;
 import java.sql.Driver;

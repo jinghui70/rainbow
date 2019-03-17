@@ -2,14 +2,13 @@ package rainbow.core.platform;
 
 import java.util.stream.Stream;
 
-import com.google.common.base.Strings;
-
 import rainbow.core.bundle.Bundle;
 import rainbow.core.bundle.BundleManager;
 import rainbow.core.bundle.BundleState;
 import rainbow.core.console.CommandInterpreter;
 import rainbow.core.console.CommandProvider;
 import rainbow.core.console.HelpBuilder;
+import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Inject;
 
 /**
@@ -159,7 +158,7 @@ public class BundleCommandProvider implements CommandProvider {
 		if (stateFilter != null) {
 			bundles = bundles.filter(b -> b.getState() == stateFilter);
 		}
-		if (!Strings.isNullOrEmpty(filteredName)) {
+		if (!Utils.isNullOrEmpty(filteredName)) {
 			bundles = bundles.filter(b -> b.getId().startsWith(filteredName));
 		}
 		return bundles;

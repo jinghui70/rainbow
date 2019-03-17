@@ -1,13 +1,11 @@
 package rainbow.core.util.pinyin;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.*;
 
 import java.io.IOException;
 import java.util.Properties;
 
-import com.google.common.base.Ascii;
-import com.google.common.base.Splitter;
-import com.google.common.collect.Iterables;
+import rainbow.core.util.Utils;
 
 public final class PinYin {
 
@@ -36,8 +34,8 @@ public final class PinYin {
 	public static char getFirstPinYin(char ch) {
 		if (ch > 128) {
 			String pinyin = getPinYinFromChar(ch);
-			checkNotNull(pinyin, "unknow hanzi %s", ch);
-			return Ascii.toUpperCase(pinyin.charAt(0));
+			checkNotNull(pinyin, "unknow hanzi {}", ch);
+			return Character.toUpperCase(pinyin.charAt(0));
 		} else
 			return ch;
 	}
@@ -54,7 +52,7 @@ public final class PinYin {
 		String foundRecord = pinyinTable.getProperty(codepointHexStr);
 		if (foundRecord == null || foundRecord.equals("null"))
 			return null;
-		return Iterables.toArray(Splitter.on(',').split(foundRecord), String.class);
+		return Utils.split(foundRecord, ',');
 	}
 
 	/**

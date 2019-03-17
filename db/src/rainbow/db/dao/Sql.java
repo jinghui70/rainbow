@@ -1,12 +1,11 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 import rainbow.core.util.Utils;
 import rainbow.core.util.converter.Converters;
@@ -25,6 +24,8 @@ public class Sql implements Appendable {
 	private StringBuilder sb = new StringBuilder();
 
 	private List<Object> params;
+
+	private boolean joinFirst;
 
 	public Sql() {
 		params = new ArrayList<Object>();
@@ -56,13 +57,30 @@ public class Sql implements Appendable {
 		sb.append(obj.toString());
 		return this;
 	}
-	
+
 	public Sql append(Sql sql) {
 		sb.append(sql.getStringBuilder());
 		this.params.addAll(sql.getParams());
 		return this;
 	}
-	
+
+	public void prepareJoin() {
+		joinFirst = true;
+	}
+
+	public Sql appendComma() {
+		return appendJoin(",");
+	}
+
+	public Sql appendJoin(String join) {
+		if (joinFirst)
+			joinFirst = false;
+		else
+			return append(join);
+		return this;
+	}
+
+	@Override
 	public Sql append(char ch) {
 		sb.append(ch);
 		return this;
@@ -92,7 +110,7 @@ public class Sql implements Appendable {
 	public void resetParams() {
 		params.clear();
 	}
-	
+
 	public boolean noParams() {
 		return params.isEmpty();
 	}
@@ -101,22 +119,21 @@ public class Sql implements Appendable {
 		sb.append(" WHERE ");
 		return keyCondition(neo);
 	}
-	
+
 	public Sql keyCondition(final NeoBean neo) {
 		Entity entity = checkNotNull(neo.getEntity(), "neobean's entity not set");
-		checkArgument(entity.getKeyCount() > 0, "entity[%s] has no key", entity.getName());
-		Utils.join(" AND ", sb, entity.getKeys(), new Consumer<Column>() {
-			@Override
-			public void accept(Column column) {
-				append(column.getDbName()).append("=?").addParam(neo.getObject(column));
-			}
-		});
+		checkArgument(entity.getKeyCount() > 0, "entity[{}] has no key", entity.getName());
+		prepareJoin();
+		for (Column column : entity.getKeys()) {
+			appendJoin(" AND ");
+			append(column.getDbName()).append("=?").addParam(neo.getObject(column));
+		}
 		return this;
 	}
-	
+
 	public Sql whereKey(Entity entity, Object... values) {
-		checkArgument(entity.getKeyCount() > 0, "entity[%s] has no key", entity.getName());
-		checkArgument(entity.getKeyCount() == values.length, "param size(%s) not match key size(%s) of entity [%s]",
+		checkArgument(entity.getKeyCount() > 0, "entity[{}] has no key", entity.getName());
+		checkArgument(entity.getKeyCount() == values.length, "param size({}) not match key size({}) of entity [{}]",
 				values.length, entity.getKeyCount(), entity.getName());
 		int index = 0;
 		for (Column column : entity.getKeys()) {

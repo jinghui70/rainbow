@@ -3,7 +3,7 @@ package rainbow.core.util.template;
 import java.io.IOException;
 import java.io.Writer;
 
-import com.google.common.base.Strings;
+import rainbow.core.util.Utils;
 
 public class TokenPart implements Part {
 
@@ -24,7 +24,7 @@ public class TokenPart implements Part {
 	@Override
 	public void output(Writer writer, ValueProvider vp) throws IOException {
 		String value = vp.getValue(token);
-		if (!Strings.isNullOrEmpty(value))
+		if (!Utils.isNullOrEmpty(value))
 			writer.write(value);
 	}
 }

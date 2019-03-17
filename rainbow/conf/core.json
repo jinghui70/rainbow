@@ -9,6 +9,7 @@
  	// "console": true, 
  	
 	"web.gate": {
-		port: 8888
+		port: 8888,
+		prefix: "/"
 	}
 }

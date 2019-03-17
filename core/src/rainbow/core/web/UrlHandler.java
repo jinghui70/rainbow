@@ -1,10 +1,11 @@
 package rainbow.core.web;
 
-import static com.google.common.base.Preconditions.*;
+import static rainbow.core.util.Preconditions.*;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -17,7 +18,6 @@ import javax.servlet.http.HttpSession;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Closeables;
@@ -45,7 +45,7 @@ public abstract class UrlHandler implements InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Mapping mapping = checkNotNull(getClass().getAnnotation(Mapping.class), "%s need mapping annotation",
+		Mapping mapping = checkNotNull(getClass().getAnnotation(Mapping.class), "{} need mapping annotation",
 				getClass().getName());
 		string = mapping.value();
 		if (string.startsWith("*")) {
@@ -84,7 +84,7 @@ public abstract class UrlHandler implements InitializingBean {
 	protected void writeJsonBack(HttpServletResponse httpResponse, Object result) throws IOException {
 		httpResponse.setContentType("application/json");
 		httpResponse.setCharacterEncoding("UTF-8");
-		try(Writer writer = new OutputStreamWriter(httpResponse.getOutputStream(), Charsets.UTF_8)) {
+		try(Writer writer = new OutputStreamWriter(httpResponse.getOutputStream(), StandardCharsets.UTF_8)) {
 			writer.write(JSON.toJSONStringWithDateFormat(result, "yyyy/MM/dd HH:mm:ss",
 					SerializerFeature.QuoteFieldNames, SerializerFeature.SkipTransientField,
 					SerializerFeature.WriteEnumUsingToString, SerializerFeature.SortField,

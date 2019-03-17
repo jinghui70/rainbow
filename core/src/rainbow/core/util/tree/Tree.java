@@ -1,12 +1,11 @@
 package rainbow.core.util.tree;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import rainbow.core.model.object.ITreeObject;
-
-import com.google.common.collect.Lists;
 
 /**
  * 对象树
@@ -25,7 +24,7 @@ public class Tree<I, T extends ITreeObject<I>> {
 	/**
 	 * 虚拟根节点
 	 */
-	private List<TreeNode<T>> roots = Lists.newLinkedList();
+	private List<TreeNode<T>> roots = new LinkedList<TreeNode<T>>();
 
 	public Tree(List<T> list) {
 		for (T t : list)

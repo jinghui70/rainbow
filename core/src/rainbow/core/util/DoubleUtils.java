@@ -1,6 +1,6 @@
 package rainbow.core.util;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkArgument;
 
 import java.math.BigDecimal;
 

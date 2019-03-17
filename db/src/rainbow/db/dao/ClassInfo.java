@@ -1,14 +1,12 @@
 package rainbow.db.dao;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.CaseFormat;
-import com.google.common.collect.Maps;
 
 import rainbow.core.util.Utils;
 
@@ -18,7 +16,7 @@ public class ClassInfo<T> {
 
 	private Class<T> clazz;
 
-	private Map<String, Property> properties = Maps.newHashMap();
+	private Map<String, Property> properties = new HashMap<String, Property>();
 
 	public ClassInfo(Class<T> clazz) {
 		this.clazz = clazz;
@@ -26,7 +24,7 @@ public class ClassInfo<T> {
 	}
 
 	private Map<String, Property> getPropertyMap(Class<?> clazz) {
-		Map<String, Property> result = Maps.newHashMap();
+		Map<String, Property> result = new HashMap<String, Property>();
 		Method[] methods = clazz.getMethods();
 		Method writeMethod = null;
 		for (Method method : methods) {
@@ -49,7 +47,7 @@ public class ClassInfo<T> {
 				if (!type.isArray())
 					continue;
 			}
-			propertyName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, propertyName);
+			propertyName = Utils.lowerFirstChar(propertyName);
 			Property p = new Property(type);
 			p.setReadMethod(method);
 			p.setWriteMethod(writeMethod);

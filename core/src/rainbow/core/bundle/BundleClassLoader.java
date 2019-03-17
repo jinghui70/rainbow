@@ -1,12 +1,11 @@
 package rainbow.core.bundle;
 
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.io.ByteStreams;
 
 public abstract class BundleClassLoader extends ClassLoader {
 
@@ -78,7 +77,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 		byte[] buf = null;
 		try(InputStream is = res.getInputStream()) {
 			buf = new byte[(int) res.getSize()];
-			ByteStreams.readFully(is, buf);
+			new DataInputStream(is).readFully(buf);
 		} catch (IOException e) {
 			logger.error("find class [{}] failed", name, e);
 			throw new ClassNotFoundException(name, e);

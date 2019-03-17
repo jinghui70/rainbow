@@ -1,7 +1,6 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.*;
 
 import com.google.common.base.Objects;
 
@@ -60,7 +59,7 @@ public class Field {
 	public Field(String str, Entity entity) {
 		String name = setString(str);
 		column = entity.getColumn(name);
-		checkNotNull(column, "column [%s] not defined in entity[%s]", name, entity.getName());
+		checkNotNull(column, "column [{}] not defined in entity[{}]", name, entity.getName());
 	}
 
 	public Field(String str, ColumnFinder finder) {
@@ -81,7 +80,7 @@ public class Field {
 			function = str.substring(0, inx);
 			str = str.substring(inx + 1);
 			inx = str.indexOf(')');
-			checkArgument(inx > 0, "bad select field,')' not found->%s", str);
+			checkArgument(inx > 0, "bad select field,')' not found->{}", str);
 			str = str.substring(0, inx);
 		}
 		inx = str.indexOf('.');

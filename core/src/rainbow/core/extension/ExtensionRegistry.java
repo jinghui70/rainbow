@@ -1,18 +1,19 @@
 package rainbow.core.extension;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static rainbow.core.util.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkState;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
+
+import rainbow.core.util.Utils;
 
 /**
  * 扩展点及扩展注册表
@@ -33,7 +34,7 @@ public abstract class ExtensionRegistry {
 	 * @param clazz
 	 */
 	public static void registerExtensionPoint(String bundle, Class<?> clazz) {
-		checkState(!pointMap.containsKey(clazz), "duplicated extension point %s ", clazz.getName());
+		checkState(!pointMap.containsKey(clazz), "duplicated extension point {} ", clazz.getName());
 		logger.info("register extension point [{}]", clazz.getSimpleName());
 		ExtensionPoint point = new ExtensionPoint(bundle, clazz);
 		pointMap.put(clazz, point);
@@ -110,7 +111,7 @@ public abstract class ExtensionRegistry {
 	 */
 	public static ExtensionPoint getExtensionPoint(Class<?> clazz) {
 		ExtensionPoint point = pointMap.get(clazz);
-		checkNotNull(point, "Extension Point [%s] not registered", clazz.getName());
+		checkNotNull(point, "Extension Point [{}] not registered", clazz.getName());
 		return point;
 	}
 
@@ -133,7 +134,7 @@ public abstract class ExtensionRegistry {
 	 */
 	public static List<String> getExtensionNames(Class<?> clazz) {
 		ExtensionPoint point = getExtensionPoint(clazz);
-		return Lists.transform(point.getExtensions(), e -> e.getName());
+		return Utils.transform(point.getExtensions(), e -> e.getName());
 	}
 
 	/**
@@ -146,10 +147,7 @@ public abstract class ExtensionRegistry {
 	public static <T> List<T> getExtensionObjects(Class<T> clazz) {
 		ExtensionPoint point = getExtensionPoint(clazz);
 		Collection<Extension> extensions = point.getExtensions();
-		ImmutableList.Builder<T> builder = ImmutableList.builder();
-		for (Extension extension : extensions)
-			builder.add((T) extension.getObject());
-		return builder.build();
+		return extensions.stream().map(e->(T) e.getObject()).collect(Collectors.toList());
 	}
 
 	/**

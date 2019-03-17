@@ -1,6 +1,6 @@
 package rainbow.db.jdbc;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.*;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -21,8 +21,6 @@ import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.base.Preconditions;
 
 /**
  * This is the central class in the JDBC core package. It simplifies the use of
@@ -165,7 +163,7 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	public <T> T execute(StatementCallback<T> action) throws DataAccessException {
-		Preconditions.checkNotNull(action, "Callback object must not be null");
+		checkNotNull(action, "Callback object must not be null");
 
 		Connection con = getConnection();
 		Statement stmt = null;
@@ -228,8 +226,8 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	public <T> T query(final String sql, final ResultSetExtractor<T> rse) throws DataAccessException {
-		Preconditions.checkNotNull(sql, "SQL must not be null");
-		Preconditions.checkNotNull(rse, "ResultSetExtractor must not be null");
+		checkNotNull(sql, "SQL must not be null");
+		checkNotNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL query [{}]", sql);
 		}
@@ -328,7 +326,7 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	public int update(final String sql) throws DataAccessException {
-		Preconditions.checkNotNull(sql, "SQL must not be null");
+		checkNotNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update [{}]", sql);
 		}
@@ -349,8 +347,8 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	public <T> T execute(String sql, PreparedStatementCallback<T> action) throws DataAccessException {
-		Preconditions.checkNotNull(sql, "sql must not be null");
-		Preconditions.checkNotNull(action, "Callback object must not be null");
+		checkNotNull(sql, "sql must not be null");
+		checkNotNull(action, "Callback object must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing prepared SQL statement [{}]", sql);
 		}
@@ -376,7 +374,7 @@ public class JdbcTemplate implements JdbcOperations {
 
 	public <T> T query(String sql, final PreparedStatementSetter pss, final ResultSetExtractor<T> rse)
 			throws DataAccessException {
-		Preconditions.checkNotNull(rse, "ResultSetExtractor must not be null");
+		checkNotNull(rse, "ResultSetExtractor must not be null");
 		return execute(sql, new PreparedStatementCallback<T>() {
 			public T doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				ResultSet rs = null;

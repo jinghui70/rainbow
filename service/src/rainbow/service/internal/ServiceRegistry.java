@@ -1,8 +1,8 @@
 package rainbow.service.internal;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkState;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -13,18 +13,15 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 
 import rainbow.core.bundle.Bean;
 import rainbow.core.extension.ExtensionRegistry;
@@ -70,21 +67,13 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 	 */
 	public Service getService(String serviceId) {
 		Service service = services.get(serviceId);
-		checkNotNull(service, "Service [%s] not found", serviceId);
+		checkNotNull(service, "Service [{}] not found", serviceId);
 		return service;
 	}
 
 	public List<Service> getServices(final String prefix) {
-		Predicate<Service> predicate = Predicates.alwaysTrue();
-		if (prefix != null && !prefix.isEmpty())
-			predicate = new Predicate<Service>() {
-				@Override
-				public boolean apply(Service input) {
-					return input.getServiceId().startsWith(prefix);
-				}
-			};
-		Iterable<Service> result = Collections2.filter(services.values(), predicate);
-		return Ordering.usingToString().sortedCopy(result);
+		return services.values().stream().filter(service -> service.getServiceId().startsWith(prefix))
+				.collect(Collectors.toList()); // TODO 排序
 	}
 
 	/**
@@ -95,9 +84,9 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 	 */
 	public String registerService(Class<?> serviceClass) {
 		checkNotNull(serviceClass, "null service def class");
-		checkArgument(serviceClass.isInterface(), "[%s] is not an interface", serviceClass.getName());
+		checkArgument(serviceClass.isInterface(), "[{}] is not an interface", serviceClass.getName());
 		String serviceId = findServiceId(serviceClass.getName(), true);
-		checkArgument(!services.containsKey(serviceId), "duplicated service id of [%s]", serviceId);
+		checkArgument(!services.containsKey(serviceId), "duplicated service id of [{}]", serviceId);
 		Service service = new Service(serviceId, serviceClass);
 		services.put(serviceId, service);
 		logger.info("service [{}] registered", serviceId);
@@ -136,7 +125,7 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 			String part1 = serviceClassName.substring(0, index + 1);
 			String part2 = serviceClassName.substring(index + flag.length());
 			checkArgument(!part2.isEmpty());
-			LinkedList<String> idParts = Lists.newLinkedList();
+			LinkedList<String> idParts = new LinkedList<String>();
 			Iterator<String> i = Splitter.on('.').split(part1 + part2).iterator();
 			while (i.hasNext()) {
 				idParts.add(i.next());
@@ -146,7 +135,7 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 			checkArgument(idParts.getLast().equals(last));
 			return Joiner.on('.').join(idParts);
 		} catch (Throwable e) {
-			throw new AppException("[%s] is not a valid %s name", serviceClassName, suffix);
+			throw new AppException("[{}] is not a valid {} name", serviceClassName, suffix);
 		}
 	}
 
@@ -161,10 +150,10 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 		List<ServiceInterceptor> interceptors = ExtensionRegistry.getExtensionObjects(ServiceInterceptor.class);
 		try {
 			Service service = getService(request.getService());
-			checkState(!service.isInternal(), "不能调用内部服务[%s]", request.getService());
+			checkState(!service.isInternal(), "不能调用内部服务[{}]", request.getService());
 
 			Method method = service.getMethod(request.getMethod());
-			checkState(method.getAnnotation(Internal.class) == null, "不能调用服务[%s]的内部函数[%s]", request.getService(),
+			checkState(method.getAnnotation(Internal.class) == null, "不能调用服务[{}]的内部函数[{}]", request.getService(),
 					request.getMethod());
 			checkSession(service, method);
 			Object target = service.getServiceImpl();
@@ -222,7 +211,7 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 	public Method getMethod(String serviceId, String methodName) {
 		Service service = getService(serviceId);
 		Method method = service.getMethod(methodName);
-		checkNotNull(method, "Service[%s]-Method[%s] not found", serviceId, methodName);
+		checkNotNull(method, "Service[{}]-Method[{}] not found", serviceId, methodName);
 		return method;
 	}
 

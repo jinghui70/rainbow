@@ -1,7 +1,6 @@
 package rainbow.db.dao.object;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static rainbow.core.util.Preconditions.*;
 
 import java.util.List;
 
@@ -181,7 +180,7 @@ public class TreeDao<I, T extends ITreeObject<I>> extends IdDao<I, T> {
 		int level = 1;
 		while (!self.getPid().equals(rootId())) {
 			self = fetch(self.getPid());
-			checkNotNull(self, "(%s) id[%d]'s ancestor [%d] not exist", entityName, id, self.getPid());
+			checkNotNull(self, "({}) id[{}]'s ancestor [{}] not exist", entityName, id, self.getPid());
 			level++;
 		}
 		return level;

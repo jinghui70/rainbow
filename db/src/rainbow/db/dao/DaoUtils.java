@@ -1,6 +1,6 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkArgument;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,8 +21,6 @@ import javax.xml.transform.stream.StreamSource;
 
 import com.google.common.base.Objects;
 
-import rainbow.core.model.exception.DuplicateCodeException;
-import rainbow.core.model.exception.DuplicateNameException;
 import rainbow.core.util.Utils;
 import rainbow.core.util.XmlBinder;
 import rainbow.db.dao.condition.C;
@@ -71,34 +69,6 @@ public abstract class DaoUtils {
 	}
 
 	/**
-	 * 检查名称是否重复
-	 * 
-	 * @param obj
-	 * @param cnd
-	 * @throws DuplicateNameException
-	 */
-	public static void checkDuplicateName(Dao dao, String entityName, String name, C cnd, String obj)
-			throws DuplicateNameException {
-		if (dao.count(entityName, C.make("name", name).and(cnd)) > 0) {
-			throw new DuplicateNameException(name, obj);
-		}
-	}
-
-	/**
-	 * 检查名称是否重复
-	 * 
-	 * @param obj
-	 * @param cnd
-	 * @throws DuplicateNameException
-	 */
-	public static void checkDuplicateCode(Dao dao, String entityName, String code, C cnd, String obj)
-			throws DuplicateNameException {
-		if (dao.count(entityName, C.make("code", code).and(cnd)) > 0) {
-			throw new DuplicateCodeException(code, obj);
-		}
-	}
-
-	/**
 	 * 增加一个nest对象时，计算左右值
 	 * 
 	 * @param dao
@@ -114,11 +84,8 @@ public abstract class DaoUtils {
 			right++;
 		} else {
 			right = dao.queryForInt(new Select("right").from(entityName).where("id", neo.getObject("pid")));
-			if (right <= 0) {
-				String err = String.format("id[%s] has a wrong parent id[%s]", neo.getObject("id"),
+			checkArgument(right>0,"id[{}] has a wrong parent id[{}]", neo.getObject("id"),
 						neo.getObject("pid"));
-				throw new IllegalArgumentException(err);
-			}
 			dao.update(entityName, cnd.and("left", Op.Greater, right), U.set("left", '+', 2), U.set("right", '+', 2));
 			dao.update(entityName, cnd.and("left", Op.Less, right).and("right", Op.GreaterEqual, right),
 					U.set("right", '+', 2));

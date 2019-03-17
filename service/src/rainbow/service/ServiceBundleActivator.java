@@ -6,8 +6,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.CaseFormat;
-
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.BundleClassLoader;
 import rainbow.core.bundle.BundleException;
@@ -44,7 +42,7 @@ public abstract class ServiceBundleActivator extends BundleActivator {
 		});
 		for (String serviceId : services) {
 			Service service = Activator.getServiceRegistry().getService(serviceId);
-			String bean = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_CAMEL, service.getServiceClass().getSimpleName());
+			String bean = Utils.lowerFirstChar(service.getServiceClass().getSimpleName());
 			try {
 				Object impl = getBean(bean);
 				service.setServiceImpl(impl);

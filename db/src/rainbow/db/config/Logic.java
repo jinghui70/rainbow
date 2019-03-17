@@ -2,8 +2,6 @@ package rainbow.db.config;
 
 import javax.xml.bind.annotation.XmlAttribute;
 
-import com.google.common.base.MoreObjects;
-
 /**
  * 系统配置的逻辑数据源
  * 
@@ -90,7 +88,7 @@ public class Logic {
 
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this).add("id", id).add("physic", physic).toString();
+		return String.format("logic:%s physic:%s",  id, physic);
 	}
 
 }

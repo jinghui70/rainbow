@@ -2,6 +2,8 @@ package rainbow.service;
 
 import com.google.common.base.Strings;
 
+import rainbow.core.util.Utils;
+
 /**
  * 服务调用结果对象
  * 
@@ -54,7 +56,7 @@ public class ServiceResult {
 	public static ServiceResult exception(Throwable e) {
 		String msg = e.getMessage();
 		if ("DataAccessException".equals(e.getClass().getSimpleName())) {
-			if (Strings.isNullOrEmpty(msg)) {
+			if (Utils.isNullOrEmpty(msg)) {
 				msg = e.getCause().getMessage();
 			}
 			msg = "数据库错误：" + msg;

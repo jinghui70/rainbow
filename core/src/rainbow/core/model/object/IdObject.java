@@ -1,6 +1,6 @@
 package rainbow.core.model.object;
 
-import com.google.common.base.Objects;
+import java.util.Objects;
 
 /**
  * 有Id 属性的对象基类
@@ -31,7 +31,7 @@ public abstract class IdObject<I> implements IIdObject<I> {
             return true;
         if (obj == null)
             return false;
-        return (getClass() == obj.getClass()) && Objects.equal(id, ((IdObject<?>) obj).getId());
+        return (getClass() == obj.getClass()) && Objects.equals(id, ((IdObject<?>) obj).getId());
     }
 
 }

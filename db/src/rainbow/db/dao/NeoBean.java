@@ -1,7 +1,6 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.*;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -81,7 +80,7 @@ public class NeoBean {
 	}
 
 	public Object getObject(String property) {
-		Column column = checkNotNull(entity.getColumn(property), "property [%s] not defined", property);
+		Column column = checkNotNull(entity.getColumn(property), "property [{}] not defined", property);
 		return valueMap.get(column);
 	}
 
@@ -153,12 +152,12 @@ public class NeoBean {
 	}
 
 	public NeoBean setValue(String property, Object value) {
-		Column column = checkNotNull(entity.getColumn(property), "property [%s] not defined", property);
+		Column column = checkNotNull(entity.getColumn(property), "property [{}] not defined", property);
 		return setValue(column, value);
 	}
 
 	public NeoBean setValue(Column column, Object value) {
-		checkArgument(value != null || !column.isMandatory(), "property [%s] can not set null", column.getName());
+		checkArgument(value != null || !column.isMandatory(), "property [{}] can not set null", column.getName());
 		value = Converters.convert(value, column.getType().dataClass());
 		setObject(column, value);
 		return this;
@@ -173,8 +172,8 @@ public class NeoBean {
 	 * @return
 	 */
 	public NeoBean setBlob(String property, InputStream value) {
-		Column column = checkNotNull(entity.getColumn(property), "property [%s] not defined", property);
-		checkArgument(column.getType() == ColumnType.BLOB, "property [%s] is not a blob", property);
+		Column column = checkNotNull(entity.getColumn(property), "property [{}] not defined", property);
+		checkArgument(column.getType() == ColumnType.BLOB, "property [{}] is not a blob", property);
 		setObject(column, value);
 		return this;
 	}

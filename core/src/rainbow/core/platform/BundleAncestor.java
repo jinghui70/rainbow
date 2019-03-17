@@ -1,18 +1,16 @@
 package rainbow.core.platform;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Ordering;
+import java.util.stream.Collectors;
 
 import rainbow.core.bundle.Bundle;
 
 public class BundleAncestor {
 
-	private Map<Bundle, Integer> map = Maps.newHashMap();
+	private Map<Bundle, Integer> map = new HashMap<Bundle, Integer>();
 
 	public boolean unaware(Bundle bundle) {
 		return !map.containsKey(bundle);
@@ -41,13 +39,8 @@ public class BundleAncestor {
 	 * 
 	 * @return
 	 */
-	public ImmutableList<Bundle> getParents() {
-		ImmutableList.Builder<Bundle> builder = ImmutableList.builder();
-		for (Entry<Bundle, Integer> entry : map.entrySet()) {
-			if (entry.getValue() == 0)
-				builder.add(entry.getKey());
-		}
-		return builder.build();
+	public List<Bundle> getParents() {
+		return map.entrySet().stream().filter(e -> e.getValue() == 0).map(e -> e.getKey()).collect(Collectors.toList());
 	}
 
 	/**
@@ -55,7 +48,7 @@ public class BundleAncestor {
 	 * 
 	 * @return
 	 */
-	public ImmutableList<Bundle> getAncestors() {
+	public List<Bundle> getAncestors() {
 		Comparator<Bundle> comparator = new Comparator<Bundle>() {
 			@Override
 			public int compare(Bundle o1, Bundle o2) {
@@ -63,6 +56,6 @@ public class BundleAncestor {
 				return map.get(o2).compareTo(map.get(o1));
 			}
 		};
-		return Ordering.from(comparator).immutableSortedCopy(map.keySet());
+		return map.keySet().stream().sorted(comparator).collect(Collectors.toList());
 	}
 }

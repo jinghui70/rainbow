@@ -3,6 +3,7 @@ package rainbow.core.web;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -14,14 +15,12 @@ import javax.servlet.http.HttpSession;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.google.common.base.Charsets;
-import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.io.Closeables;
 
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.Session;
+import rainbow.core.util.Utils;
 
 public class UploadServlet extends HttpServlet {
 
@@ -35,14 +34,11 @@ public class UploadServlet extends HttpServlet {
 		UploadResult result = processUpload(req);
 		resp.setContentType("application/json");
 		resp.setCharacterEncoding("UTF-8");
-		Writer writer = new OutputStreamWriter(resp.getOutputStream(), Charsets.UTF_8);
-		try {
+		try (Writer writer = new OutputStreamWriter(resp.getOutputStream(), StandardCharsets.UTF_8)) {
 			writer.write(JSON.toJSONStringWithDateFormat(result, "yyyy/MM/dd HH:mm:ss",
 					SerializerFeature.QuoteFieldNames, SerializerFeature.SkipTransientField,
 					SerializerFeature.WriteEnumUsingToString, SerializerFeature.SortField,
 					SerializerFeature.DisableCircularReferenceDetect, SerializerFeature.WriteDateUseDateFormat));
-		} finally {
-			Closeables.close(writer, true);
 		}
 	}
 
@@ -67,7 +63,7 @@ public class UploadServlet extends HttpServlet {
 
 	private UploadResult processUpload(HttpServletRequest httpRequest) {
 		String path = getPath(httpRequest);
-		if (Strings.isNullOrEmpty(path))
+		if (Utils.isNullOrEmpty(path))
 			return UploadResult.error("错误的上传地址->" + path);
 		UploadHandler handler = ExtensionRegistry.getExtensionObject(UploadHandler.class, path.substring(1));
 		if (handler == null) {

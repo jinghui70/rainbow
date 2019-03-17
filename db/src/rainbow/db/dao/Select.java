@@ -1,18 +1,16 @@
 package rainbow.db.dao;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
@@ -239,7 +237,7 @@ public class Select {
 
 	public Select orderBy(OrderBy orderBy) {
 		if (this.orderBy == null)
-			this.orderBy = Lists.newLinkedList();
+			this.orderBy = new ArrayList<OrderBy>();
 		this.orderBy.add(orderBy);
 		return this;
 	}
@@ -264,7 +262,7 @@ public class Select {
 	}
 
 	private Sql build(Dao dao, boolean includePage) {
-		fields = Lists.newArrayList();
+		fields = new ArrayList<Field>();
 		final Sql sql = new Sql().append("SELECT ");
 		if (distinct)
 			sql.append("DISTINCT ");
@@ -286,36 +284,32 @@ public class Select {
 		sql.whereCnd(fieldFunction, cnd);
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
-			Utils.join(sql, Arrays.asList(groupBy), new Consumer<String>() {
-				@Override
-				public void accept(String groupBy) {
-					for (Field field : fields) {
-						String sqlPart = field.match(groupBy);
-						if (sqlPart != null) {
-							sql.append(sqlPart);
-							return;
-						}
+			sql.prepareJoin();
+			Arrays.asList(groupBy).forEach(g -> {
+				for (Field field : fields) {
+					String sqlPart = field.match(g);
+					if (sqlPart != null) {
+						sql.appendComma().append(sqlPart);
+						return;
 					}
-					throw new AppException("GroupBy field [%s] not in select Fields", orderBy);
-				};
+				}
+				throw new AppException("GroupBy field [{}] not in select Fields", orderBy);
 			});
 		}
 		if (orderBy != null) {
 			sql.append(" ORDER BY ");
-			Utils.join(sql, orderBy, new Consumer<OrderBy>() {
-				@Override
-				public void accept(OrderBy orderBy) {
-					for (Field field : fields) {
-						String sqlPart = field.match(orderBy.getProperty());
-						if (sqlPart != null) {
-							sql.append(sqlPart);
-							if (orderBy.isDesc())
-								sql.append(" DESC");
-							return;
-						}
+			sql.prepareJoin();
+			orderBy.forEach(o -> {
+				for (Field field : fields) {
+					String sqlPart = field.match(o.getProperty());
+					if (sqlPart != null) {
+						sql.appendComma().append(sqlPart);
+						if (o.isDesc())
+							sql.append(" DESC");
+						return;
 					}
-					throw new AppException("OrderBy field [%s] not in select Fields", orderBy);
 				}
+				throw new AppException("OrderBy field [{}] not in select Fields", orderBy);
 			});
 		}
 		if (includePage && pager != null)
@@ -330,7 +324,7 @@ public class Select {
 
 	private void buildSelectFrom(Dao dao, Sql sql, String table) {
 		entity = dao.getEntity(table);
-		checkNotNull(entity, "entity [%s] not found", fromStr);
+		checkNotNull(entity, "entity [{}] not found", fromStr);
 		fieldFunction = new Function<String, Field>() {
 			@Override
 			public Field apply(String input) {
@@ -350,13 +344,13 @@ public class Select {
 	}
 
 	private void prepareMulti(Dao dao, String[] tables) {
-		entityMap = Maps.newHashMap();
+		entityMap = new HashMap<String, Entity>();
 		tableAliases = new ArrayList<String>(tables.length);
 		for (String tableName : tables) {
 			String[] table = Utils.split(tableName, ' ');
-			checkArgument(table.length == 2, "[%s] need table alias", tableName);
+			checkArgument(table.length == 2, "[{}] need table alias", tableName);
 			Entity entity = dao.getEntity(table[0]);
-			checkNotNull(entity, "entity [%s] not found", tableName);
+			checkNotNull(entity, "entity [{}] not found", tableName);
 			entityMap.put(table[1], entity);
 			tableAliases.add(table[1]);
 		}
@@ -367,9 +361,9 @@ public class Select {
 			@Override
 			public Column find(String tableAlias, String fieldName) {
 				Entity entity = entityMap.get(tableAlias);
-				checkNotNull(entity, "table alias not found->[%s.%s]", tableAlias, fieldName);
+				checkNotNull(entity, "table alias not found->[{}.{}]", tableAlias, fieldName);
 				Column column = entity.getColumn(fieldName);
-				return checkNotNull(column, "column [%s] of table [%s] not defined", fieldName, entity.getName());
+				return checkNotNull(column, "column [{}] of table [{}] not defined", fieldName, entity.getName());
 			}
 		};
 		fieldFunction = new Function<String, Field>() {
@@ -379,47 +373,42 @@ public class Select {
 			}
 		};
 		if (select == null || select.length == 0) {
-			Utils.join(sql, tableAliases, new Consumer<String>() {
-				@Override
-				public void accept(String tableAlias) {
-					Entity entity = entityMap.get(tableAlias);
-					addAllField(tableAlias, entity);
-					sql.append(tableAlias).append(".*");
-				}
-			});
+			sql.prepareJoin();
+			for (String tableAlias : tableAliases) {
+				Entity entity = entityMap.get(tableAlias);
+				addAllField(tableAlias, entity);
+				sql.appendComma().append(tableAlias).append(".*");
+			}
 		} else {
-			Utils.join(sql, Arrays.asList(select), new Consumer<String>() {
-				@Override
-				public void accept(String s) {
-					if (s.endsWith(".*")) {
-						final String tableAlias = s.substring(0, s.length() - 2);
-						Entity entity = entityMap.get(tableAlias);
-						checkNotNull(entity, "table alias not exist->%s", s);
-						addAllField(tableAlias, entity);
-						sql.append(s);
-					} else {
-						Field field = fieldFunction.apply(s);
-						fields.add(field);
-						sql.append(field);
-					}
+			sql.prepareJoin();
+			for (String s : select) {
+				sql.appendComma();
+				if (s.endsWith(".*")) {
+					final String tableAlias = s.substring(0, s.length() - 2);
+					Entity entity = entityMap.get(tableAlias);
+					checkNotNull(entity, "table alias not exist->{}", s);
+					addAllField(tableAlias, entity);
+					sql.append(s);
+				} else {
+					Field field = fieldFunction.apply(s);
+					fields.add(field);
+					sql.append(field);
 				}
-			});
+			}
 		}
 	}
 
 	private void buildFromMulti(final Sql sql) {
-		sql.append(" FROM ");
-		Utils.join(sql, tableAliases, new Consumer<String>() {
-			@Override
-			public void accept(String tableAlias) {
-				Entity entity = entityMap.get(tableAlias);
-				sql.append(entity.getDbName()).append(' ').append(tableAlias);
-			}
-		});
+		sql.append(" FROM ").prepareJoin();;
+		for (String tableAlias : tableAliases) {
+			sql.appendComma();
+			Entity entity = entityMap.get(tableAlias);
+			sql.append(entity.getDbName()).append(' ').append(tableAlias);
+		}
 	}
 
 	private void prepareJoin(Dao dao) {
-		entityMap = Maps.newHashMap();
+		entityMap = new HashMap<String, Entity>();
 		tableAliases = new ArrayList<String>();
 		Entity entity = dao.getEntity(join.getMaster());
 		entityMap.put(join.getAlias(), entity);

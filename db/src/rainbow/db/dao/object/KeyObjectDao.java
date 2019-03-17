@@ -1,6 +1,6 @@
 package rainbow.db.dao.object;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -56,7 +56,7 @@ public class KeyObjectDao<I, T> extends ObjectDao<T> implements Function<I, T> {
 		} while (!(type instanceof ParameterizedType));
 		ParameterizedType pt = (ParameterizedType) type;
 		keyClazz = (Class<I>) pt.getActualTypeArguments()[0];
-		checkNotNull(keyClazz, "cannot retrieve key class of [%s]", clazz.getSimpleName());
+		checkNotNull(keyClazz, "cannot retrieve key class of [{}]", clazz.getSimpleName());
 	}
 
 	/**

@@ -1,10 +1,9 @@
 package rainbow.core.util.template;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-
-import com.google.common.collect.Maps;
 
 public class BaseValueProvider extends ValueProviderAdapter {
 
@@ -20,7 +19,7 @@ public class BaseValueProvider extends ValueProviderAdapter {
 
 	protected void putLoopContext(String loopName, Iterator<?> i) {
 		if (loopContext == null)
-			loopContext = Maps.newHashMap();
+			loopContext = new HashMap<String, IteratorWrap>();
 		loopContext.put(loopName, new IteratorWrap(i));
 	}
 

@@ -16,7 +16,7 @@ public class ServiceNotReadyException extends AppException {
     private static final long serialVersionUID = 1L;
 
     public ServiceNotReadyException(String serviceId) {
-        super(String.format("service [%s] not ready", serviceId));
+        super("service [{}] not ready", serviceId);
     }
 
 }

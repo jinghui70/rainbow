@@ -90,13 +90,13 @@ public class TestObjectDao {
 	private void checkR1(_Report r) {
 		assertEquals(1, r.getCount());
 		assertEquals(_Unit.Y, r.getUnit());
-		assertEquals(100.0, r.getMoney(), 0.0d);
+		assertEquals(100.0, r.getMoney());
 	}
 
 	private void checkR2(_Report r) {
 		assertEquals(2, r.getCount());
 		assertEquals(_Unit.M, r.getUnit());
-		assertEquals(200.0, r.getMoney(), 0.0d);
+		assertEquals(200.0, r.getMoney());
 	}
 
 }

@@ -1,11 +1,9 @@
 package rainbow.db.jdbc;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.sql.Connection;
-
-import com.google.common.base.Supplier;
-import com.google.common.base.Throwables;
+import java.util.function.Supplier;
 
 /**
  * 简单的事务管理器，不支持嵌套事务
@@ -57,7 +55,7 @@ public class TransactionManager {
 			tran.commit();
 		} catch (Throwable e) {
 			tran.rollback();
-		    Throwables.throwIfUnchecked(e);
+		    throwIfUnchecked(e);
 		    throw new RuntimeException(e);
 		} finally {
 			if (tran.getCount() == 0)
@@ -73,11 +71,21 @@ public class TransactionManager {
 			return result;
 		} catch (Throwable e) {
 			tran.rollback();
-		    Throwables.throwIfUnchecked(e);
+			throwIfUnchecked(e);
 		    throw new RuntimeException(e);
 		} finally {
 			if (tran.getCount() == 0)
 				trans.set(null);
 		}
 	}
+	
+	private void throwIfUnchecked(Throwable throwable) {
+		if (throwable instanceof RuntimeException) {
+			throw (RuntimeException) throwable;
+		}
+		if (throwable instanceof Error) {
+			throw (Error) throwable;
+		}
+	}
+
 }
