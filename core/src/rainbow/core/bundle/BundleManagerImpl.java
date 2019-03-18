@@ -226,7 +226,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 			try {
 				activatorClass = bundle.getClassLoader().loadClass(className);
 			} catch (ClassNotFoundException e) {
-				className = String.format("rainbow.{}.Activator", bundle.getId());
+				className = String.format("rainbow.%s.Activator", bundle.getId());
 				activatorClass = bundle.getClassLoader().loadClass(className);
 			}
 			checkState(BundleActivator.class.isAssignableFrom(activatorClass), "wrong activator class {}",
