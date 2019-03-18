@@ -21,13 +21,6 @@ public abstract class BundleClassLoader extends ClassLoader {
 		this.bundle = bundle;
 	}
 
-	/**
-	 * 返回bundle对应的文件名
-	 * 
-	 * @return
-	 */
-	public abstract String getFileName();
-	
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
 		if (name.startsWith(bundle.getId())) {
@@ -62,7 +55,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * 
 	 * @param processor
 	 */
-	public abstract void procResource(ResourceProcessor processor) throws BundleException;
+	public abstract void procResource(ResourceProcessor processor);
 
 	protected Class<?> defineClass(String name, Resource res) throws ClassNotFoundException {
 		int i = name.lastIndexOf('.');

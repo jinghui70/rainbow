@@ -17,7 +17,7 @@ public interface ResourceProcessor {
 	 * @param resource
 	 *            要处理的抽象资源
 	 */
-	void processResource(BundleClassLoader classLoader, Resource resource) throws BundleException;
+	void processResource(BundleClassLoader classLoader, Resource resource);
 
 }
 

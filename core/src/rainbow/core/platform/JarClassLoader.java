@@ -3,14 +3,12 @@ package rainbow.core.platform;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.ZipEntry;
 
 import rainbow.core.bundle.BundleClassLoader;
-import rainbow.core.bundle.BundleException;
 import rainbow.core.bundle.Resource;
 import rainbow.core.bundle.ResourceProcessor;
 
@@ -32,11 +30,6 @@ public class JarClassLoader extends BundleClassLoader {
 	}
 
 	@Override
-	public String getFileName() {
-		return Paths.get(jarFile.getName()).getFileName().toString();
-	}
-
-	@Override
 	public Resource getLocalResource(String resourceName) {
 		ZipEntry entry = jarFile.getJarEntry(resourceName);
 		if (entry == null)
@@ -45,7 +38,7 @@ public class JarClassLoader extends BundleClassLoader {
 	}
 
 	@Override
-	public void procResource(ResourceProcessor processor) throws BundleException {
+	public void procResource(ResourceProcessor processor) {
 		Enumeration<JarEntry> entrys = jarFile.entries();
 		while (entrys.hasMoreElements()) {
 			JarEntry entry = entrys.nextElement();

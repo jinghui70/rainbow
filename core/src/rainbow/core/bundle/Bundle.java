@@ -63,10 +63,6 @@ public class Bundle {
 		this.state = state;
 	}
 
-	public String getFileName() {
-		return classLoader.getFileName();
-	}
-
 	public List<Bundle> getAncestors() {
 		if (ancestors == null)
 			return Collections.emptyList();

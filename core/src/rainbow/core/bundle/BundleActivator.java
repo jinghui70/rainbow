@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import rainbow.core.extension.Extension;
 import rainbow.core.extension.ExtensionRegistry;
+import rainbow.core.model.exception.RuntimeException2;
 import rainbow.core.platform.ConfigData;
 import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
@@ -142,7 +143,7 @@ public abstract class BundleActivator {
 			throws BundleException {
 		getClassLoader().procResource(new ResourceProcessor() {
 			@Override
-			public void processResource(BundleClassLoader classLoader, Resource resource) throws BundleException {
+			public void processResource(BundleClassLoader classLoader, Resource resource) {
 				if (!resource.getName().endsWith(".class"))
 					return;
 				String className = Utils.substringBefore(resource.getName(), ".class").replace('/', '.');
@@ -150,7 +151,7 @@ public abstract class BundleActivator {
 				try {
 					clazz = classLoader.loadClass(className);
 				} catch (ClassNotFoundException e) {
-					throw new BundleException(e, e.getMessage());
+					throw new RuntimeException2("load class [{}] failed when iterating all class", className);
 				}
 				rainbow.core.bundle.Bean beandef = clazz.getAnnotation(rainbow.core.bundle.Bean.class);
 				if (beandef == null)
@@ -168,7 +169,6 @@ public abstract class BundleActivator {
 					}
 				} else
 					contextConfig.put(beanName, Bean.prototype(clazz));
-
 			}
 		});
 	}
