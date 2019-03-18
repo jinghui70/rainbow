@@ -20,7 +20,7 @@ public class FileResource implements Resource {
 		this.file = file;
 		Path relative = root.relativize(file);
 		Iterator<Path> i = relative.iterator();
-		Stream.generate(i::next).limit(relative.getNameCount()).map(Object::toString)
+		this.name = Stream.generate(i::next).limit(relative.getNameCount()).map(Object::toString)
 				.collect(Collectors.joining("/"));
 	}
 
