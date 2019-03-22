@@ -171,7 +171,15 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 
 	@Override
 	public void insert(Object obj) {
-		NeoBean neo = toNeoBean(obj);
+		insertNeoBean(toNeoBean(obj));
+	}
+	
+	@Override
+	public void insert(String entityName, Object obj) {
+		insertNeoBean(makeNeoBean(entityName, obj));
+	}
+	
+	private void insertNeoBean(NeoBean neo) {
 		Entity entity = neo.getEntity();
 		Sql sql = new Sql(entity.getColumns().size()).append("insert into ").append(entity.getDbName()).append("(");
 		int i = 0;

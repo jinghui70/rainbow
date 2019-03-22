@@ -114,6 +114,14 @@ public interface Dao extends INameObject {
 	 * @param obj
 	 */
 	void insert(Object obj);
+	
+	/**
+	 * 插入一个对象到指定entity
+
+	 * @param entity
+	 * @param obj
+	 */
+	void insert(String entity, Object obj);
 
 	<T> void insert(List<T> list);
 

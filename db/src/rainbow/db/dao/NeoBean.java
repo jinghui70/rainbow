@@ -37,7 +37,7 @@ public class NeoBean {
 		this(entity);
 		init(obj);
 	}
-	
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void init(Object obj) {
 		if (obj == null) {
@@ -53,6 +53,14 @@ public class NeoBean {
 				}
 			}
 
+		} else if (obj instanceof Map) {
+			Map map = (Map) obj;
+			for (Object key : map.keySet()) {
+				Column column = entity.getColumn(key.toString());
+				Object value = map.get(key);
+				if (value != null)
+					setValue(column, value);
+			}
 		} else {
 			init(obj, new ClassInfo(obj.getClass()));
 		}
