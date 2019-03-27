@@ -3,9 +3,13 @@ package rainbow.core.bundle;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import rainbow.core.model.exception.RuntimeException2;
+import rainbow.core.util.Utils;
 
 public abstract class BundleClassLoader extends ClassLoader {
 
@@ -56,6 +60,29 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param processor
 	 */
 	public abstract void procResource(ResourceProcessor processor);
+	
+	/**
+	 * 对所有class进行一个特定的处理
+	 * 
+	 * @param processor
+	 */
+	public void procClass(final Consumer<Class<?>> consumer) {
+		procResource(new ResourceProcessor() {
+			@Override
+			public void processResource(BundleClassLoader classLoader, Resource resource) {
+				if (!resource.getName().endsWith(".class"))
+					return;
+				String className = Utils.substringBefore(resource.getName(), ".class").replace('/', '.');
+				Class<?> clazz = null;
+				try {
+					clazz = classLoader.loadClass(className);
+					consumer.accept(clazz);
+				} catch (ClassNotFoundException e) {
+					throw new RuntimeException2("load class [{}] failed when iterating all class", className);
+				}
+			}
+		});
+	}
 
 	protected Class<?> defineClass(String name, Resource res) throws ClassNotFoundException {
 		int i = name.lastIndexOf('.');

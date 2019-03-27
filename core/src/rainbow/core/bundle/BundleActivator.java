@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import rainbow.core.extension.Extension;
 import rainbow.core.extension.ExtensionRegistry;
-import rainbow.core.model.exception.RuntimeException2;
 import rainbow.core.platform.ConfigData;
 import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
@@ -141,35 +140,23 @@ public abstract class BundleActivator {
 	 */
 	protected void initContextConfig(final Map<String, Bean> contextConfig, final Map<String, Class<?>> extensionConfig)
 			throws BundleException {
-		getClassLoader().procResource(new ResourceProcessor() {
-			@Override
-			public void processResource(BundleClassLoader classLoader, Resource resource) {
-				if (!resource.getName().endsWith(".class"))
-					return;
-				String className = Utils.substringBefore(resource.getName(), ".class").replace('/', '.');
-				Class<?> clazz = null;
-				try {
-					clazz = classLoader.loadClass(className);
-				} catch (ClassNotFoundException e) {
-					throw new RuntimeException2("load class [{}] failed when iterating all class", className);
-				}
-				rainbow.core.bundle.Bean beandef = clazz.getAnnotation(rainbow.core.bundle.Bean.class);
-				if (beandef == null)
-					return;
-				String beanName = beandef.name();
-				if (beanName.isEmpty()) {
-					beanName = Utils.lowerFirstChar(clazz.getSimpleName());
-					if (beanName.endsWith("Impl"))
-						beanName = Utils.substringBefore(beanName, "Impl");
-				}
-				if (beandef.singleton()) {
-					contextConfig.put(beanName, Bean.singleton(clazz));
-					if (beandef.extension() != String.class) {
-						extensionConfig.put(beanName, beandef.extension());
-					}
-				} else
-					contextConfig.put(beanName, Bean.prototype(clazz));
+		getClassLoader().procClass(clazz -> {
+			rainbow.core.bundle.Bean beandef = clazz.getAnnotation(rainbow.core.bundle.Bean.class);
+			if (beandef == null)
+				return;
+			String beanName = beandef.name();
+			if (beanName.isEmpty()) {
+				beanName = Utils.lowerFirstChar(clazz.getSimpleName());
+				if (beanName.endsWith("Impl"))
+					beanName = Utils.substringBefore(beanName, "Impl");
 			}
+			if (beandef.singleton()) {
+				contextConfig.put(beanName, Bean.singleton(clazz));
+				if (beandef.extension() != String.class) {
+					extensionConfig.put(beanName, beandef.extension());
+				}
+			} else
+				contextConfig.put(beanName, Bean.prototype(clazz));
 		});
 	}
 
