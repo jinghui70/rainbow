@@ -1,7 +1,9 @@
 package rainbow.db.dao;
 
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import com.google.common.base.Supplier;
 
@@ -11,7 +13,6 @@ import rainbow.db.dao.model.Entity;
 import rainbow.db.database.Dialect;
 import rainbow.db.jdbc.JdbcTemplate;
 import rainbow.db.jdbc.ResultSetExtractor;
-import rainbow.db.jdbc.RowCallbackHandler;
 import rainbow.db.jdbc.RowMapper;
 
 /**
@@ -114,14 +115,6 @@ public interface Dao extends INameObject {
 	 * @param obj
 	 */
 	void insert(Object obj);
-	
-	/**
-	 * 插入一个对象到指定entity
-
-	 * @param entity
-	 * @param obj
-	 */
-	void insert(String entity, Object obj);
 
 	<T> void insert(List<T> list);
 
@@ -212,6 +205,14 @@ public interface Dao extends INameObject {
 	 * 根据主键查询一个实体的实例
 	 */
 	<T> T fetch(Class<T> clazz, Object... keyValues);
+	
+	/**
+	 * 查询并执行逐行的处理
+	 * 
+	 * @param select
+	 * @param consumer
+	 */
+	void query(Select select, Consumer<Map<String, Object>> consumer);
 
 	/**
 	 * 查询实体的NeoBean实例列表
@@ -288,8 +289,8 @@ public interface Dao extends INameObject {
 	/** 根据条件求一个对象列表 */
 	<T> List<T> queryForList(Sql sql, RowMapper<T> mapper);
 
-	/** 做一个查询，具体每行的查询结果的处理由callback来做 */
-	void doQuery(Sql sql, RowCallbackHandler callback);
+	/** 做一个查询，具体每行的查询结果的处理由consumer来做 */
+	void doQuery(Sql sql, Consumer<ResultSet> consumer);
 
 	/** 做一个查询，具体结果集的处理由ResultSetExtractor来做 */
 	<T> T doQuery(Sql sql, ResultSetExtractor<T> rse);

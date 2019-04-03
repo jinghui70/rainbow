@@ -1,5 +1,8 @@
 package rainbow.db.jdbc;
 
+import java.sql.ResultSet;
+import java.util.function.Consumer;
+
 /**
  * Represents a returned {@link java.sql.ResultSet} from a stored procedure call.
  *
@@ -28,8 +31,8 @@ public class SqlReturnResultSet extends ResultSetSupportingSqlParameter {
 	 * @param name name of the parameter, as used in input and output maps
 	 * @param handler RowCallbackHandler to use for parsing the {@link java.sql.ResultSet}
 	 */
-	public SqlReturnResultSet(String name, RowCallbackHandler handler) {
-		super(name, 0, handler);
+	public SqlReturnResultSet(String name, Consumer<ResultSet> consumer) {
+		super(name, 0, consumer);
 	}
 
 	/**

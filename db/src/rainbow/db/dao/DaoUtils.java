@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,9 +23,6 @@ import rainbow.core.util.Utils;
 import rainbow.core.util.XmlBinder;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.Op;
-import rainbow.db.dao.model.Entity;
-import rainbow.db.jdbc.JdbcUtils;
-import rainbow.db.model.Column;
 import rainbow.db.model.Model;
 
 public abstract class DaoUtils {
@@ -53,19 +48,6 @@ public abstract class DaoUtils {
 		} catch (JAXBException | TransformerException e) {
 			throw new RuntimeException(e);
 		}
-	}
-
-	public static NeoBean toNeoBean(ResultSet rs, Entity entity) {
-		NeoBean bean = new NeoBean(entity);
-		for (Column column : entity.getColumns()) {
-			try {
-				int index = rs.findColumn(column.getDbName());
-				bean.setObject(column, JdbcUtils.getResultSetValue(rs, index, column.getType().dataClass()));
-			} catch (SQLException e) {
-				// 没有对应Column的结果字段，忽略了
-			}
-		}
-		return bean;
 	}
 
 	/**

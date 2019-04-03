@@ -111,7 +111,7 @@ public class Field {
 	public ColumnType getDataType() {
 		return column.getType();
 	}
-	
+
 	private String fullName() {
 		if (tableAlias == null)
 			return column.getName();
@@ -122,6 +122,10 @@ public class Field {
 		if (tableAlias == null)
 			return column.getDbName();
 		return String.format("%s.%s", tableAlias, column.getDbName());
+	}
+
+	public String getName() {
+		return alias == null ? column.getName() : alias;
 	}
 
 	/**

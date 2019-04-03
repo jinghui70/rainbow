@@ -1,6 +1,6 @@
 package rainbow.db.jdbc;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -249,8 +250,8 @@ public class JdbcTemplate implements JdbcOperations {
 		return execute(new QueryStatementCallback());
 	}
 
-	public void query(String sql, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, new RowCallbackHandlerResultSetExtractor(rch));
+	public void query(String sql, Consumer<ResultSet> consumer) throws DataAccessException {
+		query(sql, new RowConsumerResultSetExtractor(consumer));
 	}
 
 	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
@@ -395,12 +396,12 @@ public class JdbcTemplate implements JdbcOperations {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
-	public void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
+	public void query(String sql, PreparedStatementSetter pss, Consumer<ResultSet> consumer) throws DataAccessException {
+		query(sql, pss, new RowConsumerResultSetExtractor(consumer));
 	}
 
-	public void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException {
-		query(sql, newArgPreparedStatementSetter(args), rch);
+	public void query(String sql, Object[] args, Consumer<ResultSet> consumer) throws DataAccessException {
+		query(sql, newArgPreparedStatementSetter(args), consumer);
 	}
 
 	public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
@@ -514,22 +515,21 @@ public class JdbcTemplate implements JdbcOperations {
 	 * don't use it for navigating since this could lead to unpredictable
 	 * consequences.
 	 */
-	private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor<Object> {
+	private static class RowConsumerResultSetExtractor implements ResultSetExtractor<Object> {
 
-		private final RowCallbackHandler rch;
+		private final Consumer<ResultSet> consumer;
 
-		public RowCallbackHandlerResultSetExtractor(RowCallbackHandler rch) {
-			this.rch = rch;
+		public RowConsumerResultSetExtractor(Consumer<ResultSet> consumer) {
+			this.consumer = consumer;
 		}
 
 		public Object extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
-				this.rch.processRow(rs);
+				this.consumer.accept(rs);
 			}
 			return null;
 		}
 	}
-
 	private static <T> T requiredSingleResult(Collection<T> results) {
 		int size = (results == null ? 0 : results.size());
 		if (size == 0) {
@@ -720,9 +720,9 @@ public class JdbcTemplate implements JdbcOperations {
 				RowMapper<?> rowMapper = param.getRowMapper();
 				Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
 				returnedResults.put(param.getName(), result);
-			} else if (param.getRowCallbackHandler() != null) {
-				RowCallbackHandler rch = param.getRowCallbackHandler();
-				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
+			} else if (param.getRowConsumer() != null) {
+				Consumer<ResultSet> rch = param.getRowConsumer();
+				(new RowConsumerResultSetExtractor(rch)).extractData(rsToUse);
 				returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed");
 			} else if (param.getResultSetExtractor() != null) {
 				Object result = param.getResultSetExtractor().extractData(rsToUse);

@@ -1,5 +1,8 @@
 package rainbow.db.jdbc;
 
+import java.sql.ResultSet;
+import java.util.function.Consumer;
+
 /**
  * Subclass of {@link SqlOutParameter} to represent an INOUT parameter.
  * Will return <code>true</code> for SqlParameter's {@link #isInputValueProvided}
@@ -71,8 +74,8 @@ public class SqlInOutParameter extends SqlOutParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rch RowCallbackHandler to use for parsing the ResultSet
 	 */
-	public SqlInOutParameter(String name, int sqlType, RowCallbackHandler rch) {
-		super(name, sqlType, rch);
+	public SqlInOutParameter(String name, int sqlType, Consumer<ResultSet> consumer) {
+		super(name, sqlType, consumer);
 	}
 
 	/**

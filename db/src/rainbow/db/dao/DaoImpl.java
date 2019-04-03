@@ -4,9 +4,12 @@ import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -27,8 +30,8 @@ import rainbow.db.database.DialectManager;
 import rainbow.db.jdbc.DataAccessException;
 import rainbow.db.jdbc.IncorrectResultSizeDataAccessException;
 import rainbow.db.jdbc.JdbcTemplate;
+import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.ResultSetExtractor;
-import rainbow.db.jdbc.RowCallbackHandler;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.model.Column;
 
@@ -173,12 +176,7 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	public void insert(Object obj) {
 		insertNeoBean(toNeoBean(obj));
 	}
-	
-	@Override
-	public void insert(String entityName, Object obj) {
-		insertNeoBean(makeNeoBean(entityName, obj));
-	}
-	
+
 	private void insertNeoBean(NeoBean neo) {
 		Entity entity = neo.getEntity();
 		Sql sql = new Sql(entity.getColumns().size()).append("insert into ").append(entity.getDbName()).append("(");
@@ -378,11 +376,30 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	}
 
 	@Override
+	public void query(Select select, Consumer<Map<String, Object>> consumer) {
+		Sql sql = select.build(this);
+		Map<String, Object> map = new HashMap<String, Object>();
+		doQuery(sql, rs -> {
+			map.clear();
+			int index = 1;
+			for (Field field : select.getFields()) {
+				try {
+					Object value = JdbcUtils.getResultSetValue(rs, index++, field.getColumn().getType().dataClass());
+					map.put(field.getName(), value);
+				} catch (SQLException e) {
+					throw new DataAccessException(e);
+				}
+			}
+			consumer.accept(map);
+		});
+	}
+
+	@Override
 	public List<NeoBean> queryForList(Select select) {
 		Sql sql = select.build(this);
 		Entity entity = select.getEntity();
 		checkNotNull(entity, "entity not defined->{}", select);
-		return queryForList(sql, new NeoBeanMapper(entity));
+		return queryForList(sql, new NeoBeanMapper(entity, select.getFields()));
 	}
 
 	@Override
@@ -507,11 +524,11 @@ public class DaoImpl extends SimpleNameObject implements Dao {
 	}
 
 	@Override
-	public void doQuery(Sql sql, RowCallbackHandler callback) {
+	public void doQuery(Sql sql, Consumer<ResultSet> consumer) {
 		if (sql.noParams())
-			jdbcTemplate.query(sql.getSql(), callback);
+			jdbcTemplate.query(sql.getSql(), consumer);
 		else
-			jdbcTemplate.query(sql.getSql(), sql.getParamArray(), callback);
+			jdbcTemplate.query(sql.getSql(), sql.getParamArray(), consumer);
 	}
 
 	@Override

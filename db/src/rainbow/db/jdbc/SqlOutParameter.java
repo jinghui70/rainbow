@@ -1,5 +1,8 @@
 package rainbow.db.jdbc;
 
+import java.sql.ResultSet;
+import java.util.function.Consumer;
+
 /**
  * Subclass of SqlParameter to represent an output parameter.
  * No additional properties: instanceof will be used to check
@@ -77,8 +80,8 @@ public class SqlOutParameter extends ResultSetSupportingSqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rch RowCallbackHandler to use for parsing the ResultSet
 	 */
-	public SqlOutParameter(String name, int sqlType, RowCallbackHandler rch) {
-		super(name, sqlType, rch);
+	public SqlOutParameter(String name, int sqlType, Consumer<ResultSet> consumer) {
+		super(name, sqlType, consumer);
 	}
 
 	/**
