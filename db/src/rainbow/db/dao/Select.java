@@ -300,16 +300,21 @@ public class Select {
 			sql.append(" ORDER BY ");
 			sql.prepareJoin();
 			orderBy.forEach(o -> {
+				sql.appendComma();
 				for (Field field : fields) {
 					String sqlPart = field.match(o.getProperty());
 					if (sqlPart != null) {
-						sql.appendComma().append(sqlPart);
+						sql.append(sqlPart);
 						if (o.isDesc())
 							sql.append(" DESC");
 						return;
 					}
 				}
-				throw new AppException("OrderBy field [{}] not in select Fields", orderBy);
+				// not in select part
+				Field field = fieldFunction.apply(o.getProperty());
+				checkNotNull(field, "order by field[{}] not found", o.getProperty());
+				sql.append(field.fullSqlName());
+				if (o.isDesc()) sql.append(" DESC");
 			});
 		}
 		if (includePage && pager != null)
@@ -399,7 +404,7 @@ public class Select {
 	}
 
 	private void buildFromMulti(final Sql sql) {
-		sql.append(" FROM ").prepareJoin();;
+		sql.append(" FROM ").prepareJoin();
 		for (String tableAlias : tableAliases) {
 			sql.appendComma();
 			Entity entity = entityMap.get(tableAlias);

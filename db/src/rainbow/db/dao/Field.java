@@ -118,7 +118,7 @@ public class Field {
 		return String.format("%s.%s", tableAlias, column.getName());
 	}
 
-	private String fullSqlName() {
+	public String fullSqlName() {
 		if (tableAlias == null)
 			return column.getDbName();
 		return String.format("%s.%s", tableAlias, column.getDbName());
