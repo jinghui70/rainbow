@@ -3,10 +3,7 @@ package rainbow.core.platform;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Optional;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
@@ -59,11 +56,6 @@ public final class Platform {
 	private int id;
 
 	/**
-	 * 产品的配置
-	 */
-	private Map<String, String> productMap;
-
-	/**
 	 * 是否开发环境
 	 */
 	private boolean dev = false;
@@ -91,10 +83,6 @@ public final class Platform {
 		ConfigData configData = new ConfigData("core", true);
 		id = configData.getInt("id");
 		logger.info("Rainbow ID = {}", id);
-
-		// 读取product配置
-		productMap = configData.getMap("product");
-		productMap.keySet().stream().forEach(s -> logger.info("Product [{}] registered", s));
 
 		setBundleLoader();
 
@@ -238,23 +226,4 @@ public final class Platform {
 		logger.info("Rainbow platform shutted down!");
 	}
 
-	/**
-	 * 返回一个类所属产品
-	 * 
-	 * @param className
-	 * @return
-	 */
-	public static Optional<String> getProduct(String className) {
-		return getProductConfig(className).map(Entry::getKey);
-	}
-
-	/**
-	 * 判断一个类属于哪个产品
-	 * 
-	 * @param className
-	 * @return
-	 */
-	public static Optional<Entry<String, String>> getProductConfig(String className) {
-		return platform.productMap.entrySet().stream().filter(e -> className.startsWith(e.getValue())).findFirst();
-	}
 }
