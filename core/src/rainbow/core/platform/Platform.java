@@ -145,13 +145,14 @@ public final class Platform {
 	}
 
 	private void startLocalJmxServer(int jmxPort) {
-		logger.error("start jmx server on port {}", jmxPort);
+		logger.info("starting jmx server on port {}", jmxPort);
 		// MBeanServer
 		MBeanServer mBeanServer = context.getBean("mBeanServer", MBeanServer.class);
 		try {
 			JMXServiceURL url = new JMXServiceURLBuilder(jmxPort, "rainbow").getJMXServiceURL();
 			cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mBeanServer);
 			cs.start();
+			logger.info("jmx server started");
 		} catch (IOException e) {
 			logger.error("start jmx server failed", e);
 			throw new RuntimeException(e);
