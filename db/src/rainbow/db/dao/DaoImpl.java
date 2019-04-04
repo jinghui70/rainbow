@@ -20,7 +20,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
-import rainbow.core.model.object.SimpleNameObject;
+import rainbow.core.model.object.NameObject;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.EmptyCondition;
@@ -35,7 +35,7 @@ import rainbow.db.jdbc.ResultSetExtractor;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.model.Column;
 
-public class DaoImpl extends SimpleNameObject implements Dao {
+public class DaoImpl extends NameObject implements Dao {
 
 	private static Logger logger = LoggerFactory.getLogger(DaoImpl.class);
 

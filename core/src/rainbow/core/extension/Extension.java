@@ -1,6 +1,6 @@
 package rainbow.core.extension;
 
-import rainbow.core.model.object.SimpleNameObject;
+import rainbow.core.model.object.NameObject;
 
 /**
  * 扩展对象
@@ -8,7 +8,7 @@ import rainbow.core.model.object.SimpleNameObject;
  * @author lijinghui
  * 
  */
-public class Extension extends SimpleNameObject {
+public class Extension extends NameObject {
 
 	private String bundle;
 

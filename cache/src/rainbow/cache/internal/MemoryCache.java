@@ -6,9 +6,9 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import rainbow.cache.Cache;
 import rainbow.cache.CacheLoader;
-import rainbow.core.model.object.SimpleNameObject;
+import rainbow.core.model.object.NameObject;
 
-public class MemoryCache<K, V> extends SimpleNameObject implements Cache<K, V> {
+public class MemoryCache<K, V> extends NameObject implements Cache<K, V> {
 
     private CacheLoader<K, V> loader;
 

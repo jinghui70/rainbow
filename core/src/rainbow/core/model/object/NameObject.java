@@ -2,20 +2,19 @@ package rainbow.core.model.object;
 
 /**
  * 
- * 有 id 和 name 属性的对象基类
+ * 有 name 属性的对象基类
  * 
  * @author lijinghui
  *
  */
-public class NameObject<I> extends IdObject<I> implements INameObject {
+public class NameObject implements INameObject {
 
 	protected String name;
 
     public NameObject() {
     }
 
-    public NameObject(I id, String name) {
-    	this.id = id;
+    public NameObject(String name) {
         this.name = name;
     }
 

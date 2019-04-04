@@ -26,8 +26,6 @@ import rainbow.core.util.JMXServiceURLBuilder;
 import rainbow.core.util.encrypt.Encryption;
 import rainbow.core.util.ioc.Bean;
 import rainbow.core.util.ioc.Context;
-import rainbow.core.web.UploadHandler;
-import rainbow.core.web.UrlHandler;
 
 /**
  * Rainbow 系统平台
@@ -93,8 +91,6 @@ public final class Platform {
 		// 注册扩展点
 		ExtensionRegistry.registerExtensionPoint(null, BundleListener.class);
 		ExtensionRegistry.registerExtensionPoint(null, Encryption.class);
-		ExtensionRegistry.registerExtensionPoint(null, UrlHandler.class);
-		ExtensionRegistry.registerExtensionPoint(null, UploadHandler.class);
 
 		// 加密
 		String encryptionClass = configData.getString("encryption");
