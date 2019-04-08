@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rainbow.core.model.exception.RuntimeException2;
 import rainbow.core.util.Utils;
 
 public abstract class BundleClassLoader extends ClassLoader {

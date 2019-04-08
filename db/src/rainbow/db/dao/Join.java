@@ -22,7 +22,7 @@ public class Join {
 
 	private Join(String master) {
 		String[] s = Utils.splitTrim(master, ' ');
-		checkArgument(s.length == 2, "[{}" + "] need table alias", master);
+		checkArgument(s.length == 2, "{} need table alias", master);
 		this.master = s[0];
 		this.alias = s[1];
 	}
@@ -73,16 +73,16 @@ public class Join {
 			checkNotNull(targetEntity, "join target entity {} not found", t.getTarget());
 			sql.append(' ').append(t.getType().getText()).append(' ').append(targetEntity.getDbName()).append(' ')
 					.append(t.getAlias()).append(" ON(");
-			sql.prepareJoin();
 			for (JoinCnd cnd : t.getCnd()) {
-				sql.appendJoin(" AND ");
 				Column left = entity.getColumn(cnd.getLeft());
 				checkNotNull(left, "column {} not found in entity {}", cnd.getLeft(), master);
 				Column right = targetEntity.getColumn(cnd.getRight());
 				checkNotNull(right, "column {} not found in entity {}", cnd.getRight(), t.getTarget());
 				sql.append(alias).append('.').append(left.getDbName()).append("=").append(t.getAlias()).append('.')
 						.append(right.getDbName());
+				sql.appendTemp(" AND ");
 			}
+			sql.clearTemp();
 			sql.append(")");
 		}
 	}

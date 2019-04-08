@@ -279,12 +279,12 @@ public class DaoImpl extends NameObject implements Dao {
 		}
 		List<Column> list = builder.build();
 		final Sql updateSql = new Sql(list.size()).append("update ").append(entity.getDbName()).append(" set ");
-		updateSql.prepareJoin();
 		for (Column column : list) {
-			updateSql.appendComma().append(column.getDbName()).append("=").append(column.getDbName())
+			updateSql.append(column.getDbName()).append("=").append(column.getDbName())
 					.append(add ? '+' : '-').append(neo.getObject(column));
-
+			updateSql.appendTempComma();
 		}
+		updateSql.clearTemp();
 		updateSql.whereKey(neo);
 		execSql(updateSql);
 	}
@@ -350,11 +350,11 @@ public class DaoImpl extends NameObject implements Dao {
 	public int update(String entityName, C cnd, U... items) {
 		Entity entity = getEntity(entityName);
 		Sql sql = new Sql("UPDATE ").append(entity.getDbName()).append(" SET ");
-		sql.prepareJoin();
 		for (U item : items) {
-			sql.appendComma();
 			item.toSql(entity, sql);
+			sql.appendTempComma();
 		}
+		sql.clearTemp();
 		sql.whereCnd(entity, cnd);
 		return execSql(sql);
 	}

@@ -284,29 +284,29 @@ public class Select {
 		sql.whereCnd(fieldFunction, cnd);
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
-			sql.prepareJoin();
 			Arrays.asList(groupBy).forEach(g -> {
 				for (Field field : fields) {
 					String sqlPart = field.match(g);
 					if (sqlPart != null) {
-						sql.appendComma().append(sqlPart);
+						sql.append(sqlPart);
+						sql.appendTempComma();
 						return;
 					}
 				}
 				throw new AppException("GroupBy field {} not in select Fields", g);
 			});
+			sql.clearTemp();
 		}
 		if (orderBy != null) {
 			sql.append(" ORDER BY ");
-			sql.prepareJoin();
 			orderBy.forEach(o -> {
-				sql.appendComma();
 				for (Field field : fields) {
 					String sqlPart = field.match(o.getProperty());
 					if (sqlPart != null) {
 						sql.append(sqlPart);
 						if (o.isDesc())
 							sql.append(" DESC");
+						sql.appendTempComma();
 						return;
 					}
 				}
@@ -314,8 +314,11 @@ public class Select {
 				Field field = fieldFunction.apply(o.getProperty());
 				checkNotNull(field, "order by field not found: {}", o.getProperty());
 				sql.append(field.fullSqlName());
-				if (o.isDesc()) sql.append(" DESC");
+				if (o.isDesc())
+					sql.append(" DESC");
+				sql.appendTempComma();
 			});
+			sql.clearTemp();
 		}
 		if (includePage && pager != null)
 			sql.paging(dao, pager);
@@ -378,20 +381,18 @@ public class Select {
 			}
 		};
 		if (select == null || select.length == 0) {
-			sql.prepareJoin();
 			for (String tableAlias : tableAliases) {
 				Entity entity = entityMap.get(tableAlias);
 				addAllField(tableAlias, entity);
-				sql.appendComma().append(tableAlias).append(".*");
+				sql.append(tableAlias).append(".*");
+				sql.appendTempComma();
 			}
 		} else {
-			sql.prepareJoin();
 			for (String s : select) {
-				sql.appendComma();
 				if (s.endsWith(".*")) {
 					final String tableAlias = s.substring(0, s.length() - 2);
 					Entity entity = entityMap.get(tableAlias);
-					checkNotNull(entity, "table alias not exist->{}", s);
+					checkNotNull(entity, "table alias not exist:{}", s);
 					addAllField(tableAlias, entity);
 					sql.append(s);
 				} else {
@@ -399,17 +400,20 @@ public class Select {
 					fields.add(field);
 					sql.append(field);
 				}
+				sql.appendTempComma();
 			}
 		}
+		sql.clearTemp();
 	}
 
 	private void buildFromMulti(final Sql sql) {
-		sql.append(" FROM ").prepareJoin();
+		sql.append(" FROM ");
 		for (String tableAlias : tableAliases) {
-			sql.appendComma();
 			Entity entity = entityMap.get(tableAlias);
 			sql.append(entity.getDbName()).append(' ').append(tableAlias);
+			sql.appendTempComma();
 		}
+		sql.clearTemp();
 	}
 
 	private void prepareJoin(Dao dao) {

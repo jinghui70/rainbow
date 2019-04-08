@@ -25,7 +25,7 @@ public class Sql implements Appendable {
 
 	private List<Object> params;
 
-	private boolean joinFirst;
+	private String tempStr = null;
 
 	public Sql() {
 		params = new ArrayList<Object>();
@@ -54,36 +54,74 @@ public class Sql implements Appendable {
 	}
 
 	public Sql append(Object obj) {
-		sb.append(obj.toString());
-		return this;
+		return this.append(obj.toString());
 	}
 
 	public Sql append(Sql sql) {
-		sb.append(sql.getStringBuilder());
+		checkTemp();
+		sb.append(sql.getStringBuilder().toString());
 		this.params.addAll(sql.getParams());
-		return this;
-	}
-
-	public void prepareJoin() {
-		joinFirst = true;
-	}
-
-	public Sql appendComma() {
-		return appendJoin(",");
-	}
-
-	public Sql appendJoin(String join) {
-		if (joinFirst)
-			joinFirst = false;
-		else
-			return append(join);
 		return this;
 	}
 
 	@Override
 	public Sql append(char ch) {
+		checkTemp();
 		sb.append(ch);
 		return this;
+	}
+
+	@Override
+	public Sql append(CharSequence csq) {
+		checkTemp();
+		sb.append(csq);
+		return this;
+	}
+
+	@Override
+	public Sql append(CharSequence csq, int start, int end) {
+		checkTemp();
+		sb.append(csq, start, end);
+		return this;
+	}
+
+	public Sql append(String str, int times) {
+		checkTemp();
+		for (int i = 0; i < times; i++)
+			sb.append(str);
+		return this;
+	}
+
+	/**
+	 * 临时字符串用来对付 Where and 逗号这样时有时无 的字符串，当后续有append的时候，会被自动append进去
+	 * 
+	 * @param str
+	 * @return
+	 */
+	public Sql appendTemp(String str) {
+		checkTemp();
+		this.tempStr = str;
+		return this;
+	}
+
+	public Sql appendTempComma() {
+		return this.appendTemp(",");
+	}
+
+	/**
+	 * 取消temp中存储的字符串
+	 * 
+	 * @return
+	 */
+	public Sql clearTemp() {
+		this.tempStr = null;
+		return this;
+	}
+
+	private void checkTemp() {
+		if (tempStr != null)
+			sb.append(tempStr);
+		tempStr = null;
 	}
 
 	public List<Object> getParams() {
@@ -123,11 +161,11 @@ public class Sql implements Appendable {
 	public Sql keyCondition(final NeoBean neo) {
 		Entity entity = checkNotNull(neo.getEntity(), "neobean's entity not set");
 		checkArgument(entity.getKeyCount() > 0, "entity {} has no key", entity.getName());
-		prepareJoin();
 		for (Column column : entity.getKeys()) {
-			appendJoin(" AND ");
 			append(column.getDbName()).append("=?").addParam(neo.getObject(column));
+			appendTemp(" AND ");
 		}
+		clearTemp();
 		return this;
 	}
 
@@ -136,16 +174,14 @@ public class Sql implements Appendable {
 		checkArgument(entity.getKeyCount() == values.length, "param size({}) not match key size({}) of entity {}",
 				values.length, entity.getKeyCount(), entity.getName());
 		int index = 0;
+		appendTemp(" WHERE ");
 		for (Column column : entity.getKeys()) {
-			if (index == 0) {
-				sb.append(" where ");
-			} else {
-				sb.append(" and ");
-			}
 			Object param = values[index++];
 			param = Converters.convert(param, column.getType().dataClass());
 			append(column.getDbName()).append("=?").addParam(param);
+			appendTemp(" AND ");
 		}
+		clearTemp();
 		return this;
 	}
 
@@ -212,21 +248,4 @@ public class Sql implements Appendable {
 		return sb.toString();
 	}
 
-	@Override
-	public Sql append(CharSequence csq) {
-		sb.append(csq);
-		return this;
-	}
-
-	@Override
-	public Sql append(CharSequence csq, int start, int end) {
-		sb.append(csq, start, end);
-		return this;
-	}
-
-	public Sql append(String str, int times) {
-		for (int i = 0; i < times; i++)
-			sb.append(str);
-		return this;
-	}
 }
