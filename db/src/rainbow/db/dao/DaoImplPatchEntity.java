@@ -7,7 +7,7 @@ public class DaoImplPatchEntity {
 	
 	private String name;
 	
-	private Map<String, Object> tagMap;
+	private Map<String, Object> tags;
 	
 	private List<DaoImplPatchEntity> columns;
 
@@ -19,12 +19,12 @@ public class DaoImplPatchEntity {
 		this.name = name;
 	}
 
-	public Map<String, Object> getTagMap() {
-		return tagMap;
+	public Map<String, Object> getTags() {
+		return tags;
 	}
 
-	public void setTagMap(Map<String, Object> tagMap) {
-		this.tagMap = tagMap;
+	public void setTags(Map<String, Object> tags) {
+		this.tags = tags;
 	}
 
 	public List<DaoImplPatchEntity> getColumns() {

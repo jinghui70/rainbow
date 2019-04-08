@@ -575,11 +575,11 @@ public class DaoImpl extends NameObject implements Dao {
 		if (entities != null) {
 			entities.stream().forEach(e -> {
 				Entity entity = entityMap.get(e.getName());
-				entity.setTagMap(e.getTagMap());
+				entity.setTags(e.getTags());
 				if (e.getColumns() != null) {
 					e.getColumns().stream().forEach(c -> {
 						Column column = entity.getColumn(c.getName());
-						column.setTagMap(c.getTagMap());
+						column.setTags(c.getTags());
 					});
 				}
 			});

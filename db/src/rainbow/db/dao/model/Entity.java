@@ -25,7 +25,7 @@ public class Entity implements INameObject, Function<String, Field> {
 
 	private List<Column> columns;
 
-	private Map<String, Object> tagMap;
+	private Map<String, Object> tags;
 
 	public List<Column> getColumns() {
 		return columns;
@@ -43,12 +43,12 @@ public class Entity implements INameObject, Function<String, Field> {
 		return label;
 	}
 
-	public Map<String, Object> getTagMap() {
-		return tagMap;
+	public Map<String, Object> getTags() {
+		return tags;
 	}
 
-	public void setTagMap(Map<String, Object> tagMap) {
-		this.tagMap = tagMap;
+	public void setTags(Map<String, Object> tags) {
+		this.tags = tags;
 	}
 
 	public List<Column> getKeys() {
@@ -64,7 +64,7 @@ public class Entity implements INameObject, Function<String, Field> {
 	}
 
 	public Object getTag(String tag) {
-		return tagMap == null ? null : tagMap.get(tag);
+		return tags == null ? null : tags.get(tag);
 	}
 
 	public Entity(rainbow.db.model.Entity src) {

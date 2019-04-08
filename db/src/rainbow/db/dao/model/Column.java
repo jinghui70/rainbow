@@ -22,7 +22,7 @@ public class Column {
 
 	private boolean mandatory;
 
-	private Map<String, Object> tagMap;
+	private Map<String, Object> tags;
 
 	private Link link;
 
@@ -58,16 +58,16 @@ public class Column {
 		return mandatory;
 	}
 
-	public Map<String, Object> getTagMap() {
-		return tagMap;
+	public Map<String, Object> getTags() {
+		return tags;
 	}
 
-	public void setTagMap(Map<String, Object> tagMap) {
-		this.tagMap = tagMap;
+	public void setTags(Map<String, Object> tags) {
+		this.tags = tags;
 	}
 
 	public Object getTag(String tag) {
-		return tagMap == null ? null : tagMap.get(tag);
+		return tags == null ? null : tags.get(tag);
 	}
 
 	public Link getLink() {
