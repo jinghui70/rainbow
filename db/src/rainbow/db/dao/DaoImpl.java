@@ -572,34 +572,40 @@ public class DaoImpl extends NameObject implements Dao {
 		Type type = new TypeReference<List<DaoImplPatchEntity>>() {
 		}.getType();
 		List<DaoImplPatchEntity> entities = patch.getObject("entity", type);
-		entities.stream().forEach(e -> {
-			Entity entity = entityMap.get(e.getName());
-			entity.setTagMap(e.getTagMap());
-			e.getColumns().stream().forEach(c -> {
-				Column column = entity.getColumn(c.getName());
-				column.setTagMap(c.getTagMap());
+		if (entities != null) {
+			entities.stream().forEach(e -> {
+				Entity entity = entityMap.get(e.getName());
+				entity.setTagMap(e.getTagMap());
+				if (e.getColumns() != null) {
+					e.getColumns().stream().forEach(c -> {
+						Column column = entity.getColumn(c.getName());
+						column.setTagMap(c.getTagMap());
+					});
+				}
 			});
-		});
+		}
 		type = new TypeReference<List<DaoImplPatchLink>>() {
 		}.getType();
 		List<DaoImplPatchLink> links = patch.getObject("reference", type);
-		links.forEach(link -> {
-			Entity entityLeft = entityMap.get(link.getLeft().getEntity());
-			Column columnLeft = entityLeft.getColumn(link.getLeft().getField());
-			Entity entityRight = entityMap.get(link.getRight().getEntity());
-			Column columnRight = entityRight.getColumn(link.getRight().getField());
+		if (links != null) {
+			links.forEach(link -> {
+				Entity entityLeft = entityMap.get(link.getLeft().getEntity());
+				Column columnLeft = entityLeft.getColumn(link.getLeft().getField());
+				Entity entityRight = entityMap.get(link.getRight().getEntity());
+				Column columnRight = entityRight.getColumn(link.getRight().getField());
 
-			Link linkLeft = new Link();
-			linkLeft.setLinkEntity(entityRight);
-			linkLeft.setLinkColumn(columnRight);
-			linkLeft.setOne(link.getRight().isOne());
-			columnLeft.setLink(linkLeft);
-			Link linkRight = new Link();
-			linkRight.setLinkEntity(entityLeft);
-			linkRight.setLinkColumn(columnLeft);
-			linkRight.setOne(link.getLeft().isOne());
-			columnRight.setLink(linkRight);
-		});
+				Link linkLeft = new Link();
+				linkLeft.setLinkEntity(entityRight);
+				linkLeft.setLinkColumn(columnRight);
+				linkLeft.setOne(link.getRight().isOne());
+				columnLeft.setLink(linkLeft);
+				Link linkRight = new Link();
+				linkRight.setLinkEntity(entityLeft);
+				linkRight.setLinkColumn(columnLeft);
+				linkRight.setOne(link.getLeft().isOne());
+				columnRight.setLink(linkRight);
+			});
+		}
 	}
 
 }
