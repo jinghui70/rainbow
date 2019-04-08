@@ -54,7 +54,7 @@ public class SimpleCondition extends C {
 
 	private void normalQuery(ColumnType type, Sql sql) {
 		if (op == Op.IN || op == Op.NotIn) {
-			checkNotNull(param, "param of [{}] should not be null", property);
+			checkNotNull(param, "param of {} should not be null", property);
 			sql.append(op.getSymbol()).append(" (");
 
 			Object[] p = null;
@@ -74,7 +74,7 @@ public class SimpleCondition extends C {
 				else if (op == Op.NotEqual)
 					sql.append(" is not null");
 				else
-					checkNotNull(param, "param of [{}] should not be null", property);
+					checkNotNull(param, "param of {} should not be null", property);
 			} else {
 				sql.append(op.getSymbol()).append("?").addParam(Converters.convert(param, type.dataClass()));
 			}

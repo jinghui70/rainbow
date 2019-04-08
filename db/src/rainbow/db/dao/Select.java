@@ -293,7 +293,7 @@ public class Select {
 						return;
 					}
 				}
-				throw new AppException("GroupBy field [{}] not in select Fields", orderBy);
+				throw new AppException("GroupBy field {} not in select Fields", g);
 			});
 		}
 		if (orderBy != null) {
@@ -312,7 +312,7 @@ public class Select {
 				}
 				// not in select part
 				Field field = fieldFunction.apply(o.getProperty());
-				checkNotNull(field, "order by field[{}] not found", o.getProperty());
+				checkNotNull(field, "order by field not found: {}", o.getProperty());
 				sql.append(field.fullSqlName());
 				if (o.isDesc()) sql.append(" DESC");
 			});
@@ -329,7 +329,7 @@ public class Select {
 
 	private void buildSelectFrom(Dao dao, Sql sql, String table) {
 		entity = dao.getEntity(table);
-		checkNotNull(entity, "entity [{}] not found", fromStr);
+		checkNotNull(entity, "entity {} not found", fromStr);
 		fieldFunction = new Function<String, Field>() {
 			@Override
 			public Field apply(String input) {
@@ -353,9 +353,9 @@ public class Select {
 		tableAliases = new ArrayList<String>(tables.length);
 		for (String tableName : tables) {
 			String[] table = Utils.split(tableName, ' ');
-			checkArgument(table.length == 2, "[{}] need table alias", tableName);
+			checkArgument(table.length == 2, "{} need table alias", tableName);
 			Entity entity = dao.getEntity(table[0]);
-			checkNotNull(entity, "entity [{}] not found", tableName);
+			checkNotNull(entity, "entity {} not found", tableName);
 			entityMap.put(table[1], entity);
 			tableAliases.add(table[1]);
 		}
@@ -368,7 +368,7 @@ public class Select {
 				Entity entity = entityMap.get(tableAlias);
 				checkNotNull(entity, "table alias not found->[{}.{}]", tableAlias, fieldName);
 				Column column = entity.getColumn(fieldName);
-				return checkNotNull(column, "column [{}] of table [{}] not defined", fieldName, entity.getName());
+				return checkNotNull(column, "column {} of entity {} not defined", fieldName, entity.getName());
 			}
 		};
 		fieldFunction = new Function<String, Field>() {

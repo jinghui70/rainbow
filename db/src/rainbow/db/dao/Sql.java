@@ -122,7 +122,7 @@ public class Sql implements Appendable {
 
 	public Sql keyCondition(final NeoBean neo) {
 		Entity entity = checkNotNull(neo.getEntity(), "neobean's entity not set");
-		checkArgument(entity.getKeyCount() > 0, "entity[{}] has no key", entity.getName());
+		checkArgument(entity.getKeyCount() > 0, "entity {} has no key", entity.getName());
 		prepareJoin();
 		for (Column column : entity.getKeys()) {
 			appendJoin(" AND ");
@@ -132,8 +132,8 @@ public class Sql implements Appendable {
 	}
 
 	public Sql whereKey(Entity entity, Object... values) {
-		checkArgument(entity.getKeyCount() > 0, "entity[{}] has no key", entity.getName());
-		checkArgument(entity.getKeyCount() == values.length, "param size({}) not match key size({}) of entity [{}]",
+		checkArgument(entity.getKeyCount() > 0, "entity {} has no key", entity.getName());
+		checkArgument(entity.getKeyCount() == values.length, "param size({}) not match key size({}) of entity {}",
 				values.length, entity.getKeyCount(), entity.getName());
 		int index = 0;
 		for (Column column : entity.getKeys()) {
@@ -224,4 +224,9 @@ public class Sql implements Appendable {
 		return this;
 	}
 
+	public Sql append(String str, int times) {
+		for (int i = 0; i < times; i++)
+			sb.append(str);
+		return this;
+	}
 }

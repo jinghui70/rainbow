@@ -188,7 +188,7 @@ public class Context {
 				((InitializingBean) object).afterPropertiesSet();
 			}
 		} catch (Throwable e) {
-			logger.error("fail to initialize bean [{}]", id, e);
+			logger.error("fail to initialize bean: {}", id, e);
 			throw new BeanInitializationException(id, e.getMessage(), e);
 		}
 		return object;
@@ -217,7 +217,7 @@ public class Context {
 			// 注入
 			Object injectBean = getInjectBean(injectName, injectType, clazz.getName());
 			if (inject.obliged())
-				checkNotNull(injectBean, "inject bean [{}-{}] of type [{}] not found", object.getClass().getName(),
+				checkNotNull(injectBean, "inject bean {}:{} of type {} not found", object.getClass().getName(),
 						injectName, injectType.getName());
 			field.setAccessible(true);
 			field.set(object, injectBean);
@@ -239,7 +239,7 @@ public class Context {
 			// 注入
 			Object injectBean = getInjectBean(injectName, injectType, clazz.getName());
 			if (inject.obliged())
-				checkNotNull(injectBean, "inject bean [{}-{}] of type [{}] not found", object.getClass().getName(),
+				checkNotNull(injectBean, "inject bean {}:{} of type {} not found", object.getClass().getName(),
 						injectName, injectType.getName());
 			method.invoke(object, injectBean);
 		}

@@ -186,7 +186,7 @@ public abstract class StatementCreatorUtils {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug(
-					"Setting SQL statement parameter value: column index {}, parameter value [{}], value class [{}], SQL type {}",
+					"Setting SQL statement parameter value: column index {}, parameter value [{}], value class {}, SQL type {}",
 					paramIndex, inValueToUse, inValueToUse != null ? inValueToUse.getClass().getName() : "null",
 					sqlTypeToUse == JdbcUtils.TYPE_UNKNOWN ? "unknown" : Integer.toString(sqlTypeToUse));
 		}

@@ -98,7 +98,7 @@ public final class Platform {
 			try {
 				Class.forName(encryptionClass);
 			} catch (ClassNotFoundException e) {
-				logger.warn("Encryption class [{}] not found!", encryptionClass);
+				logger.warn("Encryption class not found: {}", encryptionClass);
 			}
 		}
 		// 控制台

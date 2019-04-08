@@ -56,7 +56,7 @@ public class JMXServiceURLBuilder {
 		sb.append(port).append("/").append(serverName);
 		try {
 			JMXServiceURL serviceURL = new JMXServiceURL(sb.toString());
-			logger.debug("local jmx service url is [{}]", serviceURL.toString());
+			logger.debug("local jmx service url: {}", serviceURL.toString());
 			return serviceURL;
 		} catch (MalformedURLException e) {
 			logger.error("create JMX Service URL failed ", e);

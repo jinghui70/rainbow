@@ -83,7 +83,7 @@ public class ClassInfo<T> {
 				properties.put(name, result);
 				return result;
 			} catch (NumberFormatException e) {
-				logger.error("bad property name [{}]", name);
+				logger.error("bad property name: {}", name);
 				return null;
 			}
 		} else {

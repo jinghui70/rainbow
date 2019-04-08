@@ -16,7 +16,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	protected Bundle bundle;
-	
+
 	public BundleClassLoader() throws IOException {
 		super(Thread.currentThread().getContextClassLoader());
 	}
@@ -60,7 +60,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 	 * @param processor
 	 */
 	public abstract void procResource(ResourceProcessor processor);
-	
+
 	/**
 	 * 对所有class进行一个特定的处理
 	 * 
@@ -78,7 +78,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 					clazz = classLoader.loadClass(className);
 					consumer.accept(clazz);
 				} catch (ClassNotFoundException e) {
-					throw new RuntimeException2("load class [{}] failed when iterating all class", className);
+					throw new RuntimeException("load class failed when iterating: " + className);
 				}
 			}
 		});
@@ -95,11 +95,11 @@ public abstract class BundleClassLoader extends ClassLoader {
 			}
 		}
 		byte[] buf = null;
-		try(InputStream is = res.getInputStream()) {
+		try (InputStream is = res.getInputStream()) {
 			buf = new byte[(int) res.getSize()];
 			new DataInputStream(is).readFully(buf);
 		} catch (IOException e) {
-			logger.error("find class [{}] failed", name, e);
+			logger.error("find class failed: {}", name, e);
 			throw new ClassNotFoundException(name, e);
 		}
 		return defineClass(name, buf, 0, buf.length);

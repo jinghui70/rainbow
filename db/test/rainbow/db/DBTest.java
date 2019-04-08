@@ -112,7 +112,7 @@ public final class DBTest {
 								if (cell != null)
 									neo.setValue(column, getValue(column, cell));
 							} catch (Throwable e) {
-								logger.error("row[{}] col[{}] error", rowInx, column.getName());
+								logger.error("row {} col {} error", rowInx, column.getName());
 								throw e;
 							}
 						}

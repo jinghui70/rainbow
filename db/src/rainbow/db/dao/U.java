@@ -22,7 +22,7 @@ public final class U {
 	}
 
 	public static U set(String property, char calc, Object value) {
-		checkArgument(calcSet.contains(calc), "unknown calc [{}]", calc);
+		checkArgument(calcSet.contains(calc), "unknown calc: {}", calc);
 		U item = new U();
 		item.property = property;
 		item.calc = calc;

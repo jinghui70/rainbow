@@ -59,7 +59,7 @@ public class Field {
 	public Field(String str, Entity entity) {
 		String name = setString(str);
 		column = entity.getColumn(name);
-		checkNotNull(column, "column [{}] not defined in entity[{}]", name, entity.getName());
+		checkNotNull(column, "column {} not defined in entity {}", name, entity.getName());
 	}
 
 	public Field(String str, ColumnFinder finder) {

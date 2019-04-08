@@ -163,7 +163,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	}
 
 	public boolean startBundle(String id) throws BundleException {
-		Bundle bundle = checkNotNull(get(id), "bundle [{}] not found", id);
+		Bundle bundle = checkNotNull(get(id), "bundle not found: {}", id);
 		synchronized (this) {
 			return startBundle(bundle);
 		}
@@ -173,25 +173,25 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		if (bundle.getState() == BundleState.ACTIVE) 
 			return true;
 		if (bundle.getState() != BundleState.READY) {
-			logger.info("start bundle[{}] failed, bundle not ready", bundle.getId());
+			logger.info("start bundle {} failed, bundle not ready", bundle.getId());
 			return false;
 		}
 		for (Bundle parent : bundle.getParents()) {
 			if (!startBundle(parent)) {
-				logger.debug("start bundle[{}] failed, cannot start parent[{}]", bundle.getId(), parent.getId());
+				logger.debug("start bundle {} failed, parent {} not ready", bundle.getId(), parent.getId());
 				return false;
 			}
 		}
-		logger.info("starting bundle[{}]...", bundle.getId());
+		logger.info("starting bundle {}...", bundle.getId());
 		bundle.setState(BundleState.STARTING);
 		try {
 			doStartBundle(bundle);
 			bundle.setState(BundleState.ACTIVE);
-			logger.info("bundle[{}] started!", bundle.getId());
+			logger.info("bundle {} started!", bundle.getId());
 			fireBundleEvent(bundle, true);
 			return true;
 		} catch (Throwable e) {
-			logger.error("start bundle[{}] failed", bundle.getId(), e);
+			logger.error("start bundle {} failed", bundle.getId(), e);
 			stopBundle(bundle);
 			bundle.setState(BundleState.ERROR);
 			return false;
@@ -205,11 +205,11 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		int i = 0;
 		for (String id : ids) {
 			Bundle contextBundle = get(id);
-			checkNotNull(contextBundle, "can not find parent bundle [{}]", id);
-			checkState(bundle.getAncestors().contains(contextBundle), "[{}] isn't parent bundle",
+			checkNotNull(contextBundle, "can not find parent bundle {}", id);
+			checkState(bundle.getAncestors().contains(contextBundle), "bundle {}  isn't in parent list",
 					id);
 			Context parentContext = contextBundle.activator.getContext();
-			checkNotNull(parentContext, "parent bundle [{}] doesn't have a context", id);
+			checkNotNull(parentContext, "parent bundle {} doesn't have a context", id);
 			parentContexts[i++] = parentContext;
 		}
 		bundle.setActivator(activator);
@@ -241,7 +241,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 
 	public void stopBundle(String id) throws BundleException {
 		Bundle bundle = get(id);
-		checkNotNull(bundle, "bundle [{}] not found", id);
+		checkNotNull(bundle, "bundle {} not found", id);
 		synchronized (this) {
 			stopBundle(bundle);
 		}
@@ -250,7 +250,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	private void stopBundle(Bundle bundle) {
 		if (bundle.getState() != BundleState.ACTIVE)
 			return;
-		logger.debug("stopping bundle [{}]...", bundle.getId());
+		logger.debug("stopping bundle {}...", bundle.getId());
 		bundle.setState(BundleState.STOPPING);
 		// stopping children first
 		for (Bundle child : ImmutableList.copyOf(bundleChildren.get(bundle))) {
@@ -267,7 +267,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 			bundleChildren.remove(parent, bundle);
 		bundle.setState(BundleState.READY);
 
-		logger.info("bundle [{}] stopped!", bundle.getId());
+		logger.info("bundle {} stopped!", bundle.getId());
 		fireBundleEvent(bundle, false);
 	}
 
@@ -311,7 +311,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 					else
 						listener.bundleStop(bundle.getId());
 				} catch (Throwable e) {
-					logger.error("when bundle[{}] {}, listener [{}:{}] encounter an error",
+					logger.error("when bundle {} {}, listener [{}:{}] encounter an error",
 							bundle.getId(), active ? "start" : "stop", extensionBundle.getId(), listener.getClass(), e);
 				}
 			}

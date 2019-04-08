@@ -187,7 +187,7 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	public void execute(final String sql) throws DataAccessException {
-		logger.debug("Executing SQL statement [{}]", sql);
+		logger.debug("Executing SQL statement :{}", sql);
 		class ExecuteStatementCallback implements StatementCallback<Object>, SqlProvider {
 			public Object doInStatement(Statement stmt) throws SQLException {
 				stmt.execute(sql);
@@ -230,7 +230,7 @@ public class JdbcTemplate implements JdbcOperations {
 		checkNotNull(sql, "SQL must not be null");
 		checkNotNull(rse, "ResultSetExtractor must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL query [{}]", sql);
+			logger.debug("Executing SQL query: {}", sql);
 		}
 		class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
 			public T doInStatement(Statement stmt) throws SQLException {
@@ -294,7 +294,7 @@ public class JdbcTemplate implements JdbcOperations {
 	@Override
 	public void batchUpdate(final String sql, final BatchParamSetter pss, final int batchSize)
 			throws DataAccessException {
-		logger.debug("Executing SQL batch update [{}]", sql);
+		logger.debug("Executing SQL batch update: {}", sql);
 		class BatchStatementCallback implements PreparedStatementCallback<Object> {
 			@Override
 			public Object doInPreparedStatement(PreparedStatement ps) throws SQLException {
@@ -329,7 +329,7 @@ public class JdbcTemplate implements JdbcOperations {
 	public int update(final String sql) throws DataAccessException {
 		checkNotNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing SQL update [{}]", sql);
+			logger.debug("Executing SQL update: {}", sql);
 		}
 		class UpdateStatementCallback implements StatementCallback<Integer>, SqlProvider {
 			public Integer doInStatement(Statement stmt) throws SQLException {
@@ -351,7 +351,7 @@ public class JdbcTemplate implements JdbcOperations {
 		checkNotNull(sql, "sql must not be null");
 		checkNotNull(action, "Callback object must not be null");
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing prepared SQL statement [{}]", sql);
+			logger.debug("Executing prepared SQL statement: {}", sql);
 		}
 		Connection con = getConnection();
 		PreparedStatement ps = null;
@@ -433,7 +433,7 @@ public class JdbcTemplate implements JdbcOperations {
 
 	public int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
-			logger.debug("Executing prepared SQL update[{}]", sql);
+			logger.debug("Executing prepared SQL update: {}", sql);
 		}
 		return execute(sql, new PreparedStatementCallback<Integer>() {
 			public Integer doInPreparedStatement(PreparedStatement ps) throws SQLException {
@@ -472,7 +472,7 @@ public class JdbcTemplate implements JdbcOperations {
 		if (logger.isDebugEnabled()) {
 			SQLWarning warningToLog = stmt.getWarnings();
 			while (warningToLog != null) {
-				logger.debug("SQLWarning ignored: SQL state '{}', error code '{}', message [{}]",
+				logger.debug("SQLWarning ignored: SQL state '{}', error code '{}', message: {}",
 						warningToLog.getSQLState(), warningToLog.getErrorCode(), warningToLog.getMessage());
 				warningToLog = warningToLog.getNextWarning();
 			}

@@ -37,7 +37,7 @@ public class ConfigData {
 	public ConfigData(String bundleId, boolean checkExist) {
 		init(bundleId);
 		if (checkExist)
-			checkNotNull(root, "config file [{}] not found", path.getFileName());
+			checkNotNull(root, "config file not found: {}", path.getFileName());
 		if (root == null) {
 			standalone = false;
 			init("core");

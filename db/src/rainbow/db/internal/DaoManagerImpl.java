@@ -256,7 +256,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 					ctx = new InitialContext();
 				dataSource = (DataSource) ctx.lookup(name);
 			} catch (Exception e) {
-				logger.error("lookup JNDI datasource[{}] object failed", name, e);
+				logger.error("lookup JNDI datasource {} object failed", name, e);
 			}
 		}
 		return dataSource;

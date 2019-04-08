@@ -118,7 +118,7 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public Entity getEntity(String entityName) {
 		checkNotNull(entityName);
-		return checkNotNull(entityMap.get(entityName), "entity [{}] not defined", entityName);
+		return checkNotNull(entityMap.get(entityName), "entity {} not defined", entityName);
 	}
 
 	@Override
@@ -270,9 +270,9 @@ public class DaoImpl extends NameObject implements Dao {
 			}
 		} else {
 			for (String field : fields) {
-				Column column = checkNotNull(entity.getColumn(field), "column [{}] not found", field);
-				checkArgument(!column.isKey(), "column [{}] is key", field);
-				checkArgument(Number.class.isAssignableFrom(column.getType().dataClass()), "column[{}] type invalid",
+				Column column = checkNotNull(entity.getColumn(field), "column {} not found", field);
+				checkArgument(!column.isKey(), "column {} is key", field);
+				checkArgument(Number.class.isAssignableFrom(column.getType().dataClass()), "column {} type invalid",
 						field);
 				builder.add(column);
 			}
@@ -321,7 +321,7 @@ public class DaoImpl extends NameObject implements Dao {
 	public int update(Object obj) {
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
-		checkArgument(entity.getKeyCount() > 0, "cann't update 0 key entity [{}]", entity.getName());
+		checkArgument(entity.getKeyCount() > 0, "cann't update 0 key entity {}", entity.getName());
 		Sql sql = new Sql(entity.getKeyCount()).append("update ").append(entity.getDbName()).append(" set ");
 		C cnd = EmptyCondition.INSTANCE;
 		boolean first = true;
@@ -588,7 +588,7 @@ public class DaoImpl extends NameObject implements Dao {
 			Column columnLeft = entityLeft.getColumn(link.getLeft().getField());
 			Entity entityRight = entityMap.get(link.getRight().getEntity());
 			Column columnRight = entityRight.getColumn(link.getRight().getField());
-			
+
 			Link linkLeft = new Link();
 			linkLeft.setLinkEntity(entityRight);
 			linkLeft.setLinkColumn(columnRight);

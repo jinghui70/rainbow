@@ -40,7 +40,7 @@ public class JoinTarget {
 	public JoinTarget(JoinType type, String target) {
 		this.type = type;
 		String[] s = Utils.splitTrim(target, ' ');
-		checkArgument(s.length == 2, "[{}] need table alias", target);
+		checkArgument(s.length == 2, "{} need table alias", target);
 		this.target = s[0];
 		this.alias = s[1];
 		this.cnd = new LinkedList<JoinCnd>();

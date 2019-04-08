@@ -52,7 +52,7 @@ public class ExtensionPoint {
 				eo = object;
 			}
 		}
-		checkNotNull(eo, "invalid extension object[{}], register Extension[{}] failed", object.getClass().getName(),
+		checkNotNull(eo, "invalid extension object {}, register Extension {} failed", object.getClass().getName(),
 				clazz.getSimpleName());
 
 		if (name == null) {
@@ -63,7 +63,7 @@ public class ExtensionPoint {
 			}
 		}
 		for (Extension e : extensions) {
-			checkArgument(!name.equals(e.getName()), "duplicated extension name[{}] of [{}]", name,
+			checkArgument(!name.equals(e.getName()), "duplicated extension name '{}' of {}", name,
 					clazz.getSimpleName());
 		}
 		Extension extension = new Extension(bundle, this, eo);

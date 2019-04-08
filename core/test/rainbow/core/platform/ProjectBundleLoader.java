@@ -35,16 +35,16 @@ public class ProjectBundleLoader extends JarBundleLoader {
 				try {
 					BundleData data = binder.unmarshal(dataFile);
 					if (idSet.contains(data.getId())) {
-						logger.warn("duplicated bundle id [{}]", data.getId());
+						logger.warn("duplicated bundle id: {}", data.getId());
 					} else if (Objects.equals(data.getId(), root.getParent().getFileName().toString())) {
 						BundleClassLoader classLoader = new ProjectClassLoader(root);
 						result.add(new Bundle(data, classLoader));
 						idSet.add(data.getId());
-						logger.debug("find new bundle [{}]", data.getId());
+						logger.debug("find new bundle: {}", data.getId());
 					} else 
-						logger.error("project name not match with bundle id [{}]", data.getId());
+						logger.error("project name not match with bundle id: {}", data.getId());
 				} catch (JAXBException e) {
-					logger.error("bad bundle.xml in [{}]", root);
+					logger.error("bad bundle.xml in {}", root);
 				}
 			}
 		}

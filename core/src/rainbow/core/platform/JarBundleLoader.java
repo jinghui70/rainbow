@@ -28,7 +28,7 @@ public class JarBundleLoader implements BundleLoader {
 	public List<Bundle> loadBundle(List<Bundle> bundles) throws IOException {
 		Path bundleDir = getBundleDir();
 		if (!Files.exists(bundleDir) || !Files.isDirectory(bundleDir)) {
-			logger.error("bundle directory [{}] not exists", bundleDir.toAbsolutePath().toString());
+			logger.error("bundle directory not exists: {}", bundleDir.toAbsolutePath().toString());
 			return new ArrayList<Bundle>();
 		}
 		Set<String> idSet = bundles.stream().map(b -> b.getId()).collect(Collectors.toSet());
@@ -45,23 +45,23 @@ public class JarBundleLoader implements BundleLoader {
 					try {
 						classLoader = new JarClassLoader(input);
 					} catch (IOException e) {
-						logger.warn("load file [{}] failed", input, e);
+						logger.warn("load file failed: {}", input, e);
 						return null;
 					}
 					Resource r = classLoader.getLocalResource("bundle.xml");
 					if (r == null) {
-						logger.info("[{}] is not a bundle", input);
+						logger.info("{} is not a bundle", input);
 						throw new RuntimeException();
 					}
 					BundleData data = null;
 					try (InputStream is = r.getInputStream()) {
 						data = binder.unmarshal(is);
 					} catch (JAXBException | IOException e) {
-						logger.error("read bundle.xml of [{}] faild", input, e);
+						logger.error("read bundle.xml of {} faild", input, e);
 						throw new RuntimeException();
 					}
 					if (idSet.contains(data.getId())) {
-						logger.warn("duplicated bundle [{}] found: {}", data.getId(), input);
+						logger.error("duplicated bundle {} found: {}", data.getId(), input);
 						throw new RuntimeException();
 					}
 					idSet.add(data.getId());

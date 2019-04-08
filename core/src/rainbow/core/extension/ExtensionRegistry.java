@@ -35,7 +35,7 @@ public abstract class ExtensionRegistry {
 	 */
 	public static void registerExtensionPoint(String bundle, Class<?> clazz) {
 		checkState(!pointMap.containsKey(clazz), "duplicated extension point {} ", clazz.getName());
-		logger.info("register extension point [{}]", clazz.getSimpleName());
+		logger.info("register extension point {}", clazz.getSimpleName());
 		ExtensionPoint point = new ExtensionPoint(bundle, clazz);
 		pointMap.put(clazz, point);
 	}
@@ -46,11 +46,11 @@ public abstract class ExtensionRegistry {
 	 * @param clazz
 	 */
 	public static void unregisterExtensionPoint(Class<?> clazz) {
-		logger.info("try to unregister extension point [{}]", clazz.getName());
+		logger.info("try to unregister extension point {}", clazz.getName());
 		if (pointMap.remove(clazz) == null)
-			logger.warn("extension point [{}] not exist", clazz.getName());
+			logger.warn("extension point {} not exist", clazz.getSimpleName());
 		else
-			logger.info("extension point [{}] unregistered", clazz.getName());
+			logger.info("extension point {} unregistered", clazz.getSimpleName());
 	}
 
 	/**
@@ -65,7 +65,7 @@ public abstract class ExtensionRegistry {
 	public static Extension registerExtension(String bundle, Class<?> clazz, String name, Object object) {
 		ExtensionPoint point = getExtensionPoint(clazz);
 		Extension extension = point.addExtension(bundle, name, object);
-		logger.info("register extension [{}]:  [{}]", clazz.getSimpleName(), extension.getName());
+		logger.info("register extension {}:{}", clazz.getSimpleName(), extension.getName());
 		return extension;
 	}
 
@@ -111,7 +111,7 @@ public abstract class ExtensionRegistry {
 	 */
 	public static ExtensionPoint getExtensionPoint(Class<?> clazz) {
 		ExtensionPoint point = pointMap.get(clazz);
-		checkNotNull(point, "Extension Point [{}] not registered", clazz.getName());
+		checkNotNull(point, "Extension Point {} not registered", clazz.getName());
 		return point;
 	}
 

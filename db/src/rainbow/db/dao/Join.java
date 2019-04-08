@@ -70,16 +70,16 @@ public class Join {
 		sql.append(" FROM ").append(entity.getDbName()).append(' ').append(alias);
 		for (final JoinTarget t : targets) {
 			final Entity targetEntity = entityMap.get(t.getAlias());
-			checkNotNull(targetEntity, "join target entity [{}] not found", t.getTarget());
+			checkNotNull(targetEntity, "join target entity {} not found", t.getTarget());
 			sql.append(' ').append(t.getType().getText()).append(' ').append(targetEntity.getDbName()).append(' ')
 					.append(t.getAlias()).append(" ON(");
 			sql.prepareJoin();
 			for (JoinCnd cnd : t.getCnd()) {
 				sql.appendJoin(" AND ");
 				Column left = entity.getColumn(cnd.getLeft());
-				checkNotNull(left, "column [{}] not found in entity [{}]", cnd.getLeft(), master);
+				checkNotNull(left, "column {} not found in entity {}", cnd.getLeft(), master);
 				Column right = targetEntity.getColumn(cnd.getRight());
-				checkNotNull(right, "column [{}] not found in entity [{}]", cnd.getRight(), t.getTarget());
+				checkNotNull(right, "column {} not found in entity {}", cnd.getRight(), t.getTarget());
 				sql.append(alias).append('.').append(left.getDbName()).append("=").append(t.getAlias()).append('.')
 						.append(right.getDbName());
 			}

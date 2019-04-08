@@ -1,13 +1,9 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.checkArgument;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
-import java.util.Collections;
-import java.util.List;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.transform.Transformer;
@@ -17,12 +13,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.google.common.base.Objects;
-
-import rainbow.core.util.Utils;
 import rainbow.core.util.XmlBinder;
-import rainbow.db.dao.condition.C;
-import rainbow.db.dao.condition.Op;
 import rainbow.db.model.Model;
 
 public abstract class DaoUtils {
@@ -49,67 +40,4 @@ public abstract class DaoUtils {
 			throw new RuntimeException(e);
 		}
 	}
-
-	/**
-	 * 增加一个nest对象时，计算左右值
-	 * 
-	 * @param dao
-	 * @param neo
-	 * @param cnd
-	 * @param rootId
-	 */
-	public static void calcLeftRight(Dao dao, NeoBean neo, C cnd, Object rootId) {
-		String entityName = neo.getEntity().getName();
-		int right;
-		if (Objects.equal(neo.getObject("pid"), rootId)) {
-			right = dao.queryForInt(new Select("max(right)").from(entityName).where(cnd));
-			right++;
-		} else {
-			right = dao.queryForInt(new Select("right").from(entityName).where("id", neo.getObject("pid")));
-			checkArgument(right>0,"id[{}] has a wrong parent id[{}]", neo.getObject("id"),
-						neo.getObject("pid"));
-			dao.update(entityName, cnd.and("left", Op.Greater, right), U.set("left", '+', 2), U.set("right", '+', 2));
-			dao.update(entityName, cnd.and("left", Op.Less, right).and("right", Op.GreaterEqual, right),
-					U.set("right", '+', 2));
-		}
-		neo.setValue("left", right);
-		neo.setValue("right", right + 1);
-	}
-
-	/**
-	 * 返回求指定对象所有下级id的sql
-	 * 
-	 * @param entityName
-	 * @param cnd        额外条件，（如果是森林，可以是树标识条件）
-	 * @param left
-	 * @param right
-	 * @param withSelf   是否包含自己
-	 * @return
-	 */
-	public static Select subIdSql(String entityName, C cnd, int left, int right, boolean withSelf) {
-		Select sb = new Select("id").from(entityName).where(cnd);
-		if (withSelf) {
-			return sb.and("left", Op.GreaterEqual, left).and("left", Op.LessEqual, right);
-		} else {
-			return sb.and("left", Op.Greater, left).and("left", Op.Less, right);
-		}
-	}
-
-	/**
-	 * 返回获得一组节点所有下级id的sql
-	 * 
-	 * @param entityName
-	 * @param ids
-	 * @return
-	 */
-	public static <I> Sql subIdSql(String entityName, List<I> ids) {
-		checkArgument(!Utils.isNullOrEmpty(ids));
-		Sql sql = new Sql().addParam(Collections.<Object>unmodifiableList(ids));
-		sql.append("select A.ID from ").append(entityName).append(" A,").append(entityName).append(" B")
-				.append(" where A.LFT>=B.LFT and A.LFT<=B.RGT and B.ID in (");
-		Utils.repeat(sql.getStringBuilder(), "?", ',', ids.size());
-		sql.append(")");
-		return sql;
-	}
-
 }
