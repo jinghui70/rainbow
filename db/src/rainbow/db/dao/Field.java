@@ -6,7 +6,7 @@ import com.google.common.base.Objects;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Column;
+import rainbow.db.dao.model.Column;
 import rainbow.db.model.ColumnType;
 
 public class Field {

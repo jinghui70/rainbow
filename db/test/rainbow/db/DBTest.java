@@ -27,7 +27,7 @@ import rainbow.db.dao.Dao;
 import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Column;
+import rainbow.db.dao.model.Column;
 import rainbow.db.model.Model;
 
 public final class DBTest {

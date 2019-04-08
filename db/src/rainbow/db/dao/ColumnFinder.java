@@ -1,6 +1,6 @@
 package rainbow.db.dao;
 
-import rainbow.db.model.Column;
+import rainbow.db.dao.model.Column;
 
 public interface ColumnFinder {
 

@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.google.common.base.Strings;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -216,17 +216,14 @@ public class DaoManagerImpl extends ActivatorAwareObject
 					logic.getId());
 			DaoImpl dao = new DaoImpl(dataSource, entityMap);
 			dao.setName(logic.getId());
-			dao.setSchema(logic.getSchema());
-			if (Strings.isNullOrEmpty(logic.getPageSize()))
-				dao.setPageSize(16);
-			else
-				dao.setPageSize(Integer.valueOf(logic.getPageSize()));
 			logicBuilder.put(logic.getId(), dao);
 			onlyDao = dao;
 			if (entityMap == null || entityMap.isEmpty())
 				logger.warn("register logic datasource [{}] with no model", logic.toString());
 			else
 				logger.info("register logic datasource [{}] with model [{}]", logic.toString(), model);
+			JSONObject patch = Utils.loadConfigFile(activator.getConfigureFile("extra.json"));
+			dao.linkPatch(patch);
 		}
 		Map<String, Dao> result = logicBuilder.build();
 		if (result.size() != 1)

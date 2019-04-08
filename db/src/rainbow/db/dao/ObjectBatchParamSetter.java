@@ -5,11 +5,11 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.jdbc.BatchParamSetter;
 import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.StatementCreatorUtils;
-import rainbow.db.model.Column;
 
 public class ObjectBatchParamSetter<T> implements BatchParamSetter {
 

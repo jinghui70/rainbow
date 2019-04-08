@@ -18,8 +18,8 @@ import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.EmptyCondition;
 import rainbow.db.dao.condition.JoinCondition;
 import rainbow.db.dao.condition.Op;
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Column;
 
 public class Select {
 

@@ -3,6 +3,7 @@ package rainbow.db.dao;
 import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,6 +17,8 @@ import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -24,7 +27,9 @@ import rainbow.core.model.object.NameObject;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.EmptyCondition;
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.Link;
 import rainbow.db.database.Dialect;
 import rainbow.db.database.DialectManager;
 import rainbow.db.jdbc.DataAccessException;
@@ -33,7 +38,6 @@ import rainbow.db.jdbc.JdbcTemplate;
 import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.ResultSetExtractor;
 import rainbow.db.jdbc.RowMapper;
-import rainbow.db.model.Column;
 
 public class DaoImpl extends NameObject implements Dao {
 
@@ -562,6 +566,40 @@ public class DaoImpl extends NameObject implements Dao {
 		StringBuilder sb = new StringBuilder("create view ");
 		sb.append(viewName).append(" as (").append(sql).append(')');
 		execSql(sb.toString());
+	}
+
+	public void linkPatch(JSONObject patch) {
+		Type type = new TypeReference<List<DaoImplPatchEntity>>() {
+		}.getType();
+		List<DaoImplPatchEntity> entities = patch.getObject("entity", type);
+		entities.stream().forEach(e -> {
+			Entity entity = entityMap.get(e.getName());
+			entity.setTagMap(e.getTagMap());
+			e.getColumns().stream().forEach(c -> {
+				Column column = entity.getColumn(c.getName());
+				column.setTagMap(c.getTagMap());
+			});
+		});
+		type = new TypeReference<List<DaoImplPatchLink>>() {
+		}.getType();
+		List<DaoImplPatchLink> links = patch.getObject("reference", type);
+		links.forEach(link -> {
+			Entity entityLeft = entityMap.get(link.getLeft().getEntity());
+			Column columnLeft = entityLeft.getColumn(link.getLeft().getField());
+			Entity entityRight = entityMap.get(link.getRight().getEntity());
+			Column columnRight = entityRight.getColumn(link.getRight().getField());
+			
+			Link linkLeft = new Link();
+			linkLeft.setLinkEntity(entityRight);
+			linkLeft.setLinkColumn(columnRight);
+			linkLeft.setOne(link.getRight().isOne());
+			columnLeft.setLink(linkLeft);
+			Link linkRight = new Link();
+			linkRight.setLinkEntity(entityLeft);
+			linkRight.setLinkColumn(columnLeft);
+			linkRight.setOne(link.getLeft().isOne());
+			columnRight.setLink(linkRight);
+		});
 	}
 
 }

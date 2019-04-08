@@ -10,8 +10,8 @@ import java.util.function.Function;
 import rainbow.core.util.Utils;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.condition.C;
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Column;
 
 /**
  * 封装了一个Sql的内容对象

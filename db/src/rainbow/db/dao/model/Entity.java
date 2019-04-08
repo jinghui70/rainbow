@@ -1,67 +1,54 @@
 package rainbow.db.dao.model;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkState;
+
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import java.util.stream.Collectors;
 
 import rainbow.core.model.object.INameObject;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.Field;
-import rainbow.db.model.Column;
 
 public class Entity implements INameObject, Function<String, Field> {
 
-	private rainbow.db.model.Entity origin;
-	
+	private String name;
+
+	private String dbName;
+
+	private String label;
+
 	private Map<String, Column> columnMap;
 
 	private List<Column> keys;
 
-	public rainbow.db.model.Entity getOrigin() {
-		return origin;
+	private List<Column> columns;
+
+	private Map<String, Object> tagMap;
+
+	public List<Column> getColumns() {
+		return columns;
 	}
-	
-	@Override
+
 	public String getName() {
-		return origin.getName();
+		return name;
 	}
 
 	public String getDbName() {
-		return origin.getDbName();
+		return dbName;
 	}
 
-	public String getCnName() {
-		return origin.getCnName();
+	public String getLabel() {
+		return label;
 	}
 
-	public List<Column> getColumns() {
-		return origin.getColumns();
+	public Map<String, Object> getTagMap() {
+		return tagMap;
 	}
 
-	public Column getColumn(String columnName) {
-		return columnMap.get(columnName);
-	}
-
-	public Entity(rainbow.db.model.Entity src) {
-		this.origin = src;
-		ImmutableList.Builder<Column> listBuilder = ImmutableList.builder();
-		ImmutableMap.Builder<String, Column> mapBuilder = ImmutableMap.builder();
-		ImmutableList.Builder<Column> keyBuilder = ImmutableList.builder();
-		checkState(!Utils.isNullOrEmpty(src.getColumns()), "Entity {} has no column", src.getName());
-
-		for (Column column : src.getColumns()) {
-			checkNotNull(column.getName(), "Entity {} has a null name column", column);
-			listBuilder.add(column);
-			mapBuilder.put(column.getName(), column);
-			if (column.isKey())
-				keyBuilder.add(column);
-		}
-		columnMap = mapBuilder.build();
-		keys = keyBuilder.build();
+	public void setTagMap(Map<String, Object> tagMap) {
+		this.tagMap = tagMap;
 	}
 
 	public List<Column> getKeys() {
@@ -70,6 +57,24 @@ public class Entity implements INameObject, Function<String, Field> {
 
 	public int getKeyCount() {
 		return keys.size();
+	}
+
+	public Column getColumn(String name) {
+		return this.columnMap.get(name);
+	}
+
+	public Object getTag(String tag) {
+		return tagMap == null ? null : tagMap.get(tag);
+	}
+
+	public Entity(rainbow.db.model.Entity src) {
+		checkState(!Utils.isNullOrEmpty(src.getColumns()), "Entity {} has no column", src.getName());
+		this.name = src.getName();
+		this.dbName = src.getDbName();
+		this.label = src.getCnName();
+		this.columns = src.getColumns().stream().map(Column::new).collect(Collectors.toList());
+		this.keys = this.columns.stream().filter(c -> c.isKey()).collect(Collectors.toList());
+		this.columnMap = this.columns.stream().collect(Collectors.toMap(Column::getName, Function.identity()));
 	}
 
 	@Override
@@ -82,4 +87,13 @@ public class Entity implements INameObject, Function<String, Field> {
 		return new Field(input, this);
 	}
 
+	public rainbow.db.model.Entity toSimple() {
+		rainbow.db.model.Entity simple = new rainbow.db.model.Entity();
+		simple.setName(name);
+		simple.setDbName(dbName);
+		simple.setCnName(label);
+		List<rainbow.db.model.Column> simpleColumns = columns.stream().map(Column::toSimple).collect(Collectors.toList());
+		simple.setColumns(simpleColumns);
+		return simple;
+	}
 }

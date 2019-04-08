@@ -1,12 +1,12 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableSet;
 
 import rainbow.core.util.converter.Converters;
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Column;
 
 public final class U {
 

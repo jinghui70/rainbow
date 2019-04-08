@@ -1,6 +1,7 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -12,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Maps;
 
 import rainbow.core.util.converter.Converters;
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Column;
 import rainbow.db.model.ColumnType;
 
 public class NeoBean {

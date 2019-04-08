@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Column;
+import rainbow.db.dao.model.Column;
 
 public class Join {
 

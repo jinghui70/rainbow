@@ -1,9 +1,10 @@
 package rainbow.db.dao.memory;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -49,14 +50,9 @@ public class MemoryDao extends DaoImpl implements DisposableBean {
 		if (entities.length == 0)
 			return;
 		Model model = new Model();
-		List<rainbow.db.model.Entity> list = new ArrayList<rainbow.db.model.Entity>(entities.length);
+		List<rainbow.db.model.Entity> list = Arrays.stream(entities).map(Entity::toSimple).collect(Collectors.toList());
 		model.setEntities(list);
-		for (Entity entity : entities) {
-			list.add(entity.getOrigin());
-			entityMap.put(entity.getName(), entity);
-		}
-		String ddl = DaoUtils.transform(model);
-		execSql(ddl);
+		setModel(model);
 	}
 
 	@Override
