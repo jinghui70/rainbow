@@ -24,8 +24,6 @@ public class Column {
 
 	private Map<String, Object> tags;
 
-	private Link link;
-
 	public String getName() {
 		return name;
 	}
@@ -65,21 +63,13 @@ public class Column {
 	public void setTags(Map<String, Object> tags) {
 		this.tags = tags;
 	}
+	
+	public boolean hasTag(String tag) {
+		return tags.containsKey(tag);
+	}
 
 	public Object getTag(String tag) {
 		return tags == null ? null : tags.get(tag);
-	}
-
-	public Link getLink() {
-		return link;
-	}
-
-	public void setLink(Link link) {
-		this.link = link;
-	}
-
-	public boolean isLink() {
-		return link != null;
 	}
 
 	public Column(rainbow.db.model.Column src) {

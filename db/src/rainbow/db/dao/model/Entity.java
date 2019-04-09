@@ -2,6 +2,7 @@ package rainbow.db.dao.model;
 
 import static rainbow.core.util.Preconditions.checkState;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -65,15 +66,21 @@ public class Entity implements INameObject, Function<String, Field> {
 		return this.columnMap.get(name);
 	}
 
+	public boolean hasTag(String tag) {
+		return tags.containsKey(tag);
+	}
+
 	public Object getTag(String tag) {
 		return tags == null ? null : tags.get(tag);
 	}
 
 	public void addLink(Link link) {
-		
+		if (links == null)
+			links = new HashMap<String, Link>();
+		links.put(link.getName(), link);
 	}
-	
-	public Object getLink(String link) {
+
+	public Link getLink(String link) {
 		return links == null ? null : links.get(link);
 	}
 
