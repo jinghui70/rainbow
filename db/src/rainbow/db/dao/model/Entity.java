@@ -62,8 +62,12 @@ public class Entity implements INameObject, Function<String, Field> {
 		return keys.size();
 	}
 
+	public boolean hasColumn(String name) {
+		return columnMap.containsKey(name);
+	}
+	
 	public Column getColumn(String name) {
-		return this.columnMap.get(name);
+		return columnMap.get(name);
 	}
 
 	public boolean hasTag(String tag) {
