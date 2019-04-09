@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -49,10 +50,6 @@ public class DaoImpl extends NameObject implements Dao {
 
 	private JdbcTemplate jdbcTemplate;
 
-	private String schema;
-
-	private int pageSize;
-
 	public DaoImpl() {
 		this(null, null);
 	}
@@ -78,22 +75,6 @@ public class DaoImpl extends NameObject implements Dao {
 
 	public void setEntityMap(Map<String, Entity> entityMap) {
 		this.entityMap = (entityMap == null) ? ImmutableMap.<String, Entity>of() : entityMap;
-	}
-
-	public String getSchema() {
-		return schema;
-	}
-
-	public void setSchema(String schema) {
-		this.schema = schema;
-	}
-
-	public int getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(int pageSize) {
-		this.pageSize = pageSize;
 	}
 
 	private Dialect initDatabaseDialect(DataSource dataSource) {
@@ -280,8 +261,8 @@ public class DaoImpl extends NameObject implements Dao {
 		List<Column> list = builder.build();
 		final Sql updateSql = new Sql(list.size()).append("update ").append(entity.getDbName()).append(" set ");
 		for (Column column : list) {
-			updateSql.append(column.getDbName()).append("=").append(column.getDbName())
-					.append(add ? '+' : '-').append(neo.getObject(column));
+			updateSql.append(column.getDbName()).append("=").append(column.getDbName()).append(add ? '+' : '-')
+					.append(neo.getObject(column));
 			updateSql.appendTempComma();
 		}
 		updateSql.clearTemp();
@@ -559,15 +540,6 @@ public class DaoImpl extends NameObject implements Dao {
 			return jdbcTemplate.update(sql, params);
 	}
 
-	@Override
-	public void createView(String viewName, String sql) {
-		if (existsOfTable(viewName))
-			execSql(String.format("drop view %s", viewName));
-		StringBuilder sb = new StringBuilder("create view ");
-		sb.append(viewName).append(" as (").append(sql).append(')');
-		execSql(sb.toString());
-	}
-
 	public void linkPatch(JSONObject patch) {
 		Type type = new TypeReference<List<DaoImplPatchEntity>>() {
 		}.getType();
@@ -588,22 +560,36 @@ public class DaoImpl extends NameObject implements Dao {
 		}.getType();
 		List<DaoImplPatchLink> links = patch.getObject("reference", type);
 		if (links != null) {
-			links.forEach(link -> {
-				Entity entityLeft = entityMap.get(link.getLeft().getEntity());
-				Column columnLeft = entityLeft.getColumn(link.getLeft().getField());
-				Entity entityRight = entityMap.get(link.getRight().getEntity());
-				Column columnRight = entityRight.getColumn(link.getRight().getField());
-
-				Link linkLeft = new Link();
-				linkLeft.setLinkEntity(entityRight);
-				linkLeft.setLinkColumn(columnRight);
-				linkLeft.setOne(link.getRight().isOne());
-				columnLeft.setLink(linkLeft);
-				Link linkRight = new Link();
-				linkRight.setLinkEntity(entityLeft);
-				linkRight.setLinkColumn(columnLeft);
-				linkRight.setOne(link.getLeft().isOne());
-				columnRight.setLink(linkRight);
+			links.forEach(linkDef -> {
+				DaoImplPatchLinkPart left = linkDef.getLeft();
+				Entity leftEntity = entityMap.get(left.getEntity());
+				List<Column> leftColumns = left.getFields().stream().map(leftEntity::getColumn)
+						.collect(Collectors.toList());
+				DaoImplPatchLinkPart right = linkDef.getRight();
+				Entity rightEntity = entityMap.get(right.getEntity());
+				List<Column> rightColumns = right.getFields().stream().map(rightEntity::getColumn)
+						.collect(Collectors.toList());
+				checkArgument(leftColumns.size()==rightColumns.size());
+				if (Utils.hasContent(left.getName())) {
+					Link link = new Link();
+					link.setName(left.getName());
+					link.setLabel(left.getLabel());
+					link.setColumns(leftColumns);
+					link.setLinkEntity(rightEntity);
+					link.setLinkColumns(rightColumns);
+					link.setOne(right.isOne());
+					leftEntity.addLink(link);
+				}
+				if (Utils.hasContent(right.getName())) {
+					Link link = new Link();
+					link.setName(right.getName());
+					link.setLabel(right.getLabel());
+					link.setColumns(rightColumns);
+					link.setLinkEntity(leftEntity);
+					link.setLinkColumns(leftColumns);
+					link.setOne(left.isOne());
+					rightEntity.addLink(link);
+				}
 			});
 		}
 	}

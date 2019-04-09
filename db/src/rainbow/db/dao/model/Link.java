@@ -1,12 +1,36 @@
 package rainbow.db.dao.model;
 
-public class Link {
+import java.util.List;
 
+import rainbow.core.model.object.NameObject;
+
+public class Link extends NameObject {
+	
+	private String label;
+
+	private List<Column> columns;
+	
 	private Entity linkEntity;
 	
-	private Column linkColumn;
+	private List<Column> linkColumns;
 	
-	private boolean one = false;
+	private boolean one = true;
+
+	public String getLabel() {
+		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public List<Column> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(List<Column> columns) {
+		this.columns = columns;
+	}
 
 	public Entity getLinkEntity() {
 		return linkEntity;
@@ -16,12 +40,12 @@ public class Link {
 		this.linkEntity = linkEntity;
 	}
 
-	public Column getLinkColumn() {
-		return linkColumn;
+	public List<Column> getLinkColumns() {
+		return linkColumns;
 	}
 
-	public void setLinkColumn(Column linkColumn) {
-		this.linkColumn = linkColumn;
+	public void setLinkColumns(List<Column> linkColumns) {
+		this.linkColumns = linkColumns;
 	}
 
 	public boolean isOne() {
@@ -31,5 +55,4 @@ public class Link {
 	public void setOne(boolean one) {
 		this.one = one;
 	}
-
 }

@@ -27,6 +27,8 @@ public class Entity implements INameObject, Function<String, Field> {
 
 	private Map<String, Object> tags;
 
+	private Map<String, Link> links;
+
 	public List<Column> getColumns() {
 		return columns;
 	}
@@ -67,6 +69,14 @@ public class Entity implements INameObject, Function<String, Field> {
 		return tags == null ? null : tags.get(tag);
 	}
 
+	public void addLink(Link link) {
+		
+	}
+	
+	public Object getLink(String link) {
+		return links == null ? null : links.get(link);
+	}
+
 	public Entity(rainbow.db.model.Entity src) {
 		checkState(!Utils.isNullOrEmpty(src.getColumns()), "Entity {} has no column", src.getName());
 		this.name = src.getName();
@@ -92,7 +102,8 @@ public class Entity implements INameObject, Function<String, Field> {
 		simple.setName(name);
 		simple.setDbName(dbName);
 		simple.setCnName(label);
-		List<rainbow.db.model.Column> simpleColumns = columns.stream().map(Column::toSimple).collect(Collectors.toList());
+		List<rainbow.db.model.Column> simpleColumns = columns.stream().map(Column::toSimple)
+				.collect(Collectors.toList());
 		simple.setColumns(simpleColumns);
 		return simple;
 	}

@@ -305,12 +305,4 @@ public interface Dao extends INameObject {
 
 	int execSql(String sql, Object... params);
 
-	/**
-	 * 创建一个视图
-	 * 
-	 * @param viewName
-	 * @param sql
-	 */
-	void createView(String viewName, String sql);
-
 }
