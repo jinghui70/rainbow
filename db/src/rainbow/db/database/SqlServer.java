@@ -13,8 +13,8 @@ import rainbow.db.model.ColumnType;
 public class SqlServer extends AbstractDialect {
 
 	@Override
-	public String getTimeSql() {
-		return "select getdate()";
+	public String now() {
+		return "getdate()";
 	}
 
 	@Override

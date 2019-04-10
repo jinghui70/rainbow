@@ -132,6 +132,12 @@ public class Sql implements Appendable {
 		params.add(param);
 		return this;
 	}
+	
+	public Sql addParam(Object param, Class<?> type, Dao dao) {
+		if (Dao.NOW.equals(param))
+			return addParam(dao.getDatabaseDialect().now());
+		return addParam(Converters.convert(param, type));
+	}
 
 	public Sql addParams(List<Object> params) {
 		this.params.addAll(params);
@@ -185,11 +191,11 @@ public class Sql implements Appendable {
 		return this;
 	}
 
-	public Sql whereCnd(Function<String, Field> fieldFunction, C cnd) {
+	public Sql whereCnd(Dao dao, Function<String, Field> fieldFunction, C cnd) {
 		if (cnd == null || cnd.isEmpty())
 			return this;
 		append(" where ");
-		cnd.toSql(fieldFunction, this);
+		cnd.toSql(dao, fieldFunction, this);
 		return this;
 	}
 

@@ -12,6 +12,7 @@ import rainbow.core.util.converter.impl.Date2Timestamp;
 import rainbow.core.util.converter.impl.Enum2Number;
 import rainbow.core.util.converter.impl.Enum2String;
 import rainbow.core.util.converter.impl.LocalDate2SqlDate;
+import rainbow.core.util.converter.impl.LocalDate2Timestamp;
 import rainbow.core.util.converter.impl.LocalDateTime2Timestamp;
 import rainbow.core.util.converter.impl.Number2BigDecimal;
 import rainbow.core.util.converter.impl.Number2Boolean;
@@ -36,6 +37,7 @@ import rainbow.core.util.converter.impl.String2Short;
 import rainbow.core.util.converter.impl.String2SqlDate;
 import rainbow.core.util.converter.impl.String2Timestamp;
 import rainbow.core.util.converter.impl.Timestamp2Date;
+import rainbow.core.util.converter.impl.Timestamp2LocalDate;
 import rainbow.core.util.converter.impl.Timestamp2LocalDateTime;
 
 public class Converters {
@@ -144,6 +146,7 @@ public class Converters {
 		addDefault(Enum2Number.class);
 		addDefault(Enum2String.class);
 		addDefault(LocalDate2SqlDate.class);
+		addDefault(LocalDate2Timestamp.class);
 		addDefault(LocalDateTime2Timestamp.class);
 		addDefault(Number2BigDecimal.class);
 		addDefault(Number2Boolean.class);
@@ -168,6 +171,7 @@ public class Converters {
 		addDefault(String2LocalDate.class);
 		addDefault(String2LocalDateTime.class);
 		addDefault(Timestamp2Date.class);
+		addDefault(Timestamp2LocalDate.class);
 		addDefault(Timestamp2LocalDateTime.class);
 	}
 }

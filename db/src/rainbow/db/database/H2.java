@@ -18,10 +18,6 @@ import rainbow.db.model.ColumnType;
 
 public class H2 extends AbstractDialect {
 
-	public String getTimeSql() {
-		return "select CURRENT_TIMESTAMP()";
-	}
-
 	public String wrapLimitSql(String sql, int limit) {
 		return String.format("%s LIMIT %d", sql, limit);
 	}

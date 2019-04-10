@@ -16,8 +16,8 @@ import rainbow.db.model.ColumnType;
 public class DB2 extends AbstractDialect {
 
 	@Override
-	public String getTimeSql() {
-		return "select current timestamp from sysibm.sysdummy1";
+	public String now() {
+		return "current timestamp";
 	}
 
 	@Override

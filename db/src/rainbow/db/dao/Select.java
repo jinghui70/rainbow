@@ -281,7 +281,7 @@ public class Select {
 				buildSelectFrom(dao, sql, tables[0]);
 			}
 		}
-		sql.whereCnd(fieldFunction, cnd);
+		sql.whereCnd(dao, fieldFunction, cnd);
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
 			Arrays.asList(groupBy).forEach(g -> {

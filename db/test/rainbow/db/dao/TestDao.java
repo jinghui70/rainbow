@@ -1,5 +1,6 @@
 package rainbow.db.dao;
 
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.LocalDate;
@@ -14,9 +15,11 @@ import org.junit.jupiter.api.Test;
 import com.google.common.collect.Lists;
 
 import rainbow.db.DBTest;
+import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.object._Gender;
 import rainbow.db.dao.object._Person;
+import rainbow.db.dao.object._SaleRecord;
 
 public class TestDao {
 
@@ -90,25 +93,6 @@ public class TestDao {
 		assertEquals(Integer.valueOf(100), p.getScore()[0]);
 		assertEquals(Integer.valueOf(100), p.getScore()[1]);
 		assertEquals(Integer.valueOf(100), p.getScore()[2]);
-
-		p = createPerson(20);
-		p.getScore()[0] = 0;
-		p.getScore()[1] = 10;
-		p.getScore()[2] = 20;
-		dao.insertUpdate(p, false);
-		p = dao.fetch(_Person.class, 20);
-		assertEquals(Integer.valueOf(100), p.getScore()[0]);
-		assertEquals(Integer.valueOf(90), p.getScore()[1]);
-		assertEquals(Integer.valueOf(80), p.getScore()[2]);
-
-		p.getScore()[0] = 0;
-		p.getScore()[1] = 10;
-		p.getScore()[2] = 20;
-		dao.insertUpdate(p, true, "score.1", "score.2", "score.3");
-		p = dao.fetch(_Person.class, 20);
-		assertEquals(Integer.valueOf(100), p.getScore()[0]);
-		assertEquals(Integer.valueOf(100), p.getScore()[1]);
-		assertEquals(Integer.valueOf(100), p.getScore()[2]);
 	}
 
 	@Test
@@ -119,5 +103,32 @@ public class TestDao {
 		}
 		dao.insert(list, 5, null);
 		assertEquals(10, dao.count("_Person"));
+	}
+
+	@Test
+	public void testDate() {
+		LocalDate today = LocalDate.now();
+		LocalDate yesterday = today.minusDays(1);
+
+		NeoBean neo = dao.newNeoBean("_SaleRecord");
+		neo.setValue("id", 1);
+		neo.setValue("person", 1);
+		neo.setValue("goods", 1);
+		neo.setValue("qty", 1);
+		neo.setValue("money", 1);
+		neo.setValue("time", today);
+		dao.insert(neo);
+
+		_SaleRecord r = dao.queryForObject(new Select().from("_SaleRecord").where("time", Op.Greater, yesterday),
+				_SaleRecord.class);
+		assertEquals(Integer.valueOf(1), r.getId());
+		assertTrue(r.getTime().equals(today));
+
+		neo = dao.newNeoBean("_SaleRecord");
+		neo.setValue("id", 1);
+		neo.setValue("time", Dao.NOW);
+		dao.update(neo);
+		r = dao.fetch(_SaleRecord.class, 1);
+		assertEquals(today, r.getTime());
 	}
 }

@@ -6,8 +6,8 @@ import rainbow.db.model.ColumnType;
 public class Postgres extends AbstractDialect {
 
 	@Override
-	public String getTimeSql() {
-		return "select now()";
+	public String now() {
+		return "now()";
 	}
 
 	@Override

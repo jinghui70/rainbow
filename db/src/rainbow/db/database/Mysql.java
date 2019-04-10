@@ -6,20 +6,17 @@ import rainbow.db.model.ColumnType;
 
 public class Mysql extends AbstractDialect {
 
-	public String getTimeSql() {
-		return "select current_timestamp";
-	}
 
 	public String wrapLimitSql(String sql, int limit) {
 		return String.format("%s LIMIT %d", sql, limit);
 	}
 
 	public String wrapPagedSql(String sql, Pager pager) {
-		return String.format("%s LIMIT %d, %d", sql, pager.getFrom(), pager.getLimit());
+		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1, pager.getLimit());
 	}
 
 	public String wrapPagedSql(String sql, String select, Pager pager) {
-		return String.format("%s LIMIT %d, %d", sql, pager.getFrom(), pager.getLimit());
+		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1 , pager.getLimit());
 	}
 
 	public String wrapDirtyRead(String sql) {

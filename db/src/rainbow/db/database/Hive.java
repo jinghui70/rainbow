@@ -20,7 +20,7 @@ public class Hive extends AbstractDialect {
 			.build();
 
 	@Override
-	public String getTimeSql() {
+	public String now() {
 		return "select sysdate from dual";
 	}
 

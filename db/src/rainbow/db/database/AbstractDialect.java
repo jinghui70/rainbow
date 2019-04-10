@@ -17,6 +17,11 @@ import rainbow.db.model.ColumnType;
  */
 public abstract class AbstractDialect implements Dialect {
 
+	@Override
+	public String now() {
+		return "sysdate()";
+	}
+	
 	/**
 	 * 获取指定scheme下的所有存储过程
 	 * 

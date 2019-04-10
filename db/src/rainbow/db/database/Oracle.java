@@ -14,11 +14,6 @@ import rainbow.db.model.ColumnType;
 public class Oracle extends AbstractDialect {
 
 	@Override
-	public String getTimeSql() {
-		return "select sysdate from dual";
-	}
-
-	@Override
 	public String wrapLimitSql(String sql, int limit) {
 		return String.format("select A.*,ROWNUM from (%s) A where ROWNUM<=%d", sql, limit);
 	}

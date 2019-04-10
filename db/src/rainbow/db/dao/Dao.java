@@ -22,6 +22,8 @@ import rainbow.db.jdbc.RowMapper;
  * 
  */
 public interface Dao extends INameObject {
+	
+	public static final String NOW = "_now_"; 
 
 	/**
 	 * 返回屏蔽数据库差异的数据库方言对象
@@ -114,7 +116,7 @@ public interface Dao extends INameObject {
 	 * 
 	 * @param obj
 	 */
-	void insert(Object obj);
+	int insert(Object obj);
 
 	<T> void insert(List<T> list);
 
@@ -126,14 +128,6 @@ public interface Dao extends INameObject {
 	 * @param obj
 	 */
 	void replace(Object obj);
-
-	/**
-	 * 如果没有指定的记录，就插入一条。如果有，就加(或减)指定记录的字段值到数据库中已有的数据上
-	 * 
-	 * @param obj
-	 * @param add
-	 */
-	void insertUpdate(Object obj, boolean add, String... fields);
 
 	/**
 	 * 清空一个实体在数据库中的数据
@@ -180,13 +174,23 @@ public interface Dao extends INameObject {
 	 * @return
 	 */
 	int update(Object obj);
-
+	
 	/**
-	 * 更新
+	 * 按主键更新
 	 * 
 	 * @param entityName
 	 * @param update
 	 * @param cnd
+	 * @return
+	 */
+	int update(String entityName, Object obj);
+	
+	/**
+	 * 按条件可增减的更新
+	 * 
+	 * @param entityName
+	 * @param cnd
+	 * @param items
 	 * @return
 	 */
 	int update(String entityName, C cnd, U... items);

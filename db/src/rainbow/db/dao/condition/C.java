@@ -2,6 +2,7 @@ package rainbow.db.dao.condition;
 
 import java.util.function.Function;
 
+import rainbow.db.dao.Dao;
 import rainbow.db.dao.Field;
 import rainbow.db.dao.Sql;
 
@@ -43,7 +44,7 @@ public abstract class C {
 		return or(property, Op.Equal, param);
 	}
 
-	public abstract void toSql(Function<String, Field> fieldFunction, Sql sql);
+	public abstract void toSql(Dao dao, Function<String, Field> fieldFunction, Sql sql);
 
 	/**
 	 * 建一个简单的条件

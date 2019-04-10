@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import rainbow.db.dao.Dao;
 import rainbow.db.dao.Field;
 import rainbow.db.dao.Sql;
 
@@ -39,14 +40,14 @@ public class ComboCondition extends C {
 	}
 
 	@Override
-	public void toSql(Function<String, Field> fieldFunction, Sql sql) {
+	public void toSql(Dao dao, Function<String, Field> fieldFunction, Sql sql) {
 		for (C cnd : child) {
 			if (cnd instanceof ComboCondition) {
 				sql.append("(");
-				cnd.toSql(fieldFunction, sql);
+				cnd.toSql(dao, fieldFunction, sql);
 				sql.append(")");
 			} else
-				cnd.toSql(fieldFunction, sql);
+				cnd.toSql(dao, fieldFunction, sql);
 		}
 	}
 
@@ -68,7 +69,7 @@ public class ComboCondition extends C {
 		}
 
 		@Override
-		public void toSql(Function<String, Field> fieldFunction, Sql sql) {
+		public void toSql(Dao dao, Function<String, Field> fieldFunction, Sql sql) {
 			sql.append(text);
 		}
 

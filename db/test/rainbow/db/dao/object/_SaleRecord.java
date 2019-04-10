@@ -1,5 +1,7 @@
 package rainbow.db.dao.object;
 
+import java.time.LocalDate;
+
 import rainbow.core.model.object.IdObject;
 
 public class _SaleRecord extends IdObject<Integer>{
@@ -11,6 +13,8 @@ public class _SaleRecord extends IdObject<Integer>{
 	private int qty;
 	
 	private double money;
+	
+	private LocalDate time; 
 
 	public int getPerson() {
 		return person;
@@ -42,6 +46,14 @@ public class _SaleRecord extends IdObject<Integer>{
 
 	public void setMoney(double money) {
 		this.money = money;
+	}
+
+	public LocalDate getTime() {
+		return time;
+	}
+
+	public void setTime(LocalDate time) {
+		this.time = time;
 	}
 
 }

@@ -6,6 +6,7 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -167,7 +168,10 @@ public class NeoBean {
 
 	public NeoBean setValue(Column column, Object value) {
 		checkArgument(value != null || !column.isMandatory(), "property {} can not set null", column.getName());
-		value = Converters.convert(value, column.getType().dataClass());
+		if (Dao.NOW.equals(value)) {
+			// 
+		} else
+			value = Converters.convert(value, column.getType().dataClass());
 		setObject(column, value);
 		return this;
 	}
@@ -187,6 +191,10 @@ public class NeoBean {
 		return this;
 	}
 
+	public Set<Column> valueColumns() {
+		return valueMap.keySet();
+	}
+	
 	/**
 	 * 变身为某一个类实例
 	 * 

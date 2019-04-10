@@ -21,7 +21,7 @@ public interface Dialect {
 	 * 
 	 * @return
 	 */
-	String getTimeSql();
+	String now();
 
 	/**
 	 * 返回取前几条记录的语句

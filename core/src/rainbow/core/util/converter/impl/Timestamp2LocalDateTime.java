@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
- * 字符串转为LocalDate，字符串默认为yyyy-MM-dd格式
+ * Sql时间戳转为LocalDateTime
  * 
  * @author lijinghui
  *
