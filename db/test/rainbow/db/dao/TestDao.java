@@ -116,7 +116,7 @@ public class TestDao {
 		neo.setValue("goods", 1);
 		neo.setValue("qty", 1);
 		neo.setValue("money", 1);
-		neo.setValue("time", today);
+		neo.setValue("time", Dao.NOW);
 		dao.insert(neo);
 
 		_SaleRecord r = dao.queryForObject(new Select().from("_SaleRecord").where("time", Op.Greater, yesterday),

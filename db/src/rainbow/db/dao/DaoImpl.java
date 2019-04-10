@@ -165,19 +165,23 @@ public class DaoImpl extends NameObject implements Dao {
 		Entity entity = neo.getEntity();
 		Sql sql = new Sql(entity.getColumns().size()).append("insert into ").append(entity.getDbName()).append("(");
 
+		StringBuilder sb = new StringBuilder();
 		entity.getColumns().stream().forEach(column -> {
 			Object v = neo.getObject(column);
 			if (v == null) {
 				checkArgument(!column.isMandatory(), "property {} cannot be null", column.getName());
 			} else {
+				sql.append(column.getDbName());
 				if (NOW.equals(v)) {
-					v = dialect.now();
+					sb.append(dialect.now()).append(',');
+				} else {
+					sql.addParam(v);
+					sb.append("?,");
 				}
-				sql.append(column.getDbName()).addParam(v);
 				sql.appendTempComma();
 			}
 		});
-		sql.clearTemp().append(") values (?").append(",?", sql.getParams().size() - 1).append(")");
+		sql.clearTemp().append(") values (").append(sb.substring(0, sb.length() - 1)).append(")");
 		return execSql(sql);
 	}
 
