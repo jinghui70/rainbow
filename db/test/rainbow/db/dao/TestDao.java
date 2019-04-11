@@ -1,5 +1,6 @@
 package rainbow.db.dao;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -130,5 +131,10 @@ public class TestDao {
 		dao.update(neo);
 		r = dao.fetch(_SaleRecord.class, 1);
 		assertEquals(today, r.getTime());
+		
+		r = dao.queryForObject(new Select().from("_SaleRecord").where("time", Op.LessEqual, Dao.NOW),
+				_SaleRecord.class);
+		assertNotNull(r);
+
 	}
 }

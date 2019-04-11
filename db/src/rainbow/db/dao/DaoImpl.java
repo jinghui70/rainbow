@@ -86,7 +86,7 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
-	public Dialect getDatabaseDialect() {
+	public Dialect getDialect() {
 		return dialect;
 	}
 
@@ -233,7 +233,7 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public void clear(String entityName) {
 		Entity entity = getEntity(entityName);
-		jdbcTemplate.update(getDatabaseDialect().clearTable(entity.getDbName()));
+		jdbcTemplate.update(getDialect().clearTable(entity.getDbName()));
 	}
 
 	@Override
@@ -346,11 +346,15 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
+	public NeoBean queryForObject(Select select) {
+		Sql sql = select.build(this);
+		return queryForObject(sql, new NeoBeanMapper(select.getEntity(), select.getFields()));
+	}
+
+	@Override
 	public List<NeoBean> queryForList(Select select) {
 		Sql sql = select.build(this);
-		Entity entity = select.getEntity();
-		checkNotNull(entity, "entity not defined->{}", select);
-		return queryForList(sql, new NeoBeanMapper(entity, select.getFields()));
+		return queryForList(sql, new NeoBeanMapper(select.getEntity(), select.getFields()));
 	}
 
 	@Override

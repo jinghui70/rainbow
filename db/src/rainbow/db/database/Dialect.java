@@ -4,7 +4,6 @@ import java.util.List;
 
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Pager;
-import rainbow.db.dao.Sql;
 import rainbow.db.model.Column;
 import rainbow.db.model.ColumnType;
 
@@ -65,68 +64,6 @@ public interface Dialect {
 	 */
 	String toDateSql(String field, ColumnType type);
 
-	/**
-	 * 逻辑类型转为物理类型
-	 * 
-	 * @param type
-	 * @param length
-	 * @param precision
-	 * @return
-	 */
-	String toPhysicType(ColumnType type, int length, int precision);
-
-	/**
-	 * 获取指定scheme下的所有存储过程
-	 * 
-	 * @param schema
-	 * @return
-	 */
-	String getProcedureSql(String schema);
-
-	/**
-	 * 获取存储过程的内容
-	 * 
-	 * @param procName
-	 *            带schema
-	 * @return
-	 */
-	String getProcedureContent(String procName, Dao dao);
-
-	/**
-	 * 从sql建表
-	 * 
-	 * @param tableName
-	 * @param sql
-	 * @param dao
-	 */
-	void createTableAs(String tableName, Sql sql, String table_space, String index_space,boolean distribute,String distributeKey, Dao dao);
-
-	/**
-	 * 建一个表
-	 * 
-	 * @param tableName
-	 * @param columns
-	 * @param table_space
-	 * @param index_space
-	 * @param dao
-	 */
-	StringBuilder createTableSql(String tableName, List<Column> columns, String table_space, String index_space,boolean distribute,String distributeKey, Dao dao);
-
-	String getColumnInfoSql();
-
-	/**
-	 * 获取指定表空间sql
-	 * 
-	 * @param schema
-	 *            模式
-	 * @param table_name
-	 *            表名
-	 * @param pageSize
-	 *            页大小
-	 * @return
-	 */
-	String getCalcTableSizeSql(String schema, String table_name, int pageSize);
-	
 	/**
 	 * 获取数据库中所有数据表的sql,应该按id排序
 	 * @return

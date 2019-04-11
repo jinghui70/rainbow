@@ -1,10 +1,12 @@
 package rainbow.db.dao.condition;
 
+import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.Collection;
 import java.util.function.Function;
 
+import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Field;
 import rainbow.db.dao.Sql;
@@ -59,12 +61,12 @@ public class SimpleCondition extends C {
 
 			Object[] p = null;
 			if (param instanceof Collection<?>) {
-				p = ((Collection<?>)param).toArray();
+				p = ((Collection<?>) param).toArray();
 			} else if (param.getClass().isArray())
 				p = (Object[]) param;
 
 			for (int i = 0; i < p.length; i++) {
-				sql.append(i == 0 ? "?" : ",?").addParam(p[i], type.dataClass(), dao);
+				sql.append(i == 0 ? "?" : ",?").addParam(Converters.convert(p[i], type.dataClass()));
 			}
 			sql.append(")");
 		} else {
@@ -76,9 +78,14 @@ public class SimpleCondition extends C {
 				else
 					checkNotNull(param, "param of {} should not be null", property);
 			} else {
-				sql.append(op.getSymbol()).append("?").addParam(param, type.dataClass(), dao);
+				if (Dao.NOW.equals(param)) {
+					checkArgument(type == ColumnType.DATE || type == ColumnType.TIMESTAMP,
+							"Dao.NOW should be date or datetime");
+					sql.append(op.getSymbol()).append(dao.getDialect().now());
+				} else
+					sql.append(op.getSymbol()).append("?").addParam(Converters.convert(param, type.dataClass()));
 			}
 		}
 	}
-	
+
 }

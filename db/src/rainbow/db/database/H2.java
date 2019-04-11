@@ -18,10 +18,17 @@ import rainbow.db.model.ColumnType;
 
 public class H2 extends AbstractDialect {
 
+	@Override
+	public String now() {
+		return "CURRENT_TIMESTAMP";
+	}
+	
+	@Override
 	public String wrapLimitSql(String sql, int limit) {
 		return String.format("%s LIMIT %d", sql, limit);
 	}
 
+	@Override
 	public String wrapPagedSql(String sql, Pager pager) {
 		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1, pager.getLimit());
 	}
@@ -30,6 +37,7 @@ public class H2 extends AbstractDialect {
 		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1, pager.getLimit());
 	}
 
+	@Override
 	public String wrapDirtyRead(String sql) {
 		return sql;
 	}
@@ -53,51 +61,6 @@ public class H2 extends AbstractDialect {
 		}
 		sb.append(")");
 		return sb.toString();
-	}
-
-	@Override
-	public String toPhysicType(ColumnType type, int length, int precision) {
-		switch (type) {
-		case SMALLINT:
-		case INT:
-			return type.name();
-		case LONG:
-			return "BIGINT";
-		case DOUBLE:
-			return "DOUBLE";
-		case NUMERIC:
-			return (length == 0) ? "DECIMAL" : String.format("DECIMAL(%d,%d)", length, precision);
-		case DATE:
-		case TIME:
-		case TIMESTAMP:
-			return type.name();
-		case CHAR:
-			return String.format("CHAR(%d)", length);
-		case VARCHAR:
-			return String.format("VARCHAR2(%d)", length);
-		case CLOB:
-			return (length == 0) ? "CLOB" : String.format("CLOB(%d)", length);
-		case BLOB:
-			return (length == 0) ? "BLOB" : String.format("BLOB(%d)", length);
-		default:
-			return type.name();
-		}
-	}
-
-	@Override
-	public String getProcedureSql(String schema) {
-		return "SELECT ALIAS_NAME FROM INFORMATION_SCHEMA.FUNCTION_ALIASES";
-	}
-
-	@Override
-	public String getColumnInfoSql() {
-		return new StringBuilder("select TABLE_SCHEMA ,TABLE_NAME as ENTITY,COLUMN_NAME as CODE")
-				.append(",false as IS_KEY")
-				.append(",case type_name when 'TINYINT' then 'SMALLINT' when 'INTEGER' then 'INT' when 'BIGINT' then 'LONG' when 'FLOAT' then 'NUMERIC' when 'DECIMAL' then 'NUMERIC' when 'VARCHAR_IGNORECASE' then 'VARCHAR' else type_name end case as DATA_TYPE")
-				.append(",CHARACTER_MAXIMUM_LENGTH as LENGTH").append(",NUMERIC_SCALE as SCALE")
-				.append(",ORDINAL_POSITION as SORT").append(",REMARKS as COLUMN_COMMENT")
-				.append(" from information_schema.columns where Upper(TABLE_NAME)=? and Upper(TABLE_SCHEMA)=?")
-				.toString();
 	}
 
 	@Override
@@ -189,11 +152,6 @@ public class H2 extends AbstractDialect {
 			column.setLength(length);
 		} else
 			throw new AppException("H2 DataType [%s] not support", physic);
-	}
-
-	@Override
-	public String getCalcTableSizeSql(String schema, String table_name, int pageSize) {
-		return "SELECT 100";
 	}
 
 }

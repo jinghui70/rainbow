@@ -1,12 +1,16 @@
 package rainbow.db.database;
 
-import rainbow.core.util.Utils;
 import rainbow.db.dao.Pager;
 import rainbow.db.model.ColumnType;
 
-public class Mysql extends AbstractDialect {
+public class MySQL extends AbstractDialect {
 
-
+	@Override
+	public String now() {
+		return "now(3)";
+	}
+	
+	@Override
 	public String wrapLimitSql(String sql, int limit) {
 		return String.format("%s LIMIT %d", sql, limit);
 	}
@@ -44,35 +48,4 @@ public class Mysql extends AbstractDialect {
 		return sb.toString();
 	}
 
-	@Override
-	public String toPhysicType(ColumnType type, int length, int precision) {
-		switch (type) {
-		case SMALLINT:
-			return "SMALLINT";
-		case INT:
-			return "INT";
-		case LONG:
-			return "BIGINT";
-		case DOUBLE:
-			return "DOUBLE";
-		case NUMERIC:
-			return String.format("DECIMAL(%d,%d)", length, precision);
-		case DATE:
-			return "DATE";
-		case TIME:
-			return "TIME";
-		case TIMESTAMP:
-			return "TIMESTAMP";
-		case CHAR:
-			return String.format("CHAR(%d)", length);
-		case VARCHAR:
-			return String.format("VARCHAR(%d)", length);
-		case CLOB:
-			return String.format("TEXT(%d)", length);
-		case BLOB:
-			return String.format("BLOB(%d)", length);
-		default:
-			return Utils.NULL_STR;
-		}
-	}
 }

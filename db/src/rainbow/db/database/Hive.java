@@ -1,23 +1,9 @@
 package rainbow.db.database;
 
-import com.google.common.collect.ImmutableMap;
-
-import rainbow.core.util.Utils;
 import rainbow.db.dao.Pager;
 import rainbow.db.model.ColumnType;
 
 public class Hive extends AbstractDialect {
-
-	public static final ImmutableMap<String, ColumnType> PHYSIC_TO_LOGIC = new ImmutableMap.Builder<String, ColumnType>()
-			.put("DATE", ColumnType.DATE) //
-			.put("TIME", ColumnType.TIME) //
-			.put("TIMESTAMP", ColumnType.TIMESTAMP) //
-			.put("CHARACTER", ColumnType.CHAR) //
-			.put("CHAR", ColumnType.CHAR) //
-			.put("VARCHAR2", ColumnType.VARCHAR) //
-			.put("CLOB", ColumnType.CLOB) //
-			.put("BLOB", ColumnType.BLOB) //
-			.build();
 
 	@Override
 	public String now() {
@@ -59,36 +45,6 @@ public class Hive extends AbstractDialect {
 		}
 		sb.append(")");
 		return sb.toString();
-	}
-
-	@Override
-	public String toPhysicType(ColumnType type, int length, int precision) {
-		switch (type) {
-		case SMALLINT:
-			return String.format("NUMBER(%d)", 5);
-		case INT:
-			return String.format("NUMBER(%d)", 10);
-		case LONG:
-			return String.format("NUMBER(%d)", 19);
-		case DOUBLE:
-			return "NUMBER";
-		case NUMERIC:
-			return (length == 0) ? "NUMBER" : String.format("NUMBER(%d,%d)", length, precision);
-		case DATE:
-		case TIME:
-		case TIMESTAMP:
-			return "DATE";
-		case CHAR:
-			return String.format("CHAR(%d)", length);
-		case VARCHAR:
-			return String.format("VARCHAR2(%d)", length);
-		case CLOB:
-			return String.format("CLOB(%d)", length);
-		case BLOB:
-			return String.format("BLOB(%d)", length);
-		default:
-			return Utils.NULL_STR;
-		}
 	}
 
 }

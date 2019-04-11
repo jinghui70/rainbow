@@ -25,7 +25,7 @@ public final class DialectManager {
 			.put("ORACLE", Bean.singleton(Oracle.class)) //
 			.put("MSSQL", Bean.singleton(SqlServer.class)) //
 			.put("H2", Bean.singleton(H2.class)) //
-			.put("MySql", Bean.singleton(Mysql.class)) //
+			.put("MySql", Bean.singleton(MySQL.class)) //
 			.put("Postgres", Bean.singleton(Postgres.class))
 			.put("Hive", Bean.singleton(Hive.class)).build());
 

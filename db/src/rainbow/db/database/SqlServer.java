@@ -1,6 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.core.util.Utils;
 import rainbow.db.dao.Pager;
 import rainbow.db.model.ColumnType;
 
@@ -45,38 +44,6 @@ public class SqlServer extends AbstractDialect {
 			return new StringBuilder().append("TIMESTAMP(").append(field).append(")").toString();
 		default:
 			throw new IllegalArgumentException();
-		}
-	}
-
-	@Override
-	public String toPhysicType(ColumnType type, int length, int precision) {
-		switch (type) {
-		case SMALLINT:
-			return "SMALLINT";
-		case INT:
-			return "INT";
-		case LONG:
-			return "BIGINT";
-		case DOUBLE:
-			return "DOUBLE";
-		case NUMERIC:
-			if (length == 0)
-				return "NUMERIC";
-			else
-				return String.format("NUMERIC(%d,%d)", length, precision);
-		case DATE:
-			return "DATE";
-		case TIME:
-			return "TIME";
-		case TIMESTAMP:
-			return "TIMESTAMP";
-		case CHAR:
-		case VARCHAR:
-		case CLOB:
-		case BLOB:
-			return String.format("%s(%d)", type.name(), length);
-		default:
-			return Utils.NULL_STR;
 		}
 	}
 

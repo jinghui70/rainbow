@@ -133,12 +133,6 @@ public class Sql implements Appendable {
 		return this;
 	}
 	
-	public Sql addParam(Object param, Class<?> type, Dao dao) {
-		if (Dao.NOW.equals(param))
-			return addParam(dao.getDatabaseDialect().now());
-		return addParam(Converters.convert(param, type));
-	}
-
 	public Sql addParams(List<Object> params) {
 		this.params.addAll(params);
 		return this;
@@ -208,7 +202,7 @@ public class Sql implements Appendable {
 	 */
 	public Sql limit(Dao dao, int limit) {
 		if (limit > 0)
-			setSql(dao.getDatabaseDialect().wrapLimitSql(getSql(), limit));
+			setSql(dao.getDialect().wrapLimitSql(getSql(), limit));
 		return this;
 	}
 
@@ -222,9 +216,9 @@ public class Sql implements Appendable {
 	public void paging(Dao dao, Pager pager) {
 		if (pager != null) {
 			if (pager.getPage() == 1)
-				setSql(dao.getDatabaseDialect().wrapLimitSql(getSql(), pager.getLimit()));
+				setSql(dao.getDialect().wrapLimitSql(getSql(), pager.getLimit()));
 			else
-				setSql(dao.getDatabaseDialect().wrapPagedSql(getSql(), pager));
+				setSql(dao.getDialect().wrapPagedSql(getSql(), pager));
 		}
 	}
 

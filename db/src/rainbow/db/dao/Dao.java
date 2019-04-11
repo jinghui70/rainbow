@@ -22,15 +22,15 @@ import rainbow.db.jdbc.RowMapper;
  * 
  */
 public interface Dao extends INameObject {
-	
-	public static final String NOW = "_now_"; 
+
+	public static final String NOW = "_now_";
 
 	/**
 	 * 返回屏蔽数据库差异的数据库方言对象
 	 * 
 	 * @return
 	 */
-	Dialect getDatabaseDialect();
+	Dialect getDialect();
 
 	/**
 	 * 返回更底层的数据库访问对象
@@ -42,8 +42,7 @@ public interface Dao extends INameObject {
 	/**
 	 * 返回一个字符串代表的实体对象
 	 * 
-	 * @param entityName
-	 *            实体名
+	 * @param entityName 实体名
 	 * @return 实体对象
 	 */
 	Entity getEntity(String entityName);
@@ -51,8 +50,7 @@ public interface Dao extends INameObject {
 	/**
 	 * 根据一个实体名创建一个NeoBean
 	 * 
-	 * @param entityName
-	 *            实体名
+	 * @param entityName 实体名
 	 * @return 新创建的NeoBean
 	 */
 	NeoBean newNeoBean(String entityName);
@@ -68,10 +66,8 @@ public interface Dao extends INameObject {
 	/**
 	 * 根据一个实体名创建一个NeoBean，并设置属性值
 	 * 
-	 * @param entityName
-	 *            实体对象名
-	 * @param obj
-	 *            传值对象，该对象属性名若与实体属性名一致，则copy该属性值到新创建的NeoBean中
+	 * @param entityName 实体对象名
+	 * @param obj        传值对象，该对象属性名若与实体属性名一致，则copy该属性值到新创建的NeoBean中
 	 * @return 新创建的NeoBean
 	 */
 	NeoBean makeNeoBean(String entityName, Object obj);
@@ -79,14 +75,13 @@ public interface Dao extends INameObject {
 	/**
 	 * 执行一个事务
 	 * 
-	 * @param level
-	 *            one of the following <code>Connection</code> constants:
-	 *            <code>Connection.TRANSACTION_READ_UNCOMMITTED</code>,
-	 *            <code>Connection.TRANSACTION_READ_COMMITTED</code>,
-	 *            <code>Connection.TRANSACTION_REPEATABLE_READ</code>, or
-	 *            <code>Connection.TRANSACTION_SERIALIZABLE</code>. (Note that
-	 *            <code>Connection.TRANSACTION_NONE</code> cannot be used
-	 *            because it specifies that transactions are not supported.)
+	 * @param level one of the following <code>Connection</code> constants:
+	 *              <code>Connection.TRANSACTION_READ_UNCOMMITTED</code>,
+	 *              <code>Connection.TRANSACTION_READ_COMMITTED</code>,
+	 *              <code>Connection.TRANSACTION_REPEATABLE_READ</code>, or
+	 *              <code>Connection.TRANSACTION_SERIALIZABLE</code>. (Note that
+	 *              <code>Connection.TRANSACTION_NONE</code> cannot be used because
+	 *              it specifies that transactions are not supported.)
 	 * @param atom
 	 */
 	public void transaction(int level, Runnable atom);
@@ -105,8 +100,7 @@ public interface Dao extends INameObject {
 	/**
 	 * 检查数据库中是否存在指定数据表
 	 * 
-	 * @param tableName
-	 *            数据表在数据库中的名字
+	 * @param tableName 数据表在数据库中的名字
 	 * @return
 	 */
 	boolean existsOfTable(String tableName);
@@ -147,10 +141,8 @@ public interface Dao extends INameObject {
 	/**
 	 * 根据条件删除记录
 	 * 
-	 * @param entityName
-	 *            实体名称
-	 * @param cnd
-	 *            条件
+	 * @param entityName 实体名称
+	 * @param cnd        条件
 	 * @return
 	 */
 	public int delete(String entityName, C cnd);
@@ -158,10 +150,8 @@ public interface Dao extends INameObject {
 	/**
 	 * 根据主键，删除一个记录
 	 * 
-	 * @param entityName
-	 *            实体名
-	 * @param values
-	 *            主键值
+	 * @param entityName 实体名
+	 * @param values     主键值
 	 * 
 	 * @return
 	 */
@@ -174,7 +164,7 @@ public interface Dao extends INameObject {
 	 * @return
 	 */
 	int update(Object obj);
-	
+
 	/**
 	 * 按主键更新
 	 * 
@@ -184,7 +174,7 @@ public interface Dao extends INameObject {
 	 * @return
 	 */
 	int update(String entityName, Object obj);
-	
+
 	/**
 	 * 按条件可增减的更新
 	 * 
@@ -209,7 +199,7 @@ public interface Dao extends INameObject {
 	 * 根据主键查询一个实体的实例
 	 */
 	<T> T fetch(Class<T> clazz, Object... keyValues);
-	
+
 	/**
 	 * 查询并执行逐行的处理
 	 * 
@@ -219,6 +209,14 @@ public interface Dao extends INameObject {
 	void query(Select select, Consumer<Map<String, Object>> consumer);
 
 	/**
+	 * 查询一个NeoBean实例
+	 * 
+	 * @param select
+	 * @return
+	 */
+	NeoBean queryForObject(Select select);
+
+	/**
 	 * 查询实体的NeoBean实例列表
 	 */
 	List<NeoBean> queryForList(Select select);
@@ -226,10 +224,8 @@ public interface Dao extends INameObject {
 	/**
 	 * 查询一个值
 	 * 
-	 * @param select
-	 *            基于对象的查询语句
-	 * @param clazz
-	 *            查询后记录需要转换的对象类型。如果只查询一个字段，该类型应该是数据库字段能转换的类型。
+	 * @param select 基于对象的查询语句
+	 * @param clazz  查询后记录需要转换的对象类型。如果只查询一个字段，该类型应该是数据库字段能转换的类型。
 	 * @return
 	 */
 	<T> T queryForObject(Select select, Class<T> clazz);
@@ -238,10 +234,8 @@ public interface Dao extends INameObject {
 	 * 查询一个列表。参数与函数queryForObject类似。
 	 * 
 	 * 
-	 * @param select
-	 *            查询语句，如果列表需要分页，在这里设置
-	 * @param clazz
-	 *            查询后记录需要转换的对象类型。如果只查询一个字段，该类型应该是数据库字段能转换的类型。
+	 * @param select 查询语句，如果列表需要分页，在这里设置
+	 * @param clazz  查询后记录需要转换的对象类型。如果只查询一个字段，该类型应该是数据库字段能转换的类型。
 	 * @return
 	 */
 	<T> List<T> queryForList(Select select, Class<T> clazz);

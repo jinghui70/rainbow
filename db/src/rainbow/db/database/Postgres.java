@@ -46,36 +46,4 @@ public class Postgres extends AbstractDialect {
 		return sb.toString();
 	}
 
-	@Override
-	public String toPhysicType(ColumnType type, int length, int precision) {
-		switch (type) {
-		case SMALLINT:
-		case INT:
-			return type.name();
-		case LONG:
-			return "BIGINT";
-		case DOUBLE:
-			return "NUMERIC";
-		case NUMERIC:
-			if (length == 0)
-				return "NUMERIC";
-			else
-				return String.format("NUMERIC(%d,%d)", length, precision);
-		case DATE:
-		case TIME:
-		case TIMESTAMP:
-			return type.name();
-		case CHAR:
-			return String.format("CHAR(%d)", length);
-		case VARCHAR:
-			return String.format("VARCHAR(%d)", length);
-		case CLOB:
-			return "TEXT";
-		case BLOB:
-			return "BYTEA";
-		default:
-			return type.name();
-		}
-	}
-
 }
