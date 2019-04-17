@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.function.Function;
 
 import rainbow.core.util.Utils;
-import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
@@ -177,7 +176,7 @@ public class Sql implements Appendable {
 		appendTemp(" WHERE ");
 		for (Column column : entity.getKeys()) {
 			Object param = values[index++];
-			param = Converters.convert(param, column.dataClass());
+			param = column.convert(param);
 			append(column.getDbName()).append("=?").addParam(param);
 			appendTemp(" AND ");
 		}

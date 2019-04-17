@@ -22,12 +22,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.Closeables;
 
 import rainbow.core.util.XmlBinder;
-import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.memory.MemoryDao;
-import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Column;
+import rainbow.db.dao.model.Entity;
 import rainbow.db.model.Model;
 
 public final class DBTest {
@@ -145,12 +144,12 @@ public final class DBTest {
 				}
 				return v;
 			default:
-				return Converters.convert(cell.getNumericCellValue(), column.dataClass());
+				return column.convert(cell.getNumericCellValue());
 			}
 		case BLANK:
 			return null;
 		case STRING:
-			return Converters.convert(cell.getStringCellValue(), column.dataClass());
+			return column.convert(cell.getStringCellValue());
 		default:
 			return null;
 		}

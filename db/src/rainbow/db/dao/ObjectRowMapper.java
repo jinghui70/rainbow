@@ -7,7 +7,6 @@ import java.util.List;
 import rainbow.core.util.Utils;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.RowMapper;
 
 public class ObjectRowMapper<T> implements RowMapper<T> {
@@ -33,7 +32,7 @@ public class ObjectRowMapper<T> implements RowMapper<T> {
 		for (Field field : fields) {
 			Property p = classInfo.getProperty(field.getName());
 			if (p != null) {
-				Object value = JdbcUtils.getResultSetValue(rs, index, field.getColumn().dataClass());
+				Object value = DaoUtils.getResultSetValue(rs, index, field.getColumn());
 				if (value != null) {
 					value = Converters.convert(value, p.getType());
 					p.setValue(object, value);

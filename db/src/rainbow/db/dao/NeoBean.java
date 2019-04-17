@@ -59,9 +59,12 @@ public class NeoBean {
 			Map map = (Map) obj;
 			for (Object key : map.keySet()) {
 				Column column = entity.getColumn(key.toString());
-				Object value = map.get(key);
-				if (value != null)
+				if (column==null) {
+					logger.warn("column {} of entity {} not found", key.toString(), entity.getName());
+				} else {
+					Object value = map.get(key);
 					setValue(column, value);
+				}
 			}
 		} else {
 			init(obj, new ClassInfo(obj.getClass()));
@@ -101,10 +104,6 @@ public class NeoBean {
 	 * @param value
 	 */
 	void setObject(Column column, Object value) {
-		if (value == null) {
-			valueMap.remove(column);
-			return;
-		}
 		valueMap.put(column, value);
 	}
 
@@ -172,7 +171,7 @@ public class NeoBean {
 			checkArgument(java.util.Date.class.isAssignableFrom(column.dataClass()),
 					"property {} can't assign NOW", column.getName());
 		} else
-			value = Converters.convert(value, column.dataClass());
+			value = column.convert(value);
 		setObject(column, value);
 		return this;
 	}

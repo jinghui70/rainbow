@@ -4,7 +4,6 @@ import static rainbow.core.util.Preconditions.checkArgument;
 
 import com.google.common.collect.ImmutableSet;
 
-import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 
@@ -41,7 +40,7 @@ public final class U {
 	public void toSql(Entity entity, Sql sql) {
 		Column column = entity.getColumn(property);
 		String fieldName = column.getDbName();
-		Object param = Converters.convert(value, column.dataClass());
+		Object param = column.convert(value);
 		sql.append(fieldName).addParam(param);
 		if (calc == '\0') {
 			sql.append("=?");

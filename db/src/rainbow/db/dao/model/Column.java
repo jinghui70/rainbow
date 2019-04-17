@@ -3,6 +3,7 @@ package rainbow.db.dao.model;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import rainbow.core.util.converter.Converters;
 import rainbow.db.model.ColumnType;
 
 public class Column {
@@ -73,8 +74,24 @@ public class Column {
 		return tags == null ? null : tags.get(tag);
 	}
 
+	/**
+	 * 把一个值转为字段保存用的值
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public Object convert(Object value) {
+		if (type == ColumnType.CHAR && length == 1) {
+			Class<?> c = value.getClass();
+			if (c == boolean.class || c == Boolean.class) {
+				return ((Boolean) value) ? "1" : "0";
+			}
+		}
+		return Converters.convert(value, dataClass());
+	}
+
 	public Class<?> dataClass() {
-		switch(type) {
+		switch (type) {
 		case SMALLINT:
 			return Short.class;
 		case INT:
@@ -93,13 +110,13 @@ public class Column {
 			return java.sql.Timestamp.class;
 		case CHAR:
 		case VARCHAR:
-			return length==1 ? Character.class : String.class;
+			return String.class;
 		case CLOB:
 			return String.class;
 		case BLOB:
 			return byte[].class;
 		default:
-			return String.class; 
+			return String.class;
 		}
 	}
 

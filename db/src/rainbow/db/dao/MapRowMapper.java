@@ -8,7 +8,6 @@ import java.util.Map;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.RowMapper;
 
 public class MapRowMapper implements RowMapper<Map<String, Object>> {
@@ -28,7 +27,7 @@ public class MapRowMapper implements RowMapper<Map<String, Object>> {
 		Map<String, Object> map = new HashMap<String, Object>(fields.size());
 		int index = 1;
 		for (Field field : fields) {
-			Object value = JdbcUtils.getResultSetValue(rs, index++, field.getColumn().dataClass());
+			Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
 			if (value != null) {
 				map.put(field.getName(), value);
 			}

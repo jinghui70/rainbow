@@ -35,7 +35,6 @@ import rainbow.db.database.DialectManager;
 import rainbow.db.jdbc.DataAccessException;
 import rainbow.db.jdbc.IncorrectResultSizeDataAccessException;
 import rainbow.db.jdbc.JdbcTemplate;
-import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.ResultSetExtractor;
 import rainbow.db.jdbc.RowMapper;
 
@@ -335,7 +334,7 @@ public class DaoImpl extends NameObject implements Dao {
 			int index = 1;
 			for (Field field : select.getFields()) {
 				try {
-					Object value = JdbcUtils.getResultSetValue(rs, index++, field.getColumn().dataClass());
+					Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
 					map.put(field.getName(), value);
 				} catch (SQLException e) {
 					throw new DataAccessException(e);
