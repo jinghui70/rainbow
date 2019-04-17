@@ -177,7 +177,7 @@ public class Sql implements Appendable {
 		appendTemp(" WHERE ");
 		for (Column column : entity.getKeys()) {
 			Object param = values[index++];
-			param = Converters.convert(param, column.getType().dataClass());
+			param = Converters.convert(param, column.dataClass());
 			append(column.getDbName()).append("=?").addParam(param);
 			appendTemp(" AND ");
 		}

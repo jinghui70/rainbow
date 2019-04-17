@@ -41,7 +41,7 @@ public final class U {
 	public void toSql(Entity entity, Sql sql) {
 		Column column = entity.getColumn(property);
 		String fieldName = column.getDbName();
-		Object param = Converters.convert(value, column.getType().dataClass());
+		Object param = Converters.convert(value, column.dataClass());
 		sql.append(fieldName).addParam(param);
 		if (calc == '\0') {
 			sql.append("=?");

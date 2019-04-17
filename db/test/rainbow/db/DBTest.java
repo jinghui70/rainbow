@@ -145,12 +145,12 @@ public final class DBTest {
 				}
 				return v;
 			default:
-				return Converters.convert(cell.getNumericCellValue(), column.getType().dataClass());
+				return Converters.convert(cell.getNumericCellValue(), column.dataClass());
 			}
 		case BLANK:
 			return null;
 		case STRING:
-			return Converters.convert(cell.getStringCellValue(), column.getType().dataClass());
+			return Converters.convert(cell.getStringCellValue(), column.dataClass());
 		default:
 			return null;
 		}

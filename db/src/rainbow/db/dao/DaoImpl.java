@@ -335,7 +335,7 @@ public class DaoImpl extends NameObject implements Dao {
 			int index = 1;
 			for (Field field : select.getFields()) {
 				try {
-					Object value = JdbcUtils.getResultSetValue(rs, index++, field.getColumn().getType().dataClass());
+					Object value = JdbcUtils.getResultSetValue(rs, index++, field.getColumn().dataClass());
 					map.put(field.getName(), value);
 				} catch (SQLException e) {
 					throw new DataAccessException(e);

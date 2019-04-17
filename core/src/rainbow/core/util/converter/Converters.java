@@ -5,6 +5,7 @@ import java.util.Map;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
+import rainbow.core.util.converter.impl.Boolean2Character;
 import rainbow.core.util.converter.impl.Boolean2Number;
 import rainbow.core.util.converter.impl.Date2Long;
 import rainbow.core.util.converter.impl.Date2SqlDate;
@@ -139,6 +140,7 @@ public class Converters {
 	}
 
 	static {
+		addDefault(Boolean2Character.class);
 		addDefault(Boolean2Number.class);
 		addDefault(Date2Long.class);
 		addDefault(Date2SqlDate.class);

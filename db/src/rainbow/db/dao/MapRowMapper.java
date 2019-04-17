@@ -28,7 +28,7 @@ public class MapRowMapper implements RowMapper<Map<String, Object>> {
 		Map<String, Object> map = new HashMap<String, Object>(fields.size());
 		int index = 1;
 		for (Field field : fields) {
-			Object value = JdbcUtils.getResultSetValue(rs, index++, field.getDataType().dataClass());
+			Object value = JdbcUtils.getResultSetValue(rs, index++, field.getColumn().dataClass());
 			if (value != null) {
 				map.put(field.getName(), value);
 			}

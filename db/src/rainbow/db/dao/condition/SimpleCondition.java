@@ -39,22 +39,19 @@ public class SimpleCondition extends C {
 	}
 
 	public void toSql(Dao dao, Function<String, Field> fieldFunction, Sql sql) {
-		ColumnType type = null;
 		Field field = fieldFunction.apply(property);
 		sql.append(field);
-		type = field.getColumn().getType();
-
 		if (param != null && param instanceof Sql) {
 			subQuery((Sql) param, sql);
 		} else
-			normalQuery(dao, type, sql);
+			normalQuery(dao, field, sql);
 	}
 
 	private void subQuery(Sql subSql, Sql sql) {
 		sql.append(op.getSymbol()).append("(").append(subSql.getSql()).append(")").addParams(subSql.getParams());
 	}
 
-	private void normalQuery(Dao dao, ColumnType type, Sql sql) {
+	private void normalQuery(Dao dao, Field field, Sql sql) {
 		if (op == Op.IN || op == Op.NotIn) {
 			checkNotNull(param, "param of {} should not be null", property);
 			sql.append(op.getSymbol()).append(" (");
@@ -66,7 +63,7 @@ public class SimpleCondition extends C {
 				p = (Object[]) param;
 
 			for (int i = 0; i < p.length; i++) {
-				sql.append(i == 0 ? "?" : ",?").addParam(Converters.convert(p[i], type.dataClass()));
+				sql.append(i == 0 ? "?" : ",?").addParam(Converters.convert(p[i], field.getColumn().dataClass()));
 			}
 			sql.append(")");
 		} else {
@@ -79,11 +76,12 @@ public class SimpleCondition extends C {
 					checkNotNull(param, "param of {} should not be null", property);
 			} else {
 				if (Dao.NOW.equals(param)) {
+					ColumnType type = field.getColumn().getType();
 					checkArgument(type == ColumnType.DATE || type == ColumnType.TIMESTAMP,
 							"Dao.NOW should be date or datetime");
 					sql.append(op.getSymbol()).append(dao.getDialect().now());
 				} else
-					sql.append(op.getSymbol()).append("?").addParam(Converters.convert(param, type.dataClass()));
+					sql.append(op.getSymbol()).append("?").addParam(Converters.convert(param, field.getColumn().dataClass()));
 			}
 		}
 	}

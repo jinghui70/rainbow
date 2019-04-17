@@ -33,7 +33,7 @@ public class ObjectRowMapper<T> implements RowMapper<T> {
 		for (Field field : fields) {
 			Property p = classInfo.getProperty(field.getName());
 			if (p != null) {
-				Object value = JdbcUtils.getResultSetValue(rs, index, field.getDataType().dataClass());
+				Object value = JdbcUtils.getResultSetValue(rs, index, field.getColumn().dataClass());
 				if (value != null) {
 					value = Converters.convert(value, p.getType());
 					p.setValue(object, value);

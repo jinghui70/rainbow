@@ -1,13 +1,13 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 
 import rainbow.core.util.Utils;
-import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Column;
-import rainbow.db.model.ColumnType;
+import rainbow.db.dao.model.Entity;
 
 public class Field {
 
@@ -106,10 +106,6 @@ public class Field {
 		if (Utils.hasContent(alias))
 			sb.append(" AS ").append(alias);
 		return sb.toString();
-	}
-
-	public ColumnType getDataType() {
-		return column.getType();
 	}
 
 	private String fullName() {

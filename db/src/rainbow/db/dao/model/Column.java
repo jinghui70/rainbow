@@ -1,5 +1,6 @@
 package rainbow.db.dao.model;
 
+import java.math.BigDecimal;
 import java.util.Map;
 
 import rainbow.db.model.ColumnType;
@@ -63,13 +64,43 @@ public class Column {
 	public void setTags(Map<String, Object> tags) {
 		this.tags = tags;
 	}
-	
+
 	public boolean hasTag(String tag) {
 		return tags.containsKey(tag);
 	}
 
 	public Object getTag(String tag) {
 		return tags == null ? null : tags.get(tag);
+	}
+
+	public Class<?> dataClass() {
+		switch(type) {
+		case SMALLINT:
+			return Short.class;
+		case INT:
+			return Integer.class;
+		case LONG:
+			return Long.class;
+		case DOUBLE:
+			return Double.class;
+		case NUMERIC:
+			return BigDecimal.class;
+		case DATE:
+			return java.sql.Date.class;
+		case TIME:
+			return java.sql.Time.class;
+		case TIMESTAMP:
+			return java.sql.Timestamp.class;
+		case CHAR:
+		case VARCHAR:
+			return length==1 ? Character.class : String.class;
+		case CLOB:
+			return String.class;
+		case BLOB:
+			return byte[].class;
+		default:
+			return String.class; 
+		}
 	}
 
 	public Column(rainbow.db.model.Column src) {

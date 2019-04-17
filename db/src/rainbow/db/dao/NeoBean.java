@@ -169,10 +169,10 @@ public class NeoBean {
 	public NeoBean setValue(Column column, Object value) {
 		checkArgument(value != null || !column.isMandatory(), "property {} can not set null", column.getName());
 		if (Dao.NOW.equals(value)) {
-			checkArgument(java.util.Date.class.isAssignableFrom(column.getType().dataClass()),
+			checkArgument(java.util.Date.class.isAssignableFrom(column.dataClass()),
 					"property {} can't assign NOW", column.getName());
 		} else
-			value = Converters.convert(value, column.getType().dataClass());
+			value = Converters.convert(value, column.dataClass());
 		setObject(column, value);
 		return this;
 	}

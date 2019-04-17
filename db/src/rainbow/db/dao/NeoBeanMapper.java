@@ -33,7 +33,7 @@ public class NeoBeanMapper implements RowMapper<NeoBean> {
 		for (Field field : fields) {
 			try {
 				bean.setObject(field.getColumn(),
-						JdbcUtils.getResultSetValue(rs, index, field.getDataType().dataClass()));
+						JdbcUtils.getResultSetValue(rs, index, field.getColumn().dataClass()));
 			} catch (SQLException e) {
 				throw new DataAccessException(e);
 			}
