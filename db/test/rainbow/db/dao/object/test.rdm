@@ -340,5 +340,33 @@
             </columns>
             <indexes/>
         </entity>
+        <entity>
+            <name>TestType</name>
+            <dbName>TT</dbName>
+            <cnName>TestType</cnName>
+            <columns>
+                <column>
+                    <name>id</name>
+                    <dbName>ID</dbName>
+                    <cnName>ID</cnName>
+                    <type>CHAR</type>
+                    <length>22</length>
+                    <precision>0</precision>
+                    <key>true</key>
+                    <mandatory>true</mandatory>
+                </column>
+                <column>
+                    <name>ch</name>
+                    <dbName>CH</dbName>
+                    <cnName>字符</cnName>
+                    <type>CHAR</type>
+                    <length>1</length>
+                    <precision>0</precision>
+                    <key>false</key>
+                    <mandatory>true</mandatory>
+                </column>
+            </columns>
+            <indexes/>
+        </entity>
     </entities>
 </model>
