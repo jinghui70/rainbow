@@ -27,6 +27,7 @@ import rainbow.core.util.converter.impl.Object2String;
 import rainbow.core.util.converter.impl.SqlDate2LocalDate;
 import rainbow.core.util.converter.impl.String2BigDecimal;
 import rainbow.core.util.converter.impl.String2Boolean;
+import rainbow.core.util.converter.impl.String2Character;
 import rainbow.core.util.converter.impl.String2Date;
 import rainbow.core.util.converter.impl.String2Double;
 import rainbow.core.util.converter.impl.String2Enum;
@@ -162,6 +163,7 @@ public class Converters {
 		addDefault(SqlDate2LocalDate.class);
 		addDefault(String2BigDecimal.class);
 		addDefault(String2Boolean.class);
+		addDefault(String2Character.class);
 		addDefault(String2Date.class);
 		addDefault(String2Double.class);
 		addDefault(String2Enum.class);

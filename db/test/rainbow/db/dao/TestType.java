@@ -1,6 +1,5 @@
 package rainbow.db.dao;
 
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.AfterAll;
@@ -9,7 +8,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import rainbow.core.util.converter.ConvertException;
 import rainbow.db.DBTest;
 import rainbow.db.dao.memory.MemoryDao;
 
@@ -41,12 +39,9 @@ public class TestType {
 	public void testChar() {
 		NeoBean neo = dao.newNeoBean("TestType");
 		neo.setValue("id", "1");
-		try {
-			neo.setValue("ch", "1");
-			fail();
-		} catch (ConvertException e) {
-		}
-		neo.setValue("ch", '1');
+		
+		// String
+		neo.setValue("ch", "1"); 
 		dao.insert(neo);
 		neo = dao.fetch("TestType", "1");
 		assertEquals(Boolean.TRUE, neo.getBool("ch"));
