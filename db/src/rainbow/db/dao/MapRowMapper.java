@@ -12,21 +12,21 @@ import rainbow.db.jdbc.RowMapper;
 
 public class MapRowMapper implements RowMapper<Map<String, Object>> {
 
-	private List<Field> fields;
+	private List<FieldOld> fields;
 
 	public MapRowMapper(Select select) {
 		this.fields = select.getFields();
 	}
 
 	public MapRowMapper(Entity entity) {
-		this.fields = Utils.transform(entity.getColumns(), column -> new Field(null, column));
+		this.fields = Utils.transform(entity.getColumns(), column -> new FieldOld(null, column));
 	}
 
 	@Override
 	public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		Map<String, Object> map = new HashMap<String, Object>(fields.size());
 		int index = 1;
-		for (Field field : fields) {
+		for (FieldOld field : fields) {
 			Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
 			if (value != null) {
 				map.put(field.getName(), value);

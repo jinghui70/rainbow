@@ -332,7 +332,7 @@ public class DaoImpl extends NameObject implements Dao {
 		doQuery(sql, rs -> {
 			map.clear();
 			int index = 1;
-			for (Field field : select.getFields()) {
+			for (FieldOld field : select.getFields()) {
 				try {
 					Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
 					map.put(field.getName(), value);

@@ -4,7 +4,7 @@ package rainbow.db.dao.condition;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.Field;
+import rainbow.db.dao.FieldOld;
 import rainbow.db.dao.Sql;
 
 public class JoinCondition extends C {
@@ -36,7 +36,7 @@ public class JoinCondition extends C {
 	}
 
 	@Override
-	public void toSql(Dao dao, Function<String, Field> fieldFunction, Sql sql) {
+	public void toSql(Dao dao, Function<String, FieldOld> fieldFunction, Sql sql) {
 		sql.append(fieldFunction.apply(left)).append(op.getSymbol()).append(fieldFunction.apply(right));
 	}
 

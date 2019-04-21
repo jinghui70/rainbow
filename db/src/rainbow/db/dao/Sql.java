@@ -184,7 +184,7 @@ public class Sql implements Appendable {
 		return this;
 	}
 
-	public Sql whereCnd(Dao dao, Function<String, Field> fieldFunction, C cnd) {
+	public Sql whereCnd(Dao dao, Function<String, FieldOld> fieldFunction, C cnd) {
 		if (cnd == null || cnd.isEmpty())
 			return this;
 		append(" where ");

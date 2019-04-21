@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 
 import rainbow.core.model.object.INameObject;
 import rainbow.core.util.Utils;
-import rainbow.db.dao.Field;
+import rainbow.db.dao.FieldOld;
 
-public class Entity implements INameObject, Function<String, Field> {
+public class Entity implements INameObject, Function<String, FieldOld> {
 
 	private String name;
 
@@ -104,8 +104,8 @@ public class Entity implements INameObject, Function<String, Field> {
 	}
 
 	@Override
-	public Field apply(String input) {
-		return new Field(input, this);
+	public FieldOld apply(String input) {
+		return new FieldOld(input, this);
 	}
 
 	public rainbow.db.model.Entity toSimple() {

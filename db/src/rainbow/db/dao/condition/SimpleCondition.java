@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.Field;
+import rainbow.db.dao.FieldOld;
 import rainbow.db.dao.Sql;
 import rainbow.db.model.ColumnType;
 
@@ -37,8 +37,8 @@ public class SimpleCondition extends C {
 		return new ComboCondition(this).or(cnd);
 	}
 
-	public void toSql(Dao dao, Function<String, Field> fieldFunction, Sql sql) {
-		Field field = fieldFunction.apply(property);
+	public void toSql(Dao dao, Function<String, FieldOld> fieldFunction, Sql sql) {
+		FieldOld field = fieldFunction.apply(property);
 		sql.append(field);
 		if (param != null && param instanceof Sql) {
 			subQuery((Sql) param, sql);
@@ -50,7 +50,7 @@ public class SimpleCondition extends C {
 		sql.append(op.getSymbol()).append("(").append(subSql.getSql()).append(")").addParams(subSql.getParams());
 	}
 
-	private void normalQuery(Dao dao, Field field, Sql sql) {
+	private void normalQuery(Dao dao, FieldOld field, Sql sql) {
 		if (op == Op.IN || op == Op.NotIn) {
 			checkNotNull(param, "param of {} should not be null", property);
 			sql.append(op.getSymbol()).append(" (");

@@ -9,7 +9,7 @@ import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 
-public class Field {
+public class FieldOld {
 
 	private String function;
 
@@ -51,18 +51,18 @@ public class Field {
 		this.alias = alias;
 	}
 
-	public Field(String tableAlias, Column column) {
+	public FieldOld(String tableAlias, Column column) {
 		this.tableAlias = tableAlias;
 		this.column = column;
 	}
 
-	public Field(String str, Entity entity) {
+	public FieldOld(String str, Entity entity) {
 		String name = setString(str);
 		column = entity.getColumn(name);
 		checkNotNull(column, "column {} not defined in entity {}", name, entity.getName());
 	}
 
-	public Field(String str, ColumnFinder finder) {
+	public FieldOld(String str, ColumnFinder finder) {
 		String name = setString(str);
 		column = finder.find(tableAlias, name);
 	}

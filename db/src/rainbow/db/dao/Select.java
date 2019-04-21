@@ -31,7 +31,7 @@ public class Select {
 
 	private boolean distinct = false;
 
-	private List<Field> fields;
+	private List<FieldOld> fields;
 
 	private C cnd = EmptyCondition.INSTANCE;
 
@@ -41,7 +41,7 @@ public class Select {
 
 	private String[] groupBy;
 
-	private Function<String, Field> fieldFunction;
+	private Function<String, FieldOld> fieldFunction;
 
 	// 以下是普通select需要的
 	private Entity entity;
@@ -54,7 +54,7 @@ public class Select {
 		return entity;
 	}
 
-	public List<Field> getFields() {
+	public List<FieldOld> getFields() {
 		return fields;
 	}
 
@@ -262,7 +262,7 @@ public class Select {
 	}
 
 	private Sql build(Dao dao, boolean includePage) {
-		fields = new ArrayList<Field>();
+		fields = new ArrayList<FieldOld>();
 		final Sql sql = new Sql().append("SELECT ");
 		if (distinct)
 			sql.append("DISTINCT ");
@@ -285,7 +285,7 @@ public class Select {
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
 			Arrays.asList(groupBy).forEach(g -> {
-				for (Field field : fields) {
+				for (FieldOld field : fields) {
 					String sqlPart = field.match(g);
 					if (sqlPart != null) {
 						sql.append(sqlPart);
@@ -300,7 +300,7 @@ public class Select {
 		if (orderBy != null) {
 			sql.append(" ORDER BY ");
 			orderBy.forEach(o -> {
-				for (Field field : fields) {
+				for (FieldOld field : fields) {
 					String sqlPart = field.match(o.getProperty());
 					if (sqlPart != null) {
 						sql.append(sqlPart);
@@ -311,7 +311,7 @@ public class Select {
 					}
 				}
 				// not in select part
-				Field field = fieldFunction.apply(o.getProperty());
+				FieldOld field = fieldFunction.apply(o.getProperty());
 				checkNotNull(field, "order by field not found: {}", o.getProperty());
 				sql.append(field.fullSqlName());
 				if (o.isDesc())
@@ -333,10 +333,10 @@ public class Select {
 	private void buildSelectFrom(Dao dao, Sql sql, String table) {
 		entity = dao.getEntity(table);
 		checkNotNull(entity, "entity {} not found", fromStr);
-		fieldFunction = new Function<String, Field>() {
+		fieldFunction = new Function<String, FieldOld>() {
 			@Override
-			public Field apply(String input) {
-				return new Field(input, entity);
+			public FieldOld apply(String input) {
+				return new FieldOld(input, entity);
 			}
 		};
 		if (select == null || select.length == 0) {
@@ -344,7 +344,7 @@ public class Select {
 			addAllField(null, entity);
 		} else {
 			for (String s : select) {
-				fields.add(new Field(s, entity));
+				fields.add(new FieldOld(s, entity));
 			}
 			Joiner.on(',').appendTo(sql.getStringBuilder(), fields);
 		}
@@ -374,10 +374,10 @@ public class Select {
 				return checkNotNull(column, "column {} of entity {} not defined", fieldName, entity.getName());
 			}
 		};
-		fieldFunction = new Function<String, Field>() {
+		fieldFunction = new Function<String, FieldOld>() {
 			@Override
-			public Field apply(String input) {
-				return new Field(input, columnFinder);
+			public FieldOld apply(String input) {
+				return new FieldOld(input, columnFinder);
 			}
 		};
 		if (select == null || select.length == 0) {
@@ -396,7 +396,7 @@ public class Select {
 					addAllField(tableAlias, entity);
 					sql.append(s);
 				} else {
-					Field field = fieldFunction.apply(s);
+					FieldOld field = fieldFunction.apply(s);
 					fields.add(field);
 					sql.append(field);
 				}
@@ -431,7 +431,7 @@ public class Select {
 
 	private void addAllField(String tableAlias, Entity entity) {
 		for (Column column : entity.getColumns()) {
-			fields.add(new Field(tableAlias, column));
+			fields.add(new FieldOld(tableAlias, column));
 		}
 	}
 

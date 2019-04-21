@@ -1,11 +1,8 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.checkArgument;
-
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-
-import com.google.common.base.Strings;
+import java.util.stream.Collectors;
 
 import rainbow.core.util.Utils;
 
@@ -65,24 +62,7 @@ public class OrderBy {
 		if (Utils.isNullOrEmpty(orderByStr))
 			return null;
 		String[] strs = Utils.splitTrim(orderByStr, ',');
-		ArrayList<OrderBy> result = new ArrayList<OrderBy>(strs.length);
-		for (String str : strs) {
-			result.add(new OrderBy(str));
-		}
-		return result;
+		return Arrays.stream(strs).map(OrderBy::new).collect(Collectors.toList());
 	}
 
-	public static List<OrderBy> parse(String sort, String order) {
-		if (Strings.isNullOrEmpty(sort))
-			return null;
-		String[] sorts = Utils.splitTrim(sort, ',');
-		String[] orders = Utils.splitTrim(order, ',');
-		checkArgument(sorts.length == orders.length, "order count not match->{}|{}", sort, order);
-		ArrayList<OrderBy> result = new ArrayList<OrderBy>(sorts.length);
-		for (int i = 0; i < sorts.length; i++) {
-			boolean desc = "DESC".equalsIgnoreCase(orders[i]);
-			result.add(new OrderBy(sorts[i], desc));
-		}
-		return result;
-	}
 }
