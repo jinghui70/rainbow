@@ -71,7 +71,7 @@ public class Entity implements INameObject, Function<String, Field> {
 	}
 
 	public boolean hasTag(String tag) {
-		return tags.containsKey(tag);
+		return tags!=null && tags.containsKey(tag);
 	}
 
 	public Object getTag(String tag) {

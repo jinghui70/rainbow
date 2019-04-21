@@ -67,7 +67,7 @@ public class Column {
 	}
 
 	public boolean hasTag(String tag) {
-		return tags.containsKey(tag);
+		return tags != null && tags.containsKey(tag);
 	}
 
 	public Object getTag(String tag) {
