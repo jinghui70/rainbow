@@ -1,11 +1,12 @@
 package rainbow.core.util.ioc;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -28,15 +29,19 @@ public class Context {
 
 	private Map<String, Bean> beans;
 
-	private Context[] parents;
+	private List<Context> parents;
 
 	/**
 	 * 构造函数
 	 * 
-	 * @param beans
-	 *            IOC配置信息
+	 * @param beans IOC配置信息
 	 */
-	public Context(Map<String, Bean> beans, Context... parents) {
+	public Context(Map<String, Bean> beans) {
+		this.beans = beans;
+		this.parents = Collections.emptyList();
+	}
+
+	public Context(Map<String, Bean> beans, List<Context> parents) {
 		this.beans = beans;
 		this.parents = parents;
 	}
@@ -45,12 +50,11 @@ public class Context {
 	 * 加载所有的单例Bean
 	 */
 	public void loadAll() {
-		for (Entry<String, Bean> entry : beans.entrySet()) {
+		beans.entrySet().forEach(entry -> {
 			Bean bean = entry.getValue();
-			if (!bean.isPrototype()) {
+			if (!bean.isPrototype())
 				getSingletonBean(entry.getKey(), bean);
-			}
-		}
+		});
 	}
 
 	/**
@@ -197,8 +201,7 @@ public class Context {
 	/**
 	 * 给一个对象注入所依赖的容器中的bean
 	 * 
-	 * @param object
-	 *            待处理对象
+	 * @param object 待处理对象
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
 	 */
@@ -250,12 +253,9 @@ public class Context {
 	/**
 	 * 取得需要注入的bean
 	 * 
-	 * @param injectName
-	 *            注入名
-	 * @param injectType
-	 *            注入类型
-	 * @param destClassName
-	 *            被注入的目标对象类名，用来确定product以便实现根据product名的自动注入
+	 * @param injectName    注入名
+	 * @param injectType    注入类型
+	 * @param destClassName 被注入的目标对象类名，用来确定product以便实现根据product名的自动注入
 	 * @return
 	 */
 	protected Object getInjectBean(String injectName, Class<?> injectType, String destClassName) {

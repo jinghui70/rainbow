@@ -23,6 +23,7 @@ import rainbow.core.extension.Extension;
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.BundleAncestor;
 import rainbow.core.platform.BundleLoader;
+import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Context;
 import rainbow.core.util.ioc.DisposableBean;
 import rainbow.core.util.ioc.Inject;
@@ -38,7 +39,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	private BundleLoader bundleLoader;
 
 	private MBeanServer mBeanServer;
-	
+
 	@Inject
 	public void setBundleLoader(BundleLoader bundleLoader) {
 		this.bundleLoader = bundleLoader;
@@ -170,7 +171,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	}
 
 	private boolean startBundle(Bundle bundle) {
-		if (bundle.getState() == BundleState.ACTIVE) 
+		if (bundle.getState() == BundleState.ACTIVE)
 			return true;
 		if (bundle.getState() != BundleState.READY) {
 			logger.info("start bundle {} failed, bundle not ready", bundle.getId());
@@ -200,18 +201,9 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 
 	private void doStartBundle(Bundle bundle) throws BundleException {
 		BundleActivator activator = createActivator(bundle);
-		List<String> ids = activator.getParentContextId();
-		Context[] parentContexts = new Context[ids.size()];
-		int i = 0;
-		for (String id : ids) {
-			Bundle contextBundle = get(id);
-			checkNotNull(contextBundle, "can not find parent bundle {}", id);
-			checkState(bundle.getAncestors().contains(contextBundle), "bundle {}  isn't in parent list",
-					id);
-			Context parentContext = contextBundle.activator.getContext();
-			checkNotNull(parentContext, "parent bundle {} doesn't have a context", id);
-			parentContexts[i++] = parentContext;
-		}
+		List<Context> parentContexts = null;
+		if (bundle.getParents() != null) 
+			parentContexts = Utils.transform(bundle.getParents(), p->p.getActivator().getContext());
 		bundle.setActivator(activator);
 		activator.start(mBeanServer, parentContexts);
 		for (Bundle parent : bundle.getParents()) {
@@ -311,8 +303,8 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 					else
 						listener.bundleStop(bundle.getId());
 				} catch (Throwable e) {
-					logger.error("when bundle {} {}, listener [{}:{}] encounter an error",
-							bundle.getId(), active ? "start" : "stop", extensionBundle.getId(), listener.getClass(), e);
+					logger.error("when bundle {} {}, listener [{}:{}] encounter an error", bundle.getId(),
+							active ? "start" : "stop", extensionBundle.getId(), listener.getClass(), e);
 				}
 			}
 		}

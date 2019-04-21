@@ -1,5 +1,6 @@
 package rainbow.core.util.ioc;
 
+import java.util.List;
 import java.util.Map;
 
 import rainbow.core.extension.ExtensionRegistry;
@@ -18,7 +19,7 @@ public class ApplicationContext extends Context {
 		ExtensionRegistry.registerExtensionPoint(null, InjectProvider.class);
 	}
 
-	public ApplicationContext(Map<String, Bean> beans, Context... parents) {
+	public ApplicationContext(Map<String, Bean> beans, List<Context> parents) {
 		super(beans, parents);
 	}
 

@@ -1,6 +1,7 @@
 package rainbow.core.util.ioc;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Map;
 
 import rainbow.core.bundle.BundleActivator;
@@ -9,7 +10,7 @@ public class BundleContext extends ApplicationContext {
 
 	private BundleActivator activator;
 
-	public BundleContext(BundleActivator activator, Map<String, Bean> beans, Context... parents) {
+	public BundleContext(BundleActivator activator, Map<String, Bean> beans, List<Context> parents) {
 		super(beans, parents);
 		this.activator = activator;
 	}

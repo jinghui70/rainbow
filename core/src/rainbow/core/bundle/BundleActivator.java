@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,7 +68,7 @@ public abstract class BundleActivator {
 	 * @param bundleId
 	 * @throws BundleException
 	 */
-	public final void start(MBeanServer mBeanServer, Context[] parentContexts) throws BundleException {
+	public final void start(MBeanServer mBeanServer, List<Context> parentContexts) throws BundleException {
 		this.mBeanServer = mBeanServer;
 		registerExtensionPoint();
 
@@ -118,17 +117,8 @@ public abstract class BundleActivator {
 	 * @param contextConfig
 	 * @param parent
 	 */
-	protected Context createContext(Map<String, Bean> contextConfig, Context[] parent) {
+	protected Context createContext(Map<String, Bean> contextConfig, List<Context> parent) {
 		return new BundleContext(this, contextConfig, parent);
-	}
-
-	/**
-	 * 对于自己的context，返回需要的上级Context对应的bundleId
-	 * 
-	 * @return
-	 */
-	public List<String> getParentContextId() {
-		return Collections.emptyList();
 	}
 
 	/**
