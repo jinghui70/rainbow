@@ -244,7 +244,7 @@ public abstract class Utils {
 	 * @return
 	 */
 	public static String randomUUID64() {
-		return Base64.getEncoder().withoutPadding().encodeToString(UUID2Byte(UUID.randomUUID()));
+		return Base64.getUrlEncoder().withoutPadding().encodeToString(UUID2Byte(UUID.randomUUID()));
 	}
 
 	/**
