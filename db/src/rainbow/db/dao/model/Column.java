@@ -81,6 +81,8 @@ public class Column {
 	 * @return
 	 */
 	public Object convert(Object value) {
+		if (value == null)
+			return null;
 		if (type == ColumnType.CHAR && length == 1) {
 			Class<?> c = value.getClass();
 			if (c == boolean.class || c == Boolean.class) {
