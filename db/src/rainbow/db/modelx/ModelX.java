@@ -4,25 +4,13 @@ import java.util.List;
 
 public class ModelX extends Unit {
 
-	private String code;
-	
 	private String name;
 	
 	private String comment;
 	
-	private List<Link> links;
-	
 	private List<TableTag> tableTags;
 	
 	private List<FieldTag> fieldTags;
-
-	public String getCode() {
-		return code;
-	}
-
-	public void setCode(String code) {
-		this.code = code;
-	}
 
 	public String getName() {
 		return name;
@@ -38,14 +26,6 @@ public class ModelX extends Unit {
 
 	public void setComment(String comment) {
 		this.comment = comment;
-	}
-
-	public List<Link> getLinks() {
-		return links;
-	}
-
-	public void setLinks(List<Link> links) {
-		this.links = links;
 	}
 
 	public List<TableTag> getTableTags() {

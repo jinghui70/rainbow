@@ -10,7 +10,9 @@
     { "group":"com.google.guava","name":"guava","version":"27.0.1-jre", "source": true },
     { "group":"org.slf4j","name":"slf4j-api","version":"1.7.26" },
     { "group":"ch.qos.logback","name":"logback-core","version":"1.2.3" },
-    { "group":"ch.qos.logback","name":"logback-classic","version":"1.2.3" }
+    { "group":"ch.qos.logback","name":"logback-classic","version":"1.2.3" },
+    { "group":"org.csource","name":"fastdfs-client-java","version":"1.27" },
+    { "group":"org.antlr","name":"antlr4","version":"4.7.2" }
   ],
   "poi": [
     { "group":"org.apache.poi","name":"poi","version":"4.0.1" },

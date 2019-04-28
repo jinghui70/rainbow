@@ -2,11 +2,9 @@ package rainbow.db.modelx;
 
 import java.util.Map;
 
-import rainbow.db.model.ColumnType;
-
 public class Field extends BaseObject {
 
-	private ColumnType type;
+	private DataType type;
 
 	private int length;
 
@@ -18,11 +16,11 @@ public class Field extends BaseObject {
 	
 	private Map<String, Object> tags;
 
-	public ColumnType getType() {
+	public DataType getType() {
 		return type;
 	}
 
-	public void setType(ColumnType type) {
+	public void setType(DataType type) {
 		this.type = type;
 	}
 

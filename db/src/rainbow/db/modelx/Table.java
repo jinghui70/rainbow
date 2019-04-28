@@ -10,6 +10,8 @@ public class Table extends BaseObject {
 	private List<Index> indexes;
 	
 	private Map<String, Object> tags;
+	
+	private List<LinkField> linkFields;
 
 	public List<Field> getFields() {
 		return fields;
@@ -25,6 +27,14 @@ public class Table extends BaseObject {
 
 	public void setIndexes(List<Index> indexes) {
 		this.indexes = indexes;
+	}
+
+	public List<LinkField> getLinkFields() {
+		return linkFields;
+	}
+
+	public void setLinkFields(List<LinkField> linkFields) {
+		this.linkFields = linkFields;
 	}
 
 	public Map<String, Object> getTags() {

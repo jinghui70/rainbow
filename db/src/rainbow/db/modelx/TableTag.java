@@ -5,10 +5,22 @@ import java.util.List;
 import rainbow.core.model.object.NameObject;
 import rainbow.core.util.Utils;
 
+/**
+ * Table上的标记
+ * 
+ * @author lijinghui
+ *
+ */
 public class TableTag extends NameObject {
 	
+	/**
+	 * 这个tag要求该表一定要有的字段定义
+	 */
 	private List<Field> fields;
 	
+	/**
+	 * 其他相关属性
+	 */
 	private List<TagProperty> properties;
 
 	public List<Field> getFields() {
