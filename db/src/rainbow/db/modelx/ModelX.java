@@ -10,7 +10,7 @@ public class ModelX extends Unit {
 	
 	private List<TableTag> tableTags;
 	
-	private List<FieldTag> fieldTags;
+	private List<Tag> fieldTags;
 
 	public String getName() {
 		return name;
@@ -36,11 +36,11 @@ public class ModelX extends Unit {
 		this.tableTags = tableTags;
 	}
 
-	public List<FieldTag> getFieldTags() {
+	public List<Tag> getFieldTags() {
 		return fieldTags;
 	}
 
-	public void setFieldTags(List<FieldTag> fieldTags) {
+	public void setFieldTags(List<Tag> fieldTags) {
 		this.fieldTags = fieldTags;
 	}
 

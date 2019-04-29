@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.FieldOld;
+import rainbow.db.dao.Field;
 import rainbow.db.dao.Sql;
+import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.Link;
 
 public class ComboCondition extends C {
 
@@ -40,17 +42,34 @@ public class ComboCondition extends C {
 	}
 
 	@Override
-	public void toSql(Dao dao, Function<String, FieldOld> fieldFunction, Sql sql) {
+	public void initField(Function<String, Field> fieldFunction) {
+		child.stream().forEach(child->child.initField(fieldFunction));
+	}
+
+	@Override
+	public void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql) {
 		for (C cnd : child) {
 			if (cnd instanceof ComboCondition) {
 				sql.append("(");
-				cnd.toSql(dao, fieldFunction, sql);
+				cnd.toSql(dao, linkToAlias, sql);
 				sql.append(")");
 			} else
-				cnd.toSql(dao, fieldFunction, sql);
+				cnd.toSql(dao, linkToAlias, sql);
 		}
 	}
 
+	@Override
+	public void toSql(Dao dao, Entity entity, Sql sql) {
+		for (C cnd : child) {
+			if (cnd instanceof ComboCondition) {
+				sql.append("(");
+				cnd.toSql(dao, entity, sql);
+				sql.append(")");
+			} else
+				cnd.toSql(dao, entity, sql);
+		}
+	}
+	
 	private static class Join extends C {
 		private String text;
 
@@ -69,8 +88,17 @@ public class ComboCondition extends C {
 		}
 
 		@Override
-		public void toSql(Dao dao, Function<String, FieldOld> fieldFunction, Sql sql) {
+		public void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql) {
 			sql.append(text);
+		}
+
+		@Override
+		public void toSql(Dao dao, Entity entity, Sql sql) {
+			sql.append(text);
+		}
+		
+		@Override
+		public void initField(Function<String, Field> fieldFunction) {
 		}
 
 	}

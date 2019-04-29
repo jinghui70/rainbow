@@ -5,7 +5,6 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
@@ -131,7 +130,7 @@ public class Sql implements Appendable {
 		params.add(param);
 		return this;
 	}
-	
+
 	public Sql addParams(List<Object> params) {
 		this.params.addAll(params);
 		return this;
@@ -160,8 +159,8 @@ public class Sql implements Appendable {
 	public Sql keyCondition(final NeoBean neo) {
 		Entity entity = checkNotNull(neo.getEntity(), "neobean's entity not set");
 		checkArgument(entity.getKeyCount() > 0, "entity {} has no key", entity.getName());
-		for (Column column : entity.getKeys()) {
-			append(column.getDbName()).append("=?").addParam(neo.getObject(column));
+		for (Column column : entity.getKeyColumns()) {
+			append(column.getCode()).append("=?").addParam(neo.getObject(column));
 			appendTemp(" AND ");
 		}
 		clearTemp();
@@ -174,21 +173,13 @@ public class Sql implements Appendable {
 				values.length, entity.getKeyCount(), entity.getName());
 		int index = 0;
 		appendTemp(" WHERE ");
-		for (Column column : entity.getKeys()) {
+		for (Column column : entity.getKeyColumns()) {
 			Object param = values[index++];
 			param = column.convert(param);
-			append(column.getDbName()).append("=?").addParam(param);
+			append(column.getCode()).append("=?").addParam(param);
 			appendTemp(" AND ");
 		}
 		clearTemp();
-		return this;
-	}
-
-	public Sql whereCnd(Dao dao, Function<String, FieldOld> fieldFunction, C cnd) {
-		if (cnd == null || cnd.isEmpty())
-			return this;
-		append(" where ");
-		cnd.toSql(dao, fieldFunction, this);
 		return this;
 	}
 
@@ -245,6 +236,14 @@ public class Sql implements Appendable {
 			}
 		}
 		return sb.toString();
+	}
+
+	public Sql whereCnd(Dao dao, Entity entity, C cnd) {
+		if (cnd == null || cnd.isEmpty())
+			return this;
+		append(" where ");
+		cnd.toSql(dao, entity, this);
+		return this;
 	}
 
 }

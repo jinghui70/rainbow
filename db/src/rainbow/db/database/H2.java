@@ -81,7 +81,7 @@ public class H2 extends AbstractDialect {
 				column.setDbName(rs.getString(1));
 				column.setCnName(rs.getString(2));
 				setColumnType(column, rs.getString(3), rs.getInt(4), rs.getInt(5));
-				map.put(column.getDbName(), column);
+				map.put(column.getCode(), column);
 				return column;
 			}
 		});

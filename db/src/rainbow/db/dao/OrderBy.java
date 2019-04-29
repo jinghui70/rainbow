@@ -2,6 +2,7 @@ package rainbow.db.dao;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import rainbow.core.util.Utils;
@@ -11,6 +12,8 @@ public class OrderBy {
 	private String property;
 
 	private boolean desc;
+	
+	private Field field;
 
 	public String getProperty() {
 		return property;
@@ -26,6 +29,10 @@ public class OrderBy {
 
 	public void setDesc(boolean desc) {
 		this.desc = desc;
+	}
+
+	public Field getField() {
+		return field;
 	}
 
 	public OrderBy() {
@@ -58,6 +65,11 @@ public class OrderBy {
 		return property;
 	}
 
+	public void initField(Function<String, Field> fieldFunction) {
+		field = fieldFunction.apply(property);
+	}
+	
+	
 	public static List<OrderBy> parse(String orderByStr) {
 		if (Utils.isNullOrEmpty(orderByStr))
 			return null;

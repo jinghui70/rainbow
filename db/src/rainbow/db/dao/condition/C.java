@@ -3,8 +3,10 @@ package rainbow.db.dao.condition;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.FieldOld;
+import rainbow.db.dao.Field;
 import rainbow.db.dao.Sql;
+import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.Link;
 
 public abstract class C {
 
@@ -44,7 +46,11 @@ public abstract class C {
 		return or(property, Op.Equal, param);
 	}
 
-	public abstract void toSql(Dao dao, Function<String, FieldOld> fieldFunction, Sql sql);
+	public abstract void initField(Function<String, Field> fieldFunction);
+	
+	public abstract void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql);
+
+	public abstract void toSql(Dao dao, Entity entity, Sql sql);
 
 	/**
 	 * 建一个简单的条件

@@ -3,18 +3,18 @@ package rainbow.db.dao.model;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import rainbow.core.model.object.NameObject;
 import rainbow.core.util.converter.Converters;
-import rainbow.db.model.ColumnType;
+import rainbow.db.modelx.DataType;
+import rainbow.db.modelx.Field;
 
-public class Column {
+public class Column extends NameObject {
 
-	private String name;
-
-	private String dbName;
+	private String code;
 
 	private String label;
 
-	private ColumnType type;
+	private DataType type;
 
 	private int length;
 
@@ -26,36 +26,60 @@ public class Column {
 
 	private Map<String, Object> tags;
 
-	public String getName() {
-		return name;
+	public String getCode() {
+		return code;
 	}
 
-	public String getDbName() {
-		return dbName;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public String getLabel() {
 		return label;
 	}
 
-	public ColumnType getType() {
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public DataType getType() {
 		return type;
+	}
+
+	public void setType(DataType type) {
+		this.type = type;
 	}
 
 	public int getLength() {
 		return length;
 	}
 
+	public void setLength(int length) {
+		this.length = length;
+	}
+
 	public int getPrecision() {
 		return precision;
+	}
+
+	public void setPrecision(int precision) {
+		this.precision = precision;
 	}
 
 	public boolean isKey() {
 		return key;
 	}
 
+	public void setKey(boolean key) {
+		this.key = key;
+	}
+
 	public boolean isMandatory() {
 		return mandatory;
+	}
+
+	public void setMandatory(boolean mandatory) {
+		this.mandatory = mandatory;
 	}
 
 	public Map<String, Object> getTags() {
@@ -83,7 +107,7 @@ public class Column {
 	public Object convert(Object value) {
 		if (value == null)
 			return null;
-		if (type == ColumnType.CHAR && length == 1) {
+		if (type == DataType.CHAR && length == 1) {
 			Class<?> c = value.getClass();
 			if (c == boolean.class || c == Boolean.class) {
 				return ((Boolean) value) ? "1" : "0";
@@ -122,10 +146,10 @@ public class Column {
 		}
 	}
 
-	public Column(rainbow.db.model.Column src) {
+	public Column(Field src) {
 		this.name = src.getName();
-		this.dbName = src.getDbName();
-		this.label = src.getCnName();
+		this.code = src.getCode();
+		this.label = src.getLabel();
 		this.key = src.isKey();
 		this.mandatory = src.isMandatory();
 		this.length = src.getLength();
@@ -133,16 +157,4 @@ public class Column {
 		this.type = src.getType();
 	}
 
-	public rainbow.db.model.Column toSimple() {
-		rainbow.db.model.Column simple = new rainbow.db.model.Column();
-		simple.setName(name);
-		simple.setDbName(dbName);
-		simple.setCnName(label);
-		simple.setKey(key);
-		simple.setMandatory(mandatory);
-		simple.setLength(length);
-		simple.setPrecision(precision);
-		simple.setType(type);
-		return simple;
-	}
 }

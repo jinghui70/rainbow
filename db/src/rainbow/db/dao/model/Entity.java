@@ -1,28 +1,18 @@
 package rainbow.db.dao.model;
 
-import static rainbow.core.util.Preconditions.checkState;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import rainbow.core.model.object.INameObject;
-import rainbow.core.util.Utils;
-import rainbow.db.dao.FieldOld;
+import rainbow.core.model.object.NameObject;
+import rainbow.db.modelx.Table;
 
-public class Entity implements INameObject, Function<String, FieldOld> {
+public class Entity extends NameObject {
 
-	private String name;
-
-	private String dbName;
+	private String code;
 
 	private String label;
-
-	private Map<String, Column> columnMap;
-
-	private List<Column> keys;
 
 	private List<Column> columns;
 
@@ -30,20 +20,32 @@ public class Entity implements INameObject, Function<String, FieldOld> {
 
 	private Map<String, Link> links;
 
-	public List<Column> getColumns() {
-		return columns;
+	private Map<String, Column> columnMap;
+
+	private List<Column> keys;
+
+	public String getCode() {
+		return code;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public String getDbName() {
-		return dbName;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public String getLabel() {
 		return label;
+	}
+
+	public void setLabel(String label) {
+		this.label = label;
+	}
+
+	public List<Column> getColumns() {
+		return columns;
+	}
+
+	public void setColumns(List<Column> columns) {
+		this.columns = columns;
 	}
 
 	public Map<String, Object> getTags() {
@@ -54,7 +56,15 @@ public class Entity implements INameObject, Function<String, FieldOld> {
 		this.tags = tags;
 	}
 
-	public List<Column> getKeys() {
+	public Map<String, Link> getLinks() {
+		return links;
+	}
+
+	public void setLinks(Map<String, Link> links) {
+		this.links = links;
+	}
+
+	public List<Column> getKeyColumns() {
 		return keys;
 	}
 
@@ -78,22 +88,16 @@ public class Entity implements INameObject, Function<String, FieldOld> {
 		return tags == null ? null : tags.get(tag);
 	}
 
-	public void addLink(Link link) {
-		if (links == null)
-			links = new HashMap<String, Link>();
-		links.put(link.getName(), link);
-	}
-
 	public Link getLink(String link) {
 		return links == null ? null : links.get(link);
 	}
 
-	public Entity(rainbow.db.model.Entity src) {
-		checkState(!Utils.isNullOrEmpty(src.getColumns()), "Entity {} has no column", src.getName());
+	public Entity(Table src) {
 		this.name = src.getName();
-		this.dbName = src.getDbName();
-		this.label = src.getCnName();
-		this.columns = src.getColumns().stream().map(Column::new).collect(Collectors.toList());
+		this.code = src.getCode();
+		this.label = src.getLabel();
+		this.columns = src.getFields().stream().map(Column::new).collect(Collectors.toList());
+		this.tags = src.getTags();
 		this.keys = this.columns.stream().filter(c -> c.isKey()).collect(Collectors.toList());
 		this.columnMap = this.columns.stream().collect(Collectors.toMap(Column::getName, Function.identity()));
 	}
@@ -103,19 +107,4 @@ public class Entity implements INameObject, Function<String, FieldOld> {
 		return new StringBuilder("Entity [name=").append(getName()).append("]").toString();
 	}
 
-	@Override
-	public FieldOld apply(String input) {
-		return new FieldOld(input, this);
-	}
-
-	public rainbow.db.model.Entity toSimple() {
-		rainbow.db.model.Entity simple = new rainbow.db.model.Entity();
-		simple.setName(name);
-		simple.setDbName(dbName);
-		simple.setCnName(label);
-		List<rainbow.db.model.Column> simpleColumns = columns.stream().map(Column::toSimple)
-				.collect(Collectors.toList());
-		simple.setColumns(simpleColumns);
-		return simple;
-	}
 }

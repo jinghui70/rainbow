@@ -7,9 +7,12 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.FieldOld;
+import rainbow.db.dao.Field;
 import rainbow.db.dao.Sql;
-import rainbow.db.model.ColumnType;
+import rainbow.db.dao.model.Column;
+import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.Link;
+import rainbow.db.modelx.DataType;
 
 public class SimpleCondition extends C {
 
@@ -18,6 +21,8 @@ public class SimpleCondition extends C {
 	private Op op;
 
 	private Object param;
+	
+	private Field field;
 
 	public SimpleCondition(String property, Op op, Object param) {
 		this.property = property;
@@ -25,21 +30,37 @@ public class SimpleCondition extends C {
 		this.param = param;
 	}
 
+	@Override
 	public C and(C cnd) {
 		if (cnd == null || cnd.isEmpty())
 			return this;
 		return new ComboCondition(this).and(cnd);
 	}
 
+	@Override
 	public C or(C cnd) {
 		if (cnd == null || cnd.isEmpty())
 			return this;
 		return new ComboCondition(this).or(cnd);
 	}
 
-	public void toSql(Dao dao, Function<String, FieldOld> fieldFunction, Sql sql) {
-		FieldOld field = fieldFunction.apply(property);
-		sql.append(field);
+	@Override
+	public void initField(Function<String, Field> fieldFunction) {
+		field = fieldFunction.apply(property);
+	}
+	
+	@Override
+	public void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql) {
+		field.toSql(sql, linkToAlias);
+		if (param != null && param instanceof Sql) {
+			subQuery((Sql) param, sql);
+		} else
+			normalQuery(dao, field, sql);
+	}
+	@Override
+	public void toSql(Dao dao,Entity entity, Sql sql) {
+		Column c = entity.getColumn(property);
+		sql.append(c.getCode());
 		if (param != null && param instanceof Sql) {
 			subQuery((Sql) param, sql);
 		} else
@@ -50,7 +71,7 @@ public class SimpleCondition extends C {
 		sql.append(op.getSymbol()).append("(").append(subSql.getSql()).append(")").addParams(subSql.getParams());
 	}
 
-	private void normalQuery(Dao dao, FieldOld field, Sql sql) {
+	private void normalQuery(Dao dao, Field field, Sql sql) {
 		if (op == Op.IN || op == Op.NotIn) {
 			checkNotNull(param, "param of {} should not be null", property);
 			sql.append(op.getSymbol()).append(" (");
@@ -75,8 +96,8 @@ public class SimpleCondition extends C {
 					checkNotNull(param, "param of {} should not be null", property);
 			} else {
 				if (Dao.NOW.equals(param)) {
-					ColumnType type = field.getColumn().getType();
-					checkArgument(type == ColumnType.DATE || type == ColumnType.TIMESTAMP,
+					DataType type = field.getColumn().getType();
+					checkArgument(type == DataType.DATE || type == DataType.TIMESTAMP,
 							"Dao.NOW should be date or datetime");
 					sql.append(op.getSymbol()).append(dao.getDialect().now());
 				} else

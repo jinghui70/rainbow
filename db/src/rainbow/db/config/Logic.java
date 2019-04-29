@@ -22,14 +22,6 @@ public class Logic {
 	@XmlAttribute
 	private String id;
 	
-	private String tableSpace;
-	
-	private String indexSpace;
-	
-	private String schema;
-	
-	private String pageSize;
-
 	public String getId() {
 		return id;
 	}
@@ -52,38 +44,6 @@ public class Logic {
 
 	public void setPhysic(String physic) {
 		this.physic = physic;
-	}
-
-	public String getTableSpace() {
-		return tableSpace;
-	}
-
-	public void setTableSpace(String tableSpace) {
-		this.tableSpace = tableSpace;
-	}
-
-	public String getIndexSpace() {
-		return indexSpace;
-	}
-
-	public void setIndexSpace(String indexSpace) {
-		this.indexSpace = indexSpace;
-	}
-
-	public String getSchema() {
-		return schema;
-	}
-
-	public void setSchema(String schema) {
-		this.schema = schema;
-	}
-
-	public String getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(String pageSize) {
-		this.pageSize = pageSize;
 	}
 
 	@Override

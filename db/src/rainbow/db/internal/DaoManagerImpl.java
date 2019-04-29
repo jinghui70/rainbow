@@ -9,14 +9,16 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -28,17 +30,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSON;
+import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 
 import rainbow.core.bundle.Bean;
 import rainbow.core.model.IAdaptable;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
-import rainbow.core.util.XmlBinder;
 import rainbow.core.util.encrypt.EncryptUtils;
 import rainbow.core.util.ioc.ActivatorAwareObject;
 import rainbow.core.util.ioc.DisposableBean;
@@ -52,13 +53,17 @@ import rainbow.db.config.Property;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Model;
+import rainbow.db.dao.model.Link;
+import rainbow.db.modelx.ModelX;
+import rainbow.db.modelx.Unit;
 
 @Bean(extension = InjectProvider.class)
 public class DaoManagerImpl extends ActivatorAwareObject
 		implements DaoManager, IAdaptable, InitializingBean, DisposableBean {
 
 	private static Logger logger = LoggerFactory.getLogger(DaoManagerImpl.class);
+
+	private Map<String, Map<String, Entity>> modelMap = new HashMap<String, Map<String, Entity>>();
 
 	private Map<String, DruidDataSource> physicMap;
 
@@ -93,7 +98,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 
 		physicMap = readPhysicConfig(config);
 		try {
-			logicMap = readLogicConfig(config, procRDMs());
+			logicMap = readLogicConfig(config);
 		} finally {
 			if (ctx != null) {
 				try {
@@ -167,34 +172,41 @@ public class DaoManagerImpl extends ActivatorAwareObject
 		return builder.build();
 	}
 
-	/**
-	 * 处理所有的rmd文件，转化为一个Map（key是模型名，value是实体翻译的函数）
-	 * 
-	 * @return
-	 * @throws JAXBException
-	 * @throws IOException
-	 */
-	private Map<String, Map<String, Entity>> procRDMs() throws JAXBException, IOException {
-		List<Path> rdmFiles = activator.getConfigureFiles(".rdm");
-		if (Utils.isNullOrEmpty(rdmFiles))
-			return ImmutableMap.of();
-		Map<String, Map<String, Entity>> entityMaps = Maps.newHashMap();
-		XmlBinder<Model> binder = Model.getXmlBinder();
-		for (Path modelFile : rdmFiles) {
-			Model model = binder.unmarshal(modelFile);
-			String modelName = model.getName();
-			Map<String, Entity> map = entityMaps.get(modelName);
-			if (map == null) {
-				map = Maps.newHashMap();
-				entityMaps.put(modelName, map);
-			}
-			for (rainbow.db.model.Entity src : model.getEntities()) {
-				checkState(!map.containsKey(src.getName()), "Entity [{}] is duplicated in model file [{}]",
-						src.getName(), modelFile.getFileName());
-				map.put(src.getName(), new Entity(src));
-			}
+	private Map<String, Entity> loadModel(String name) {
+		Map<String, Entity> model = modelMap.get(name);
+		if (model!=null) return model;
+		Path modelFile = activator.getConfigureFile(name + ".rdmx");
+		String fileName = modelFile.getFileName().toString();
+		checkState(Files.exists(modelFile), "database model file not exist:{}", fileName);
+		ModelX modelX = null;
+		try (InputStream is = Files.newInputStream(modelFile)) {
+			modelX = JSON.parseObject(is, StandardCharsets.UTF_8, ModelX.class);
+		} catch (Exception e) {
+			logger.error("load rdmx file {} faild", fileName);
+			throw new RuntimeException(e);
 		}
-		return entityMaps;
+		model = new HashMap<String, Entity>();
+		loadUnit(model, modelX);
+		loadLink(model, modelX);
+		modelMap.put(name, model);
+		return model;
+	}
+
+	private void loadUnit(Map<String, Entity> model, Unit unit) {
+		unit.getTables().stream().map(Entity::new).forEach(e -> model.put(e.getName(), e));
+		unit.getUnits().stream().forEach(u -> loadUnit(model, u));
+	}
+
+	private void loadLink(Map<String, Entity> model, Unit unit) {
+		unit.getTables().stream().forEach(e -> {
+			if (Utils.isNullOrEmpty(e.getLinkFields()))
+				return;
+			Entity entity = model.get(e.getName());
+			Map<String, Link> links = e.getLinkFields().stream().map(l-> new Link(model, entity, l))
+			.collect(Collectors.toMap(Link::getName, Functions.identity()));
+			entity.setLinks(links);
+		});
+		unit.getUnits().stream().forEach(u -> loadLink(model, u));
 	}
 
 	/**
@@ -204,26 +216,22 @@ public class DaoManagerImpl extends ActivatorAwareObject
 	 * @param entityMaps 数据模型Map
 	 * @return
 	 */
-	private Map<String, Dao> readLogicConfig(Config config, Map<String, Map<String, Entity>> entityMaps) {
+	private Map<String, Dao> readLogicConfig(Config config) {
 		ImmutableMap.Builder<String, Dao> logicBuilder = ImmutableMap.builder();
 		for (Logic logic : config.getLogics()) {
 			String model = logic.getModel();
 			if (model == null)
 				model = logic.getId();
-			Map<String, Entity> entityMap = entityMaps.get(model);
 			DataSource dataSource = getDataSource(logic.getPhysic());
 			checkNotNull(dataSource, "physic datasource[{}] of logic source[{}] not defined", logic.getPhysic(),
 					logic.getId());
+
+			Map<String, Entity> entityMap = loadModel(model);
 			DaoImpl dao = new DaoImpl(dataSource, entityMap);
 			dao.setName(logic.getId());
 			logicBuilder.put(logic.getId(), dao);
 			onlyDao = dao;
-			if (entityMap == null || entityMap.isEmpty())
-				logger.warn("register logic datasource [{}] with no model", logic.toString());
-			else
-				logger.info("register logic datasource [{}] with model [{}]", logic.toString(), model);
-			JSONObject patch = Utils.loadConfigFile(activator.getConfigureFile("extra.json"));
-			dao.linkPatch(patch);
+			logger.info("register logic datasource [{}] with model [{}]", logic.toString(), model);
 		}
 		Map<String, Dao> result = logicBuilder.build();
 		if (result.size() != 1)
@@ -243,6 +251,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 		}
 	}
 
+	@Override
 	public Collection<String> getLogicSources() {
 		return logicMap.keySet();
 	}

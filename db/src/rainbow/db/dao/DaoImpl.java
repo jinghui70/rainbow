@@ -3,7 +3,6 @@ package rainbow.db.dao;
 import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
-import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,15 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 
@@ -29,7 +25,6 @@ import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.EmptyCondition;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.dao.model.Link;
 import rainbow.db.database.Dialect;
 import rainbow.db.database.DialectManager;
 import rainbow.db.jdbc.DataAccessException;
@@ -162,7 +157,7 @@ public class DaoImpl extends NameObject implements Dao {
 
 	private int insertNeoBean(NeoBean neo) {
 		Entity entity = neo.getEntity();
-		Sql sql = new Sql(entity.getColumns().size()).append("insert into ").append(entity.getDbName()).append("(");
+		Sql sql = new Sql(entity.getColumns().size()).append("insert into ").append(entity.getCode()).append("(");
 
 		StringBuilder sb = new StringBuilder();
 		entity.getColumns().stream().forEach(column -> {
@@ -170,7 +165,7 @@ public class DaoImpl extends NameObject implements Dao {
 			if (v == null) {
 				checkArgument(!column.isMandatory(), "property {} cannot be null", column.getName());
 			} else {
-				sql.append(column.getDbName());
+				sql.append(column.getCode());
 				if (NOW.equals(v)) {
 					sb.append(dialect.now()).append(',');
 				} else {
@@ -196,7 +191,7 @@ public class DaoImpl extends NameObject implements Dao {
 		Object obj = list.get(0);
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
-		StringBuilder sql = new StringBuilder().append("insert into ").append(entity.getDbName()).append("(");
+		StringBuilder sql = new StringBuilder().append("insert into ").append(entity.getCode()).append("(");
 		int i = 0;
 		for (Column column : entity.getColumns()) {
 			if (i == 0) {
@@ -204,7 +199,7 @@ public class DaoImpl extends NameObject implements Dao {
 			} else {
 				sql.append(",");
 			}
-			sql.append(column.getDbName());
+			sql.append(column.getCode());
 		}
 		sql.append(") values (?");
 		for (i = 1; i < entity.getColumns().size(); i++)
@@ -221,7 +216,7 @@ public class DaoImpl extends NameObject implements Dao {
 	public void replace(Object obj) {
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
-		Sql sql = new Sql().append("select count(1) from ").append(entity.getDbName()).whereKey(neo);
+		Sql sql = new Sql().append("select count(1) from ").append(entity.getCode()).whereKey(neo);
 		int count = queryForInt(sql);
 		if (count == 0)
 			insert(neo);
@@ -232,28 +227,28 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public void clear(String entityName) {
 		Entity entity = getEntity(entityName);
-		jdbcTemplate.update(getDialect().clearTable(entity.getDbName()));
+		jdbcTemplate.update(getDialect().clearTable(entity.getCode()));
 	}
 
 	@Override
 	public int delete(Object obj) {
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
-		Sql sql = new Sql(entity.getKeyCount()).append("delete from ").append(entity.getDbName()).whereKey(neo);
+		Sql sql = new Sql(entity.getKeyCount()).append("delete from ").append(entity.getCode()).whereKey(neo);
 		return execSql(sql);
 	}
 
 	@Override
 	public int delete(String entityName, C cnd) {
 		Entity entity = getEntity(entityName);
-		Sql sql = new Sql("delete from ").append(entity.getDbName()).whereCnd(this, entity, cnd);
+		Sql sql = new Sql("delete from ").append(entity.getCode()).whereCnd(this, entity, cnd);
 		return execSql(sql);
 	}
 
 	@Override
 	public int delete(String entityName, Object... values) {
 		Entity entity = getEntity(entityName);
-		Sql sql = new Sql("delete from ").append(entity.getDbName()).whereKey(entity, values);
+		Sql sql = new Sql("delete from ").append(entity.getCode()).whereKey(entity, values);
 		return execSql(sql);
 	}
 
@@ -272,12 +267,12 @@ public class DaoImpl extends NameObject implements Dao {
 	public int update(NeoBean neo) {
 		Entity entity = neo.getEntity();
 		checkArgument(entity.getKeyCount() > 0, "cann't update 0 key entity {}", entity.getName());
-		Sql sql = new Sql().append("update ").append(entity.getDbName()).append(" set ");
+		Sql sql = new Sql().append("update ").append(entity.getCode()).append(" set ");
 
 		neo.valueColumns().stream().forEach(column -> {
 			if (column.isKey())
 				return;
-			sql.append(column.getDbName());
+			sql.append(column.getCode());
 			Object v = neo.getObject(column);
 			if (v == null)
 				sql.append("=null");
@@ -295,7 +290,7 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public int update(String entityName, C cnd, U... items) {
 		Entity entity = getEntity(entityName);
-		Sql sql = new Sql("UPDATE ").append(entity.getDbName()).append(" SET ");
+		Sql sql = new Sql("UPDATE ").append(entity.getCode()).append(" SET ");
 		for (U item : items) {
 			item.toSql(entity, sql);
 			sql.appendTempComma();
@@ -308,14 +303,14 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public NeoBean fetch(String entityName, Object... keyValues) {
 		Entity entity = getEntity(entityName);
-		Sql sql = new Sql().append("select * from ").append(entity.getDbName()).whereKey(entity, keyValues);
+		Sql sql = new Sql().append("select * from ").append(entity.getCode()).whereKey(entity, keyValues);
 		return queryForObject(sql, new NeoBeanMapper(entity));
 	}
 
 	@Override
 	public NeoBean fetch(String entityName, C cnd) {
 		Entity entity = getEntity(entityName);
-		Sql sql = new Sql().append("select * from ").append(entity.getDbName()).whereCnd(this, entity, cnd);
+		Sql sql = new Sql().append("select * from ").append(entity.getCode()).whereCnd(this, entity, cnd);
 		return queryForObject(sql, new NeoBeanMapper(entity));
 	}
 
@@ -332,7 +327,7 @@ public class DaoImpl extends NameObject implements Dao {
 		doQuery(sql, rs -> {
 			map.clear();
 			int index = 1;
-			for (FieldOld field : select.getFields()) {
+			for (Field field : select.getFields()) {
 				try {
 					Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
 					map.put(field.getName(), value);
@@ -417,7 +412,7 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public int count(String entityName, C cnd) {
 		Entity entity = getEntity(entityName);
-		Sql sql = new Sql().append("select count(1) from ").append(entity.getDbName()).whereCnd(this, entity, cnd);
+		Sql sql = new Sql().append("select count(1) from ").append(entity.getCode()).whereCnd(this, entity, cnd);
 		return queryForInt(sql);
 	}
 
@@ -428,7 +423,9 @@ public class DaoImpl extends NameObject implements Dao {
 
 	@Override
 	public int count(Select select) {
-		return queryForInt(select.buildCount(this));
+		Sql sql = select.build(this);
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
+		return queryForInt(countSql);
 	}
 
 	@Override
@@ -507,60 +504,6 @@ public class DaoImpl extends NameObject implements Dao {
 			return jdbcTemplate.update(sql);
 		else
 			return jdbcTemplate.update(sql, params);
-	}
-
-	public void linkPatch(JSONObject patch) {
-		Type type = new TypeReference<List<DaoImplPatchEntity>>() {
-		}.getType();
-		List<DaoImplPatchEntity> entities = patch.getObject("entity", type);
-		if (entities != null) {
-			entities.stream().forEach(e -> {
-				Entity entity = entityMap.get(e.getName());
-				entity.setTags(e.getTags());
-				if (e.getColumns() != null) {
-					e.getColumns().stream().forEach(c -> {
-						Column column = entity.getColumn(c.getName());
-						column.setTags(c.getTags());
-					});
-				}
-			});
-		}
-		type = new TypeReference<List<DaoImplPatchLink>>() {
-		}.getType();
-		List<DaoImplPatchLink> links = patch.getObject("reference", type);
-		if (links != null) {
-			links.forEach(linkDef -> {
-				DaoImplPatchLinkPart left = linkDef.getLeft();
-				Entity leftEntity = entityMap.get(left.getEntity());
-				List<Column> leftColumns = left.getFields().stream().map(leftEntity::getColumn)
-						.collect(Collectors.toList());
-				DaoImplPatchLinkPart right = linkDef.getRight();
-				Entity rightEntity = entityMap.get(right.getEntity());
-				List<Column> rightColumns = right.getFields().stream().map(rightEntity::getColumn)
-						.collect(Collectors.toList());
-				checkArgument(leftColumns.size() == rightColumns.size());
-				if (Utils.hasContent(left.getName())) {
-					Link link = new Link();
-					link.setName(left.getName());
-					link.setLabel(left.getLabel());
-					link.setColumns(leftColumns);
-					link.setLinkEntity(rightEntity);
-					link.setLinkColumns(rightColumns);
-					link.setOne(right.isOne());
-					leftEntity.addLink(link);
-				}
-				if (Utils.hasContent(right.getName())) {
-					Link link = new Link();
-					link.setName(right.getName());
-					link.setLabel(right.getLabel());
-					link.setColumns(rightColumns);
-					link.setLinkEntity(leftEntity);
-					link.setLinkColumns(leftColumns);
-					link.setOne(left.isOne());
-					rightEntity.addLink(link);
-				}
-			});
-		}
 	}
 
 }

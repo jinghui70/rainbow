@@ -41,18 +41,18 @@ public class MemoryDao extends DaoImpl implements DisposableBean {
 	public void setModel(Model model) {
 		String ddl = DaoUtils.transform(model);
 		execSql(ddl);
-		for (rainbow.db.model.Entity e : model.getEntities()) {
-			entityMap.put(e.getName(), new Entity(e));
-		}
+//		for (rainbow.db.model.Entity e : model.getEntities()) {
+//			entityMap.put(e.getName(), new Entity(e));
+//		}
 	}
 
 	public void setEntity(Entity... entities) {
-		if (entities.length == 0)
-			return;
-		Model model = new Model();
-		List<rainbow.db.model.Entity> list = Arrays.stream(entities).map(Entity::toSimple).collect(Collectors.toList());
-		model.setEntities(list);
-		setModel(model);
+//		if (entities.length == 0)
+//			return;
+//		Model model = new Model();
+//		List<rainbow.db.model.Entity> list = Arrays.stream(entities).map(Entity::toSimple).collect(Collectors.toList());
+//		model.setEntities(list);
+//		setModel(model);
 	}
 
 	@Override

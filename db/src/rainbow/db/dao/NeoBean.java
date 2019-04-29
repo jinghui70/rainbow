@@ -16,7 +16,7 @@ import com.google.common.collect.Maps;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.ColumnType;
+import rainbow.db.modelx.DataType;
 
 public class NeoBean {
 
@@ -186,7 +186,7 @@ public class NeoBean {
 	 */
 	public NeoBean setBlob(String property, InputStream value) {
 		Column column = checkNotNull(entity.getColumn(property), "property {} not defined", property);
-		checkArgument(column.getType() == ColumnType.BLOB, "property {} is not a blob", property);
+		checkArgument(column.getType() == DataType.BLOB, "property {} is not a blob", property);
 		setObject(column, value);
 		return this;
 	}

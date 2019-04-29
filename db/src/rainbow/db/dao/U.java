@@ -39,7 +39,7 @@ public final class U {
 	
 	public void toSql(Entity entity, Sql sql) {
 		Column column = entity.getColumn(property);
-		String fieldName = column.getDbName();
+		String fieldName = column.getCode();
 		Object param = column.convert(value);
 		sql.append(fieldName).addParam(param);
 		if (calc == '\0') {

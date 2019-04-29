@@ -53,7 +53,7 @@ public class Entity implements Cloneable {
 		this.name = name;
 	}
 
-	public String getDbName() {
+	public String getCode() {
 		return dbName;
 	}
 

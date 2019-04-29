@@ -1,20 +1,29 @@
 package rainbow.db.dao.model;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import rainbow.core.model.object.NameObject;
+import rainbow.db.modelx.LinkField;
 
 public class Link extends NameObject {
-	
+
 	private String label;
 
 	private List<Column> columns;
-	
-	private Entity linkEntity;
-	
-	private List<Column> linkColumns;
-	
-	private boolean one = true;
+
+	private Entity interEntity;
+
+	private List<Column> leftColumns;
+
+	private List<Column> rightColumns;
+
+	private Entity targetEntity;
+
+	private List<Column> targetColumns;
+
+	private boolean many = true;
 
 	public String getLabel() {
 		return label;
@@ -32,27 +41,65 @@ public class Link extends NameObject {
 		this.columns = columns;
 	}
 
-	public Entity getLinkEntity() {
-		return linkEntity;
+	public Entity getInterEntity() {
+		return interEntity;
 	}
 
-	public void setLinkEntity(Entity linkEntity) {
-		this.linkEntity = linkEntity;
+	public void setInterEntity(Entity interEntity) {
+		this.interEntity = interEntity;
 	}
 
-	public List<Column> getLinkColumns() {
-		return linkColumns;
+	public List<Column> getLeftColumns() {
+		return leftColumns;
 	}
 
-	public void setLinkColumns(List<Column> linkColumns) {
-		this.linkColumns = linkColumns;
+	public void setLeftColumns(List<Column> leftColumns) {
+		this.leftColumns = leftColumns;
 	}
 
-	public boolean isOne() {
-		return one;
+	public List<Column> getRightColumns() {
+		return rightColumns;
 	}
 
-	public void setOne(boolean one) {
-		this.one = one;
+	public void setRightColumns(List<Column> rightColumns) {
+		this.rightColumns = rightColumns;
+	}
+
+	public Entity getTargetEntity() {
+		return targetEntity;
+	}
+
+	public void setTargetEntity(Entity targetEntity) {
+		this.targetEntity = targetEntity;
+	}
+
+	public List<Column> getTargetColumns() {
+		return targetColumns;
+	}
+
+	public void setTargetColumns(List<Column> targetColumns) {
+		this.targetColumns = targetColumns;
+	}
+
+	public boolean isMany() {
+		return many;
+	}
+
+	public void setMany(boolean many) {
+		this.many = many;
+	}
+
+	public Link(Map<String, Entity> model, Entity entity, LinkField link) {
+		this.name = link.getName();
+		this.label = link.getLabel();
+		this.many = link.isMany();
+		this.columns = link.getFields().stream().map(entity::getColumn).collect(Collectors.toList());
+		if (link.getInterTable() != null) {
+			this.interEntity = model.get(link.getInterTable());
+			this.leftColumns = link.getLeftFields().stream().map(this.interEntity::getColumn).collect(Collectors.toList());
+			this.rightColumns = link.getRightFields().stream().map(this.interEntity::getColumn).collect(Collectors.toList());
+		}
+		this.targetEntity = model.get(link.getTargetTable());
+		this.targetColumns = link.getTargetFields().stream().map(this.targetEntity::getColumn).collect(Collectors.toList());
 	}
 }

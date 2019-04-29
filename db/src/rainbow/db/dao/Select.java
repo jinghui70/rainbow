@@ -1,37 +1,29 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.checkArgument;
-import static rainbow.core.util.Preconditions.checkNotNull;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import com.google.common.base.Joiner;
-
-import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.condition.EmptyCondition;
-import rainbow.db.dao.condition.JoinCondition;
 import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.Link;
 
 public class Select {
 
 	private String[] select;
 
-	private String fromStr;
-
-	private Join join;
+	private String entityName;
 
 	private boolean distinct = false;
 
-	private List<FieldOld> fields;
+	private List<Field> fields;
 
 	private C cnd = EmptyCondition.INSTANCE;
 
@@ -41,28 +33,23 @@ public class Select {
 
 	private String[] groupBy;
 
-	private Function<String, FieldOld> fieldFunction;
+	private Map<Link, Character> linkEntities = new HashMap<Link, Character>();
 
-	// 以下是普通select需要的
+	private List<Link> links = new LinkedList<Link>();
+
+	private Character linkAlias = 'A';
+
 	private Entity entity;
-
-	// 以下是joinSelect需要的信息
-	private Map<String, Entity> entityMap;
-	private List<String> tableAliases;
 
 	public Entity getEntity() {
 		return entity;
 	}
 
-	public List<FieldOld> getFields() {
+	public List<Field> getFields() {
 		return fields;
 	}
 
 	public Select() {
-	}
-
-	public C getCondition() {
-		return cnd;
 	}
 
 	public Select(String selectStr) {
@@ -93,13 +80,8 @@ public class Select {
 		return this;
 	}
 
-	public Select from(String fromStr) {
-		this.fromStr = fromStr;
-		return this;
-	}
-
-	public Select from(Join join) {
-		this.join = join;
+	public Select from(String entityName) {
+		this.entityName = entityName;
 		return this;
 	}
 
@@ -208,15 +190,6 @@ public class Select {
 		return or(C.make(property, param));
 	}
 
-	public Select andJoin(String left, String right) {
-		return andJoin(left, Op.Equal, right);
-	}
-
-	public Select andJoin(String left, Op op, String right) {
-		cnd = cnd.and(new JoinCondition(left, op, right));
-		return this;
-	}
-
 	/**
 	 * 设置OrderBy项
 	 * 
@@ -224,26 +197,12 @@ public class Select {
 	 * @return
 	 */
 	public Select orderBy(String orderByStr) {
-		if (Utils.hasContent(orderByStr)) {
-			orderBy = OrderBy.parse(orderByStr);
-		}
-		return this;
-	}
-
-	public Select orderBy(List<OrderBy> orderBy) {
-		this.orderBy = orderBy;
-		return this;
-	}
-
-	public Select orderBy(OrderBy orderBy) {
-		if (this.orderBy == null)
-			this.orderBy = new ArrayList<OrderBy>();
-		this.orderBy.add(orderBy);
+		this.orderBy = OrderBy.parse(orderByStr);
 		return this;
 	}
 
 	/**
-	 * 添加GroupBy项
+	 * 添加GroupBy项,有个约定，如果是link查询，groupby必须是别名，否则groupby是字段名
 	 * 
 	 * @param property
 	 * @return
@@ -254,185 +213,103 @@ public class Select {
 	}
 
 	public int getSelCount() {
-		return select == null ? 0 : select.length;
+		return fields.size();
+	}
+
+	private boolean isLinkSql() {
+		return linkEntities.size() > 0;
+	}
+
+	private String linkToAlias(Link link) {
+		if (isLinkSql()) {
+			if (link == null)
+				return "A.";
+			return linkEntities.get(link) + ".";
+		}
+		return Utils.NULL_STR;
+	}
+
+	private Field createField(String id) {
+		Field field = Field.parse(id, entity);
+		Link link = field.getLink();
+		if (link != null) {
+			if (!linkEntities.containsKey(link)) {
+				linkEntities.put(link, ++linkAlias);
+				links.add(link);
+			}
+		}
+		return field;
 	}
 
 	public Sql build(Dao dao) {
-		return build(dao, true);
-	}
-
-	private Sql build(Dao dao, boolean includePage) {
-		fields = new ArrayList<FieldOld>();
+		this.entity = dao.getEntity(entityName);
+		this.linkAlias = 'A';
+		if (select.length == 0) {
+			fields = entity.getColumns().stream().map(Field::fromColumn).collect(Collectors.toList());
+		} else {
+			fields = Arrays.stream(select).map(this::createField).collect(Collectors.toList());
+		}
+		if (!cnd.isEmpty()) {
+			cnd.initField(this::createField);
+		}
+		if (orderBy != null) {
+			orderBy.forEach(o -> o.initField(this::createField));
+		}
 		final Sql sql = new Sql().append("SELECT ");
 		if (distinct)
 			sql.append("DISTINCT ");
-		if (join != null) {
-			prepareJoin(dao);
-			buildSelectMulti(dao, sql);
-			join.build(entityMap, sql);
-		} else {
-			String[] tables = Utils.splitTrim(fromStr, ',');
-			checkArgument(tables.length > 0, "from table not set");
-			if (tables.length > 1) {
-				prepareMulti(dao, tables);
-				buildSelectMulti(dao, sql);
-				buildFromMulti(sql);
-			} else {
-				buildSelectFrom(dao, sql, tables[0]);
-			}
+		for (Field field : fields) {
+			field.toSql(sql, this::linkToAlias);
+			sql.appendTempComma();
 		}
-		sql.whereCnd(dao, fieldFunction, cnd);
+		sql.clearTemp();
+		sql.append(" FROM ");
+		sql.append(entity.getCode());
+		if (isLinkSql()) {
+			sql.append(" AS A");
+			links.stream().forEach(link -> {
+				Character alias = linkEntities.get(link);
+				sql.append(" LEFT JOIN ").append(link.getTargetEntity().getCode());
+				sql.append(" AS ").append(alias).append(" ON ");
+				for (int i = 0; i < link.getColumns().size(); i++) {
+					Column c = link.getColumns().get(i);
+					Column cl = link.getTargetColumns().get(i);
+					sql.append("A.").append(c.getCode()).append("=").append(alias).append('.').append(cl.getCode());
+					sql.appendTemp(" AND ");
+				}
+				sql.clearTemp();
+			});
+		}
+		
+		if (!cnd.isEmpty()) {
+			sql.append(" WHERE ");
+			cnd.toSql(dao, this::linkToAlias,  sql);
+		}
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
-			Arrays.asList(groupBy).forEach(g -> {
-				for (FieldOld field : fields) {
-					String sqlPart = field.match(g);
-					if (sqlPart != null) {
-						sql.append(sqlPart);
-						sql.appendTempComma();
-						return;
-					}
-				}
-				throw new AppException("GroupBy field {} not in select Fields", g);
-			});
+			if (isLinkSql()) {
+				Arrays.asList(groupBy).forEach(g -> {
+					sql.append(g).appendTempComma();
+				});
+			} else {
+				Arrays.asList(groupBy).forEach(g -> {
+					Column c = entity.getColumn(g);
+					sql.append(c.getCode()).appendTempComma();
+				});
+			}
 			sql.clearTemp();
 		}
 		if (orderBy != null) {
 			sql.append(" ORDER BY ");
-			orderBy.forEach(o -> {
-				for (FieldOld field : fields) {
-					String sqlPart = field.match(o.getProperty());
-					if (sqlPart != null) {
-						sql.append(sqlPart);
-						if (o.isDesc())
-							sql.append(" DESC");
-						sql.appendTempComma();
-						return;
-					}
-				}
-				// not in select part
-				FieldOld field = fieldFunction.apply(o.getProperty());
-				checkNotNull(field, "order by field not found: {}", o.getProperty());
-				sql.append(field.fullSqlName());
-				if (o.isDesc())
+			orderBy.forEach(g -> {
+				g.getField().toSql(sql, this::linkToAlias);
+				if (g.isDesc())
 					sql.append(" DESC");
 				sql.appendTempComma();
 			});
 			sql.clearTemp();
 		}
-		if (includePage && pager != null)
-			sql.paging(dao, pager);
 		return sql;
-	}
-
-	public Sql buildCount(Dao dao) {
-		Sql sql = build(dao, false);
-		return new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-	}
-
-	private void buildSelectFrom(Dao dao, Sql sql, String table) {
-		entity = dao.getEntity(table);
-		checkNotNull(entity, "entity {} not found", fromStr);
-		fieldFunction = new Function<String, FieldOld>() {
-			@Override
-			public FieldOld apply(String input) {
-				return new FieldOld(input, entity);
-			}
-		};
-		if (select == null || select.length == 0) {
-			sql.append("*");
-			addAllField(null, entity);
-		} else {
-			for (String s : select) {
-				fields.add(new FieldOld(s, entity));
-			}
-			Joiner.on(',').appendTo(sql.getStringBuilder(), fields);
-		}
-		sql.append(" FROM ").append(entity.getDbName());
-	}
-
-	private void prepareMulti(Dao dao, String[] tables) {
-		entityMap = new HashMap<String, Entity>();
-		tableAliases = new ArrayList<String>(tables.length);
-		for (String tableName : tables) {
-			String[] table = Utils.split(tableName, ' ');
-			checkArgument(table.length == 2, "{} need table alias", tableName);
-			Entity entity = dao.getEntity(table[0]);
-			checkNotNull(entity, "entity {} not found", tableName);
-			entityMap.put(table[1], entity);
-			tableAliases.add(table[1]);
-		}
-	}
-
-	private void buildSelectMulti(Dao dao, final Sql sql) {
-		final ColumnFinder columnFinder = new ColumnFinder() {
-			@Override
-			public Column find(String tableAlias, String fieldName) {
-				Entity entity = entityMap.get(tableAlias);
-				checkNotNull(entity, "table alias not found->[{}.{}]", tableAlias, fieldName);
-				Column column = entity.getColumn(fieldName);
-				return checkNotNull(column, "column {} of entity {} not defined", fieldName, entity.getName());
-			}
-		};
-		fieldFunction = new Function<String, FieldOld>() {
-			@Override
-			public FieldOld apply(String input) {
-				return new FieldOld(input, columnFinder);
-			}
-		};
-		if (select == null || select.length == 0) {
-			for (String tableAlias : tableAliases) {
-				Entity entity = entityMap.get(tableAlias);
-				addAllField(tableAlias, entity);
-				sql.append(tableAlias).append(".*");
-				sql.appendTempComma();
-			}
-		} else {
-			for (String s : select) {
-				if (s.endsWith(".*")) {
-					final String tableAlias = s.substring(0, s.length() - 2);
-					Entity entity = entityMap.get(tableAlias);
-					checkNotNull(entity, "table alias not exist:{}", s);
-					addAllField(tableAlias, entity);
-					sql.append(s);
-				} else {
-					FieldOld field = fieldFunction.apply(s);
-					fields.add(field);
-					sql.append(field);
-				}
-				sql.appendTempComma();
-			}
-		}
-		sql.clearTemp();
-	}
-
-	private void buildFromMulti(final Sql sql) {
-		sql.append(" FROM ");
-		for (String tableAlias : tableAliases) {
-			Entity entity = entityMap.get(tableAlias);
-			sql.append(entity.getDbName()).append(' ').append(tableAlias);
-			sql.appendTempComma();
-		}
-		sql.clearTemp();
-	}
-
-	private void prepareJoin(Dao dao) {
-		entityMap = new HashMap<String, Entity>();
-		tableAliases = new ArrayList<String>();
-		Entity entity = dao.getEntity(join.getMaster());
-		entityMap.put(join.getAlias(), entity);
-		tableAliases.add(join.getAlias());
-		for (JoinTarget t : join.getTargets()) {
-			entity = dao.getEntity(t.getTarget());
-			entityMap.put(t.getAlias(), entity);
-			tableAliases.add(t.getAlias());
-		}
-	}
-
-	private void addAllField(String tableAlias, Entity entity) {
-		for (Column column : entity.getColumns()) {
-			fields.add(new FieldOld(tableAlias, column));
-		}
 	}
 
 	@Override
@@ -444,7 +321,7 @@ public class Select {
 			sb.append("*");
 		else
 			sb.append(Arrays.toString(select));
-		sb.append(" from ").append(fromStr);
+		sb.append(" from ").append(entityName);
 		if (cnd != null && !cnd.isEmpty())
 			sb.append(" where...");
 		sb.append("]");
