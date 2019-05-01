@@ -1,7 +1,6 @@
 package rainbow.db.dao;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +24,7 @@ public class TestQuery {
 
 	@BeforeAll
 	public static void setUpBeforeClass() throws Exception {
-		dao = DBTest.createMemoryDao(TestQuery.class.getResource("object/test.rdm"));
+		dao = DBTest.createMemoryDao(TestQuery.class.getResource("object/test.rdmx"));
 		DBTest.loadDataFromExcel(dao, TestQuery.class.getResource("object/TestData.xlsx"));
 	}
 
@@ -36,9 +35,9 @@ public class TestQuery {
 
 	@BeforeEach
 	public void setUp() throws Exception {
-		dao.getJdbcTemplate().getTransactionManager().beginTransaction();		
+		dao.getJdbcTemplate().getTransactionManager().beginTransaction();
 	}
-	
+
 	@AfterEach
 	public void tearDown() throws Exception {
 		dao.getJdbcTemplate().getTransactionManager().rollback();
@@ -94,107 +93,19 @@ public class TestQuery {
 
 	@Test
 	public void testSimpleJoin() {
-		_JoinRecord j = dao.queryForObject(
-				new Select("P.name as person, G.name as goods, S.qty").from("_SaleRecord S, _Person P, _Goods G")
-						.andJoin("S.person", "P.id").andJoin("S.goods", "G.id").and("S.id", 1),
+		_JoinRecord j = dao.queryForObject(new Select("qty,person.name,goods.name").from("_SaleRecord").where("id", 1),
 				_JoinRecord.class);
 		assertEquals("张三", j.getPerson());
 		assertEquals("Tesla ModelX", j.getGoods());
 		assertEquals(1, j.getQty());
-
-		PageData<_JoinRecord> page = dao.pageQuery(
-				new Select("P.name as person, G.name as goods, S.qty").from("_SaleRecord S, _Person P, _Goods G")
-						.andJoin("S.person", "P.id").andJoin("S.goods", "G.id").paging(2, 10),
-				_JoinRecord.class);
-		assertEquals(10, page.getRows().size());
-		assertEquals(20, page.getTotal());
-		j = page.getRows().get(0);
-		assertEquals("李四", j.getPerson());
-		assertEquals("iPhone", j.getGoods());
 
 		List<_JoinRecord> list = dao.queryForList(
-				new Select("P.name as person, G.name as goods").distinct().from("_SaleRecord S, _Person P, _Goods G")
-						.andJoin("S.person", "P.id").andJoin("S.goods", "G.id").orderBy("G.name desc"),
+				new Select("persion.name, goods.name").distinct().from("_SaleRecord").orderBy("goods.name desc"),
 				_JoinRecord.class);
 		assertEquals(2, list.size());
 		j = list.get(0);
 		assertEquals("李四", j.getPerson());
 		assertEquals("iPhone", j.getGoods());
-
-		list = dao.queryForList(
-				new Select("P.name as person, G.name as goods").distinct().from("_SaleRecord S, _Person P, _Goods G")
-						.andJoin("S.person", "P.id").andJoin("S.goods", "G.id").orderBy("goods desc"),
-				_JoinRecord.class);
-		assertEquals(2, list.size());
-		j = list.get(0);
-		assertEquals("李四", j.getPerson());
-		assertEquals("iPhone", j.getGoods());
-
-		list = dao.queryForList(
-				new Select("P.name as person, G.name as goods, sum(S.qty) as qty").distinct()
-						.from("_SaleRecord S, _Person P, _Goods G").andJoin("S.person", "P.id")
-						.andJoin("S.goods", "G.id").groupBy("P.name, goods").orderBy("goods desc"),
-				_JoinRecord.class);
-		assertEquals(2, list.size());
-		j = list.get(0);
-		assertEquals("李四", j.getPerson());
-		assertEquals("iPhone", j.getGoods());
-		assertEquals(55, j.getQty());
 	}
 
-	@Test
-	public void TestSimpleJoinEx() {
-		Select select = new Select("P.name,S.*").from("_SaleRecord S, _Person P").andJoin("S.person", "P.id")
-				.and("S.id", 1);
-		Map<String, Object> m = dao.queryForMap(select);
-		assertEquals("张三", m.get("name"));
-		assertEquals(1, m.get("id"));
-		assertEquals(1, m.get("qty"));
-		assertEquals(Double.valueOf(100), m.get("money"));
-
-		select = new Select().from("_SaleRecord S, _Person P").andJoin("S.person", "P.id").and("S.id", 1);
-		m = dao.queryForMap(select);
-		assertEquals("张三", m.get("name"));
-		assertEquals(1, m.get("id"));
-		assertEquals(1, m.get("qty"));
-		assertEquals(Double.valueOf(100), m.get("money"));
-
-		select = new Select("S.*,P.*,S.id as sid,P.id as pid").from("_SaleRecord S, _Person P")
-				.andJoin("S.person", "P.id").and("S.id", 1);
-		m = dao.queryForMap(select);
-		assertEquals("张三", m.get("name"));
-		assertEquals(1, m.get("sid"));
-		assertEquals(1, m.get("pid"));
-		assertEquals(1, m.get("qty"));
-		assertEquals(Double.valueOf(100), m.get("money"));
-	}
-
-	@Test
-	public void TestJoin() {
-		Join join = Join.make("_SaleRecord S").join("_Person P").on("person", "id").join("_Goods G").on("goods", "id");
-		_JoinRecord j = dao.queryForObject(
-				new Select("P.name as person, G.name as goods, S.qty").from(join).where("S.id", 1), _JoinRecord.class);
-		assertEquals("张三", j.getPerson());
-		assertEquals("Tesla ModelX", j.getGoods());
-		assertEquals(1, j.getQty());
-
-		Select select = new Select("P.name, G.name AS gg");
-		join = Join.make("_Person P").join("_Goods G").on("id", "id");
-		int count = dao.count(select.from(join));
-		assertEquals(1, count);
-		join = Join.make("_Person P").leftJoin("_Goods G").on("id", "id");
-		List<Map<String, Object>> list = dao.queryForMapList(select.from(join));
-		assertEquals(2, list.size());
-		assertEquals("李四", list.get(1).get("name"));
-		assertEquals(null, list.get(1).get("gg"));
-		join = Join.make("_Person P").rightJoin("_Goods G").on("id", "id");
-		list = dao.queryForMapList(select.from(join));
-		assertEquals(2, list.size());
-		assertEquals(null, list.get(1).get("name"));
-		assertEquals("iPhone", list.get(1).get("gg"));
-		
-		join = Join.make("_SaleRecord S").join("_Person P").on("person", "id").on("id", "id"); // 多字段join，借id一用
-		j = dao.queryForObject(new Select("P.name as person, S.qty").from(join), _JoinRecord.class);
-		assertNotNull(j);
-	}
 }

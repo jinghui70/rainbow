@@ -8,7 +8,7 @@ public class ModelX extends Unit {
 	
 	private String comment;
 	
-	private List<TableTag> tableTags;
+	private List<Tag> tableTags;
 	
 	private List<Tag> fieldTags;
 
@@ -28,11 +28,11 @@ public class ModelX extends Unit {
 		this.comment = comment;
 	}
 
-	public List<TableTag> getTableTags() {
+	public List<Tag> getTableTags() {
 		return tableTags;
 	}
 
-	public void setTableTags(List<TableTag> tableTags) {
+	public void setTableTags(List<Tag> tableTags) {
 		this.tableTags = tableTags;
 	}
 

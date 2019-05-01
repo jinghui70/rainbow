@@ -1,48 +1,25 @@
 package rainbow.db.dao;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
+import com.google.common.collect.ImmutableList;
 
-import rainbow.core.util.XmlBinder;
+import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
-import rainbow.db.model.Model;
+import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.Link;
+import rainbow.db.modelx.ModelX;
+import rainbow.db.modelx.Tag;
+import rainbow.db.modelx.TagType;
+import rainbow.db.modelx.Unit;
 
 public abstract class DaoUtils {
-
-	private static Transformer transformer;
-
-	static {
-		try (InputStream xsltStream = DaoUtils.class.getResourceAsStream("h2.xsl")) {
-			TransformerFactory tf = TransformerFactory.newInstance();
-			transformer = tf.newTransformer(new StreamSource(xsltStream));
-		} catch (TransformerConfigurationException | IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	synchronized public static String transform(Model model) {
-		try {
-			String xmltext = new XmlBinder<Model>(Model.class).marshalString(model);
-			StringReader reader = new StringReader(xmltext);
-			StringWriter writer = new StringWriter();
-			transformer.transform(new StreamSource(reader), new StreamResult(writer));
-			return writer.toString();
-		} catch (JAXBException | TransformerException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	public static Object getResultSetValue(ResultSet rs, int index, Column column) throws SQLException {
 		Object value = null;
@@ -94,4 +71,83 @@ public abstract class DaoUtils {
 		return value;
 	}
 
+	public static HashMap<String, Entity> loadModel(ModelX model) {
+		HashMap<String, Entity> result = new HashMap<String, Entity>();
+		loadUnit(result, model);
+		List<Tag> linkTags = model.getFieldTags().stream().filter(tag -> tag.getType() == TagType.LINK)
+				.collect(Collectors.toList());
+		loadLink(result, linkTags, model);
+		return result;
+	}
+
+	private static void loadUnit(Map<String, Entity> model, Unit unit) {
+		unit.getTables().stream().map(Entity::new).forEach(e -> model.put(e.getName(), e));
+		if (unit.getUnits() != null)
+			unit.getUnits().stream().forEach(u -> loadUnit(model, u));
+	}
+
+	private static void loadLink(Map<String, Entity> model, List<Tag> linkTags, Unit unit) {
+		unit.getTables().stream().forEach(e -> {
+			if (Utils.isNullOrEmpty(e.getLinkFields()))
+				return;
+			Entity entity = model.get(e.getName());
+			Map<String, Link> links = e.getLinkFields().stream().map(l -> new Link(model, entity, l))
+					.collect(Collectors.toMap(Link::getName, Function.identity()));
+			if (!linkTags.isEmpty()) {
+				for (Tag tag : linkTags) {
+					Entity targetEntity = model.get(tag.getLinkTable());
+					List<Column> targetColumns = ImmutableList.of(targetEntity.getColumn(tag.getLinkField()));
+					entity.getColumns().stream().forEach(column -> {
+						if (column.hasTag(tag.getName())) {
+							Link link = new Link();
+							link.setName(column.getName());
+							link.setLabel(column.getLabel());
+							link.setColumns(ImmutableList.of(column));
+							link.setTargetEntity(targetEntity);
+							link.setTargetColumns(targetColumns);
+							links.put(link.getName(), link);
+						}
+					});
+				}
+			}
+			entity.setLinks(links);
+		});
+		if (unit.getUnits() != null)
+			unit.getUnits().stream().forEach(u -> loadLink(model, linkTags, u));
+	}
+
+	public static String transform(Map<String, Entity> model) {
+		StringBuilder sb = new StringBuilder();
+		model.values().stream().forEach(entity -> {
+			sb.append("CREATE TABLE ").append(entity.getCode()).append("(");
+			entity.getColumns().stream().forEach(field -> {
+				sb.append(field.getCode()).append("\t").append(field.getType());
+				switch (field.getType()) {
+				case CHAR:
+				case VARCHAR:
+					sb.append("(").append(field.getLength()).append(")");
+					break;
+				case NUMERIC:
+					sb.append("(").append(field.getLength()).append(",").append(field.getPrecision()).append(")");
+					break;
+				default:
+					break;
+				}
+				if (field.isMandatory())
+					sb.append(" NOT NULL");
+				sb.append(",");
+			});
+			if (entity.getKeyCount() == 0) {
+				sb.setLength(sb.length() - 1);
+			} else {
+				sb.append("	CONSTRAINT PK_").append(entity.getCode()).append(" PRIMARY KEY(");
+				for (Column c : entity.getKeyColumns()) {
+					sb.append(c.getCode()).append(",");
+				}
+				sb.setLength(sb.length() - 1);
+			}
+			sb.append("));");
+		});
+		return sb.toString();
+	}
 }

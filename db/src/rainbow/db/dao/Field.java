@@ -1,5 +1,6 @@
 package rainbow.db.dao;
 
+import static rainbow.core.util.Preconditions.*;
 import java.util.function.Function;
 
 import rainbow.core.util.Utils;
@@ -50,8 +51,7 @@ public class Field {
 	}
 
 	public void toSql(Sql sql, Function<Link, String> linkToAlias) {
-		if (link != null) 
-			sql.append(linkToAlias.apply(link)).append(".");
+		sql.append(linkToAlias.apply(link));
 		sql.append(column.getCode());
 		if (alias != null)
 			sql.append(" AS ").append(alias);
@@ -84,6 +84,7 @@ public class Field {
 		inx = str.indexOf('.');
 		if (inx > 0) {
 			field.link = entity.getLink(str.substring(0, inx));
+			checkNotNull(field.link, "link {} of entity {} not defined", str, entity.getName());
 			str = str.substring(inx + 1);
 			field.column = field.link.getTargetEntity().getColumn(str);
 		} else

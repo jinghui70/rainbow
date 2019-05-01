@@ -244,7 +244,7 @@ public class Select {
 	public Sql build(Dao dao) {
 		this.entity = dao.getEntity(entityName);
 		this.linkAlias = 'A';
-		if (select.length == 0) {
+		if (select == null || select.length == 0) {
 			fields = entity.getColumns().stream().map(Field::fromColumn).collect(Collectors.toList());
 		} else {
 			fields = Arrays.stream(select).map(this::createField).collect(Collectors.toList());
@@ -280,10 +280,10 @@ public class Select {
 				sql.clearTemp();
 			});
 		}
-		
+
 		if (!cnd.isEmpty()) {
 			sql.append(" WHERE ");
-			cnd.toSql(dao, this::linkToAlias,  sql);
+			cnd.toSql(dao, this::linkToAlias, sql);
 		}
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");

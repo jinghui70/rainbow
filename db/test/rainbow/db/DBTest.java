@@ -7,8 +7,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-
-import javax.xml.bind.JAXBException;
+import java.util.Map;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
@@ -19,15 +18,16 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.io.Closeables;
 
-import rainbow.core.util.XmlBinder;
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Model;
+import rainbow.db.modelx.ModelX;
 
 public final class DBTest {
 
@@ -36,27 +36,23 @@ public final class DBTest {
 	private DBTest() {
 	}
 
-	public static MemoryDao createMemoryDao(Object... modelSource) throws IOException, JAXBException {
-		InputStream is = null;
-		MemoryDao dao = new MemoryDao();
-		for (int i = 0; i < modelSource.length; i++) {
-			Object source = modelSource[i];
-			if (source instanceof URL)
-				is = ((URL) source).openStream();
-			else if (source instanceof String) {
-				is = new FileInputStream((String) source);
-			} else if (source instanceof File) {
-				is = new FileInputStream((File) source);
-			} else
-				throw new IllegalArgumentException("bad model param");
-			try {
-				Model model = new XmlBinder<Model>(Model.class).unmarshal(is);
-				dao.setModel(model);
-			} finally {
-				Closeables.closeQuietly(is);
-			}
+	public static MemoryDao createMemoryDao(Object source) throws IOException {
+		try (InputStream is = sourceToInputStream(source)) {
+			ModelX model = JSONObject.parseObject(is, ModelX.class);
+			Map<String, Entity> entityMap = DaoUtils.loadModel(model);
+			return new MemoryDao(entityMap);
 		}
-		return dao;
+	}
+
+	private static InputStream sourceToInputStream(Object source) throws IOException {
+		if (source instanceof URL)
+			return ((URL) source).openStream();
+		else if (source instanceof String) {
+			return new FileInputStream((String) source);
+		} else if (source instanceof File) {
+			return new FileInputStream((File) source);
+		} else
+			throw new IllegalArgumentException("bad model param");
 	}
 
 	public static InputStream getClasspathFile(String file) {

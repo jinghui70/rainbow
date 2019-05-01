@@ -88,6 +88,9 @@ public class Link extends NameObject {
 	public void setMany(boolean many) {
 		this.many = many;
 	}
+	
+	public Link() {
+	}
 
 	public Link(Map<String, Entity> model, Entity entity, LinkField link) {
 		this.name = link.getName();

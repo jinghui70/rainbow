@@ -27,6 +27,21 @@ public class Tag extends NameObject {
 	 */
 	private String comment;
 
+	/**
+	 * 如果是表的FLag型tag，可以对应有字段定义
+	 */
+	private List<Field> fields;
+
+	/**
+	 * 如果是字段的LINK型tag，保存的表名
+	 */
+	private String linkTable;
+
+	/**
+	 * 如果是字段的LINK型tag，保存的属性名
+	 */
+	private String linkField;
+
 	public TagType getType() {
 		return type;
 	}
@@ -49,6 +64,30 @@ public class Tag extends NameObject {
 
 	public void setComment(String comment) {
 		this.comment = comment;
+	}
+
+	public List<Field> getFields() {
+		return fields;
+	}
+
+	public void setFields(List<Field> fields) {
+		this.fields = fields;
+	}
+
+	public String getLinkTable() {
+		return linkTable;
+	}
+
+	public void setLinkTable(String linkTable) {
+		this.linkTable = linkTable;
+	}
+
+	public String getLinkField() {
+		return linkField;
+	}
+
+	public void setLinkField(String linkField) {
+		this.linkField = linkField;
 	}
 
 }

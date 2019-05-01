@@ -18,7 +18,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.naming.Context;
 import javax.naming.InitialContext;
@@ -31,7 +30,6 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSON;
-import com.google.common.base.Functions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -52,10 +50,9 @@ import rainbow.db.config.Physic;
 import rainbow.db.config.Property;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
+import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.dao.model.Link;
 import rainbow.db.modelx.ModelX;
-import rainbow.db.modelx.Unit;
 
 @Bean(extension = InjectProvider.class)
 public class DaoManagerImpl extends ActivatorAwareObject
@@ -174,7 +171,8 @@ public class DaoManagerImpl extends ActivatorAwareObject
 
 	private Map<String, Entity> loadModel(String name) {
 		Map<String, Entity> model = modelMap.get(name);
-		if (model!=null) return model;
+		if (model != null)
+			return model;
 		Path modelFile = activator.getConfigureFile(name + ".rdmx");
 		String fileName = modelFile.getFileName().toString();
 		checkState(Files.exists(modelFile), "database model file not exist:{}", fileName);
@@ -185,28 +183,8 @@ public class DaoManagerImpl extends ActivatorAwareObject
 			logger.error("load rdmx file {} faild", fileName);
 			throw new RuntimeException(e);
 		}
-		model = new HashMap<String, Entity>();
-		loadUnit(model, modelX);
-		loadLink(model, modelX);
-		modelMap.put(name, model);
+		modelMap.put(name, DaoUtils.loadModel(modelX));
 		return model;
-	}
-
-	private void loadUnit(Map<String, Entity> model, Unit unit) {
-		unit.getTables().stream().map(Entity::new).forEach(e -> model.put(e.getName(), e));
-		unit.getUnits().stream().forEach(u -> loadUnit(model, u));
-	}
-
-	private void loadLink(Map<String, Entity> model, Unit unit) {
-		unit.getTables().stream().forEach(e -> {
-			if (Utils.isNullOrEmpty(e.getLinkFields()))
-				return;
-			Entity entity = model.get(e.getName());
-			Map<String, Link> links = e.getLinkFields().stream().map(l-> new Link(model, entity, l))
-			.collect(Collectors.toMap(Link::getName, Functions.identity()));
-			entity.setLinks(links);
-		});
-		unit.getUnits().stream().forEach(u -> loadLink(model, u));
 	}
 
 	/**

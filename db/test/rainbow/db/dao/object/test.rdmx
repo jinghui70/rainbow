@@ -1,0 +1,203 @@
+{
+    "label": "测试模型",
+    "name": "TEST",
+    "tableTags": [],
+    "fieldTags": [],
+    "tables": [
+        {
+            "code": "SP",
+            "label": "商品",
+            "name": "_Goods",
+            "comment": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "code": "ID",
+                    "label": "ID",
+                    "type": "INT",
+                    "length": 0,
+                    "precision": 0,
+                    "comment": "",
+                    "key": true,
+                    "mandatory": true
+                },
+                {
+                    "name": "name",
+                    "code": "NAME",
+                    "label": "商品名",
+                    "type": "VARCHAR",
+                    "length": 22,
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "price",
+                    "code": "PRICE",
+                    "label": "价格",
+                    "type": "DOUBLE",
+                    "length": 0,
+                    "precision": 0,
+                    "comment": ""
+                }
+            ]
+        },
+        {
+            "code": "RY",
+            "label": "人员",
+            "name": "_Person",
+            "comment": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "code": "ID",
+                    "label": "ID",
+                    "type": "INT",
+                    "precision": 0,
+                    "comment": "",
+                    "key": true,
+                    "mandatory": true
+                },
+                {
+                    "name": "name",
+                    "code": "NAME",
+                    "label": "姓名",
+                    "type": "VARCHAR",
+                    "length": 20,
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "birthday",
+                    "code": "BIRTH",
+                    "label": "生日",
+                    "type": "DATE",
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "gender",
+                    "code": "GENDER",
+                    "label": "性别",
+                    "type": "INT",
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "score.1",
+                    "code": "S1",
+                    "label": "成绩1",
+                    "type": "INT",
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "score.2",
+                    "code": "S2",
+                    "label": "成绩2",
+                    "type": "INT",
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "score.3",
+                    "code": "S3",
+                    "label": "成绩3",
+                    "type": "INT",
+                    "precision": 0,
+                    "comment": ""
+                }
+            ]
+        },
+        {
+            "code": "XSJL",
+            "label": "销售记录",
+            "name": "_SaleRecord",
+            "comment": "",
+            "fields": [
+                {
+                    "name": "id",
+                    "code": "ID",
+                    "label": "ID",
+                    "type": "INT",
+                    "length": 22,
+                    "precision": 0,
+                    "comment": "",
+                    "key": true,
+                    "mandatory": true
+                },
+                {
+                    "name": "person",
+                    "code": "RY",
+                    "label": "销售员",
+                    "type": "INT",
+                    "length": 0,
+                    "precision": 0,
+                    "comment": "",
+                    "mandatory": true
+                },
+                {
+                    "name": "goods",
+                    "code": "SP",
+                    "label": "商品",
+                    "type": "INT",
+                    "length": 0,
+                    "precision": 0,
+                    "comment": "",
+                    "mandatory": true
+                },
+                {
+                    "name": "qty",
+                    "code": "SL",
+                    "label": "数量",
+                    "type": "DOUBLE",
+                    "length": 0,
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "money",
+                    "code": "JE",
+                    "label": "金额",
+                    "type": "DOUBLE",
+                    "length": 0,
+                    "precision": 0,
+                    "comment": ""
+                },
+                {
+                    "name": "time",
+                    "code": "SJ",
+                    "label": "时间",
+                    "type": "TIMESTAMP",
+                    "length": 0,
+                    "precision": 0,
+                    "comment": "",
+                    "mandatory": true
+                }
+            ],
+            "linkFields": [
+                {
+                    "name": "person",
+                    "label": "销售员",
+                    "fields": [
+                        "person"
+                    ],
+                    "targetTable": "_Person",
+                    "targetFields": [
+                        "id"
+                    ]
+                },
+                {
+                    "name": "goods",
+                    "label": "商品",
+                    "fields": [
+                        "goods"
+                    ],
+                    "targetTable": "_Goods",
+                    "targetFields": [
+                        "id"
+                    ]
+                }
+            ]
+        }
+    ]
+}

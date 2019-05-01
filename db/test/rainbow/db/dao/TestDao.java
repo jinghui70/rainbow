@@ -28,7 +28,7 @@ public class TestDao {
 
 	@BeforeAll
 	public static void setUpBeforeClass() throws Exception {
-		dao = DBTest.createMemoryDao(TestDao.class.getResource("object/test.rdm"));
+		dao = DBTest.createMemoryDao(TestDao.class.getResource("object/test.rdmx"));
 	}
 
 	@AfterAll
