@@ -4,9 +4,9 @@ import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Field;
+import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.dao.model.Link;
 
 public abstract class C {
 
@@ -25,7 +25,7 @@ public abstract class C {
 	 * @return
 	 */
 	public abstract C or(C cnd);
-	
+
 	public boolean isEmpty() {
 		return false;
 	}
@@ -47,8 +47,8 @@ public abstract class C {
 	}
 
 	public abstract void initField(Function<String, Field> fieldFunction);
-	
-	public abstract void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql);
+
+	public abstract void toSql(SelectBuildContext context, Sql sql);
 
 	public abstract void toSql(Dao dao, Entity entity, Sql sql);
 

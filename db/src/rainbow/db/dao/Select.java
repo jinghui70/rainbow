@@ -1,11 +1,12 @@
 package rainbow.db.dao;
 
+import static rainbow.core.util.Preconditions.checkState;
+
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
@@ -16,14 +17,14 @@ import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
 
 public class Select {
+	
+	private Dao dao;
 
 	private String[] select;
 
 	private String entityName;
 
 	private boolean distinct = false;
-
-	private List<Field> fields;
 
 	private C cnd = EmptyCondition.INSTANCE;
 
@@ -33,23 +34,13 @@ public class Select {
 
 	private String[] groupBy;
 
-	private Map<Link, Character> linkEntities = new HashMap<Link, Character>();
-
-	private List<Link> links = new LinkedList<Link>();
-
-	private Character linkAlias = 'A';
-
-	private Entity entity;
-
-	public Entity getEntity() {
-		return entity;
-	}
-
-	public List<Field> getFields() {
-		return fields;
-	}
+	private SelectBuildContext context = null;
 
 	public Select() {
+	}
+	
+	public Select(Dao dao) {
+		this.dao = dao;
 	}
 
 	public Select(String selectStr) {
@@ -212,63 +203,39 @@ public class Select {
 		return this;
 	}
 
+	public List<Field> getFields() {
+		return context.getSelectFields();
+	}
+
 	public int getSelCount() {
-		return fields.size();
+		return getFields().size();
 	}
 
-	private boolean isLinkSql() {
-		return linkEntities.size() > 0;
-	}
-
-	private String linkToAlias(Link link) {
-		if (isLinkSql()) {
-			if (link == null)
-				return "A.";
-			return linkEntities.get(link) + ".";
-		}
-		return Utils.NULL_STR;
-	}
-
-	private Field createField(String id) {
-		Field field = Field.parse(id, entity);
-		Link link = field.getLink();
-		if (link != null) {
-			if (!linkEntities.containsKey(link)) {
-				linkEntities.put(link, ++linkAlias);
-				links.add(link);
-			}
-		}
-		return field;
+	public Entity getEntity() {
+		return context.getEntity();
 	}
 
 	public Sql build(Dao dao) {
-		this.entity = dao.getEntity(entityName);
-		this.linkAlias = 'A';
-		if (select == null || select.length == 0) {
-			fields = entity.getColumns().stream().map(Field::fromColumn).collect(Collectors.toList());
-		} else {
-			fields = Arrays.stream(select).map(this::createField).collect(Collectors.toList());
-		}
-		if (!cnd.isEmpty()) {
-			cnd.initField(this::createField);
-		}
-		if (orderBy != null) {
-			orderBy.forEach(o -> o.initField(this::createField));
-		}
+		context = new SelectBuildContext(dao, entityName, select);
+		if (!cnd.isEmpty())
+			context.setCnd(cnd);
+		if (!Utils.isNullOrEmpty(orderBy))
+			context.setOrderBy(orderBy);
 		final Sql sql = new Sql().append("SELECT ");
 		if (distinct)
 			sql.append("DISTINCT ");
-		for (Field field : fields) {
-			field.toSql(sql, this::linkToAlias);
+		for (Field field : context.getSelectFields()) {
+			field.toSelectSql(sql, context);
 			sql.appendTempComma();
 		}
 		sql.clearTemp();
 		sql.append(" FROM ");
-		sql.append(entity.getCode());
-		if (isLinkSql()) {
+		sql.append(context.getEntity().getCode());
+		if (context.isLinkSql()) {
 			sql.append(" AS A");
-			links.stream().forEach(link -> {
-				Character alias = linkEntities.get(link);
+			char alias = 'A';
+			for (Link link : context.getLinks()) {
+				alias++;
 				sql.append(" LEFT JOIN ").append(link.getTargetEntity().getCode());
 				sql.append(" AS ").append(alias).append(" ON ");
 				for (int i = 0; i < link.getColumns().size(); i++) {
@@ -278,31 +245,37 @@ public class Select {
 					sql.appendTemp(" AND ");
 				}
 				sql.clearTemp();
-			});
+			}
 		}
 
 		if (!cnd.isEmpty()) {
 			sql.append(" WHERE ");
-			cnd.toSql(dao, this::linkToAlias, sql);
+			cnd.toSql(context, sql);
 		}
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
-			if (isLinkSql()) {
-				Arrays.asList(groupBy).forEach(g -> {
-					sql.append(g).appendTempComma();
-				});
-			} else {
-				Arrays.asList(groupBy).forEach(g -> {
-					Column c = entity.getColumn(g);
-					sql.append(c.getCode()).appendTempComma();
-				});
-			}
+			Arrays.asList(groupBy).forEach(g -> {
+				String linkStr = null;
+				String nameStr = null;
+				String[] f = Utils.split(g, '.');
+				if (f.length == 1) {
+					nameStr = f[0];
+				} else {
+					linkStr = f[0];
+					nameStr = f[1];
+				}
+				Optional<Field> field = context.selectField(linkStr, nameStr);
+				checkState(field.isPresent(), "group field {} not in select fields", g);
+				field.get().toSql(sql, context);
+				sql.appendTempComma();
+			});
 			sql.clearTemp();
 		}
+
 		if (orderBy != null) {
 			sql.append(" ORDER BY ");
 			orderBy.forEach(g -> {
-				g.getField().toSql(sql, this::linkToAlias);
+				g.getField().toSql(sql, context);
 				if (g.isDesc())
 					sql.append(" DESC");
 				sql.appendTempComma();
@@ -326,5 +299,8 @@ public class Select {
 			sb.append(" where...");
 		sb.append("]");
 		return sb.toString();
+	}
+	
+	public void query(Consumer<Map<String, Object>> consumer) {
 	}
 }

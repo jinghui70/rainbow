@@ -8,10 +8,10 @@ import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Field;
+import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.dao.model.Link;
 import rainbow.db.modelx.DataType;
 
 public class SimpleCondition extends C {
@@ -50,12 +50,12 @@ public class SimpleCondition extends C {
 	}
 	
 	@Override
-	public void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql) {
-		field.toSql(sql, linkToAlias);
+	public void toSql(SelectBuildContext context, Sql sql) {
+		field.toSql(sql, context);
 		if (param != null && param instanceof Sql) {
 			subQuery((Sql) param, sql);
 		} else
-			normalQuery(dao, field, sql);
+			normalQuery(context.getDao(), field.getColumn(), sql);
 	}
 	@Override
 	public void toSql(Dao dao,Entity entity, Sql sql) {
@@ -64,14 +64,14 @@ public class SimpleCondition extends C {
 		if (param != null && param instanceof Sql) {
 			subQuery((Sql) param, sql);
 		} else
-			normalQuery(dao, field, sql);
+			normalQuery(dao, c, sql);
 	}
 
 	private void subQuery(Sql subSql, Sql sql) {
 		sql.append(op.getSymbol()).append("(").append(subSql.getSql()).append(")").addParams(subSql.getParams());
 	}
 
-	private void normalQuery(Dao dao, Field field, Sql sql) {
+	private void normalQuery(Dao dao, Column column, Sql sql) {
 		if (op == Op.IN || op == Op.NotIn) {
 			checkNotNull(param, "param of {} should not be null", property);
 			sql.append(op.getSymbol()).append(" (");
@@ -83,7 +83,7 @@ public class SimpleCondition extends C {
 				p = (Object[]) param;
 
 			for (int i = 0; i < p.length; i++) {
-				sql.append(i == 0 ? "?" : ",?").addParam(field.getColumn().convert(p[i]));
+				sql.append(i == 0 ? "?" : ",?").addParam(column.convert(p[i]));
 			}
 			sql.append(")");
 		} else {
@@ -96,12 +96,12 @@ public class SimpleCondition extends C {
 					checkNotNull(param, "param of {} should not be null", property);
 			} else {
 				if (Dao.NOW.equals(param)) {
-					DataType type = field.getColumn().getType();
+					DataType type = column.getType();
 					checkArgument(type == DataType.DATE || type == DataType.TIMESTAMP,
 							"Dao.NOW should be date or datetime");
 					sql.append(op.getSymbol()).append(dao.getDialect().now());
 				} else
-					sql.append(op.getSymbol()).append("?").addParam(field.getColumn().convert(param));
+					sql.append(op.getSymbol()).append("?").addParam(column.convert(param));
 			}
 		}
 	}

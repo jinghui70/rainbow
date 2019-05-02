@@ -213,18 +213,6 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
-	public void replace(Object obj) {
-		NeoBean neo = toNeoBean(obj);
-		Entity entity = neo.getEntity();
-		Sql sql = new Sql().append("select count(1) from ").append(entity.getCode()).whereKey(neo);
-		int count = queryForInt(sql);
-		if (count == 0)
-			insert(neo);
-		else
-			update(neo);
-	}
-
-	@Override
 	public void clear(String entityName) {
 		Entity entity = getEntity(entityName);
 		jdbcTemplate.update(getDialect().clearTable(entity.getCode()));
@@ -255,12 +243,6 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public int update(Object obj) {
 		NeoBean neo = toNeoBean(obj);
-		return update(neo);
-	}
-
-	@Override
-	public int update(String entityName, Object obj) {
-		NeoBean neo = makeNeoBean(entityName, obj);
 		return update(neo);
 	}
 

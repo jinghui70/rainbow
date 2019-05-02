@@ -2,6 +2,12 @@ package rainbow.db.modelx;
 
 import java.util.List;
 
+/**
+ * 数据模型，未来加上模型依赖，就可以把一个大模型拆分成多个文件
+ * 
+ * @author lijinghui
+ *
+ */
 public class ModelX extends Unit {
 
 	private String name;

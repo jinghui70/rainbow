@@ -6,9 +6,9 @@ import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Field;
+import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.dao.model.Link;
 
 public class ComboCondition extends C {
 
@@ -47,14 +47,14 @@ public class ComboCondition extends C {
 	}
 
 	@Override
-	public void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql) {
+	public void toSql(SelectBuildContext context, Sql sql) {
 		for (C cnd : child) {
 			if (cnd instanceof ComboCondition) {
 				sql.append("(");
-				cnd.toSql(dao, linkToAlias, sql);
+				cnd.toSql(context, sql);
 				sql.append(")");
 			} else
-				cnd.toSql(dao, linkToAlias, sql);
+				cnd.toSql(context, sql);
 		}
 	}
 
@@ -88,7 +88,7 @@ public class ComboCondition extends C {
 		}
 
 		@Override
-		public void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql) {
+		public void toSql(SelectBuildContext context, Sql sql) {
 			sql.append(text);
 		}
 

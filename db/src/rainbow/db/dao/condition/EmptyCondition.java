@@ -5,9 +5,9 @@ import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Field;
+import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.dao.model.Link;
 
 public class EmptyCondition extends C {
 
@@ -35,7 +35,7 @@ public class EmptyCondition extends C {
 	}
 
 	@Override
-	public void toSql(Dao dao, Function<Link, String> linkToAlias, Sql sql) {
+	public void toSql(SelectBuildContext context, Sql sql) {
 	}
 
 	@Override

@@ -24,6 +24,10 @@ import rainbow.db.jdbc.RowMapper;
 public interface Dao extends INameObject {
 
 	public static final String NOW = "_now_";
+	
+	public static Select select() {
+		return new Select();
+	}
 
 	/**
 	 * 返回屏蔽数据库差异的数据库方言对象
@@ -117,13 +121,6 @@ public interface Dao extends INameObject {
 	<T> void insert(List<T> list, int batchSize, ObjectBatchParamSetter<T> setter);
 
 	/**
-	 * 如果没有，就插入一个对象，如果有，就更新它
-	 * 
-	 * @param obj
-	 */
-	void replace(Object obj);
-
-	/**
 	 * 清空一个实体在数据库中的数据
 	 * 
 	 * @param entityName
@@ -166,16 +163,6 @@ public interface Dao extends INameObject {
 	int update(Object obj);
 
 	/**
-	 * 按主键更新
-	 * 
-	 * @param entityName
-	 * @param update
-	 * @param cnd
-	 * @return
-	 */
-	int update(String entityName, Object obj);
-
-	/**
 	 * 按条件可增减的更新
 	 * 
 	 * @param entityName
@@ -187,6 +174,9 @@ public interface Dao extends INameObject {
 
 	/**
 	 * 根据主键查询一个实体的NeoBean实例
+	 * @param entityName
+	 * @param keyValues
+	 * @return
 	 */
 	NeoBean fetch(String entityName, Object... keyValues);
 

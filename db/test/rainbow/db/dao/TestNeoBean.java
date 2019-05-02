@@ -23,7 +23,7 @@ public class TestNeoBean {
 
 	@BeforeAll
 	public static void setUpBeforeClass() throws Exception {
-		dao = DBTest.createMemoryDao(TestNeoBean.class.getResource("object/test.rdm"));
+		dao = DBTest.createMemoryDao(TestNeoBean.class.getResource("object/test.rdmx"));
 	}
 
 	@AfterAll

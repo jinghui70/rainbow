@@ -1,7 +1,11 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.*;
-import java.util.function.Function;
+import static rainbow.core.util.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.checkState;
+
+import java.util.Optional;
+
+import com.google.common.base.Objects;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
@@ -50,15 +54,45 @@ public class Field {
 		this.link = link;
 	}
 
-	public void toSql(Sql sql, Function<Link, String> linkToAlias) {
-		sql.append(linkToAlias.apply(link));
+	public String getName() {
+		if (alias != null)
+			return alias;
+		if (link == null)
+			return column.getName();
+		return new StringBuilder(link.getName()).append('.').append(column.getName()).toString();
+	}
+
+	public void toSelectSql(Sql sql, SelectBuildContext context) {
+		if (function != null)
+			sql.append(function).append("(");
+		if (context.isLinkSql())
+			sql.append(link == null ? 'A' : context.getLinkAlias(link)).append('.');
 		sql.append(column.getCode());
+		if (function != null)
+			sql.append(')');
 		if (alias != null)
 			sql.append(" AS ").append(alias);
 	}
 
-	public String getName() {
-		return alias != null ? alias : column.getName();
+	public void toSql(Sql sql, SelectBuildContext context) {
+		if (alias != null) {
+			sql.append(alias);
+			return;
+		}
+		if (context.isLinkSql())
+			sql.append(link == null ? 'A' : context.getLinkAlias(link)).append('.');
+		sql.append(column.getCode());
+	}
+
+	public boolean match(String linkStr, String nameStr) {
+		if (linkStr == null && Objects.equal(alias, nameStr))
+			return true;
+		if (!Objects.equal(column.getName(), nameStr))
+			return false;
+		if (link == null)
+			return linkStr == null;
+		else
+			return Objects.equal(link.getName(), linkStr);
 	}
 
 	public static Field fromColumn(Column column) {
@@ -67,6 +101,13 @@ public class Field {
 		return field;
 	}
 
+	/**
+	 * 这个是用于select字段的解析
+	 * 
+	 * @param str
+	 * @param entity
+	 * @return
+	 */
 	public static Field parse(String str, Entity entity) {
 		Field field = new Field();
 		String[] f = Utils.split(str, ':');
@@ -89,6 +130,33 @@ public class Field {
 			field.column = field.link.getTargetEntity().getColumn(str);
 		} else
 			field.column = entity.getColumn(str);
+		return field;
+	}
+
+	/**
+	 * 这个是用于条件字段的解析
+	 * 
+	 * @param str
+	 * @param context
+	 * @return
+	 */
+	public static Field parse(String str, SelectBuildContext context) {
+		Field field = new Field();
+		Entity entity = context.getEntity();
+		String[] f = Utils.split(str, '.');
+		if (f.length > 1) {
+			field.link = entity.getLink(f[0]);
+			checkNotNull(field.link, "link {} of entity {} not defined", str, entity.getName());
+			field.column = field.link.getTargetEntity().getColumn(f[1]);
+		} else {
+			field.column = entity.getColumn(str);
+			if (field.column == null) {
+				Optional<Field> sf = context.alias2selectField(str);
+				checkState(sf.isPresent(), "bad field {}", str);
+				field.alias = str;
+				field.column = sf.get().column;
+			}
+		}
 		return field;
 	}
 

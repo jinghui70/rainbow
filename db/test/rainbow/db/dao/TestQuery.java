@@ -93,19 +93,19 @@ public class TestQuery {
 
 	@Test
 	public void testSimpleJoin() {
-		_JoinRecord j = dao.queryForObject(new Select("qty,person.name,goods.name").from("_SaleRecord").where("id", 1),
+		_JoinRecord j = dao.queryForObject(
+				new Select("qty,person.name:person,goods.name:goods").from("_SaleRecord").where("id", 1),
 				_JoinRecord.class);
 		assertEquals("张三", j.getPerson());
 		assertEquals("Tesla ModelX", j.getGoods());
 		assertEquals(1, j.getQty());
 
-		List<_JoinRecord> list = dao.queryForList(
-				new Select("persion.name, goods.name").distinct().from("_SaleRecord").orderBy("goods.name desc"),
-				_JoinRecord.class);
+		List<Map<String, Object>> list = dao.queryForMapList(
+				new Select("person.name, goods.name").distinct().from("_SaleRecord").orderBy("goods.name desc"));
 		assertEquals(2, list.size());
-		j = list.get(0);
-		assertEquals("李四", j.getPerson());
-		assertEquals("iPhone", j.getGoods());
+		Map<String, Object> m = list.get(0);
+		assertEquals("李四", m.get("person.name"));
+		assertEquals("iPhone", m.get("goods.name"));
 	}
 
 }
