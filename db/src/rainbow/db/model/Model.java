@@ -2,22 +2,21 @@ package rainbow.db.model;
 
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
-import rainbow.core.util.XmlBinder;
-
-@XmlRootElement
-@XmlType(name = "")
-public class Model {
+/**
+ * 数据模型，未来加上模型依赖，就可以把一个大模型拆分成多个文件
+ * 
+ * @author lijinghui
+ *
+ */
+public class Model extends Unit {
 
 	private String name;
-
-	@XmlElementWrapper(name = "entities", required = true)
-	@XmlElement(name = "entity", required = true)
-	private List<Entity> entities;
+	
+	private String comment;
+	
+	private List<Tag> tableTags;
+	
+	private List<Tag> fieldTags;
 
 	public String getName() {
 		return name;
@@ -27,15 +26,28 @@ public class Model {
 		this.name = name;
 	}
 
-	public List<Entity> getEntities() {
-		return entities;
+	public String getComment() {
+		return comment;
 	}
 
-	public void setEntities(List<Entity> entities) {
-		this.entities = entities;
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
-	public static XmlBinder<Model> getXmlBinder() {
-		return new XmlBinder<Model>(Model.class);
+	public List<Tag> getTableTags() {
+		return tableTags;
 	}
+
+	public void setTableTags(List<Tag> tableTags) {
+		this.tableTags = tableTags;
+	}
+
+	public List<Tag> getFieldTags() {
+		return fieldTags;
+	}
+
+	public void setFieldTags(List<Tag> fieldTags) {
+		this.fieldTags = fieldTags;
+	}
+
 }

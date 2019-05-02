@@ -5,8 +5,8 @@ import java.util.Map;
 
 import rainbow.core.model.object.NameObject;
 import rainbow.core.util.converter.Converters;
-import rainbow.db.modelx.DataType;
-import rainbow.db.modelx.Field;
+import rainbow.db.model.DataType;
+import rainbow.db.model.Field;
 
 public class Column extends NameObject {
 

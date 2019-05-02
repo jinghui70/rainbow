@@ -12,7 +12,7 @@ import rainbow.db.dao.condition.EmptyCondition;
 import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.modelx.DataType;
+import rainbow.db.model.DataType;
 
 public class Update {
 

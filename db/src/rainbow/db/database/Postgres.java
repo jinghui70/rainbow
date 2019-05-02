@@ -1,7 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.model.ColumnType;
-
 public class Postgres extends AbstractDialect {
 
 	@Override
@@ -23,27 +21,6 @@ public class Postgres extends AbstractDialect {
 	@Override
 	public String wrapDirtyRead(String sql) {
 		return sql;
-	}
-
-	@Override
-	public String toDateSql(String field, ColumnType type) {
-		StringBuilder sb = new StringBuilder("to_date(");
-		sb.append(field).append(",");
-		switch (type) {
-		case DATE:
-			sb.append("'YYYY-MM-DD'");
-			break;
-		case TIME:
-			sb.append("'HH24:MI:SS'");
-			break;
-		case TIMESTAMP:
-			sb.append("'YYYY-MM-DD HH24:MI:SS'");
-			break;
-		default:
-			throw new IllegalArgumentException();
-		}
-		sb.append(")");
-		return sb.toString();
 	}
 
 }

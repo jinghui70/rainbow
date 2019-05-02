@@ -1,4 +1,4 @@
-package rainbow.db.modelx;
+package rainbow.db.model;
 
 import java.util.List;
 

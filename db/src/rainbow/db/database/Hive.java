@@ -1,7 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.model.ColumnType;
-
 public class Hive extends AbstractDialect {
 
 	@Override
@@ -25,27 +23,6 @@ public class Hive extends AbstractDialect {
 	@Override
 	public String wrapDirtyRead(String sql) {
 		return sql;
-	}
-
-	@Override
-	public String toDateSql(String field, ColumnType type) {
-		StringBuilder sb = new StringBuilder("to_date(");
-		sb.append(field).append(",");
-		switch (type) {
-		case DATE:
-			sb.append("'yyyy-MM-dd'");
-			break;
-		case TIME:
-			sb.append("'HH24:mm:ss'");
-			break;
-		case TIMESTAMP:
-			sb.append("'yyyy-MM-dd HH24:mm:ss'");
-			break;
-		default:
-			throw new IllegalArgumentException();
-		}
-		sb.append(")");
-		return sb.toString();
 	}
 
 }

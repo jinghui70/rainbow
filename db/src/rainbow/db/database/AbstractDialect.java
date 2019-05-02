@@ -4,7 +4,7 @@ import java.util.List;
 
 import rainbow.core.model.exception.AppException;
 import rainbow.db.dao.Dao;
-import rainbow.db.model.Column;
+import rainbow.db.model.Field;
 
 /**
  * 数据库方言接口
@@ -20,7 +20,7 @@ public abstract class AbstractDialect implements Dialect {
 	}
 
 	@Override
-	public List<Column> getColumn(String table, Dao dao) {
+	public List<Field> getColumn(String table, Dao dao) {
 		throw new AppException("{} not implement getColumnSql", getClass().getSimpleName());
 	}
 

@@ -6,7 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import rainbow.core.model.object.NameObject;
-import rainbow.db.modelx.Table;
+import rainbow.db.model.Table;
 
 public class Entity extends NameObject {
 

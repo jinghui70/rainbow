@@ -52,7 +52,7 @@ import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.modelx.ModelX;
+import rainbow.db.model.Model;
 
 @Bean(extension = InjectProvider.class)
 public class DaoManagerImpl extends ActivatorAwareObject
@@ -176,9 +176,9 @@ public class DaoManagerImpl extends ActivatorAwareObject
 		Path modelFile = activator.getConfigureFile(name + ".rdmx");
 		String fileName = modelFile.getFileName().toString();
 		checkState(Files.exists(modelFile), "database model file not exist:{}", fileName);
-		ModelX modelX = null;
+		Model modelX = null;
 		try (InputStream is = Files.newInputStream(modelFile)) {
-			modelX = JSON.parseObject(is, StandardCharsets.UTF_8, ModelX.class);
+			modelX = JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
 		} catch (Exception e) {
 			logger.error("load rdmx file {} faild", fileName);
 			throw new RuntimeException(e);

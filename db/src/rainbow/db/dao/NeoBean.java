@@ -16,7 +16,7 @@ import com.google.common.collect.Maps;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.modelx.DataType;
+import rainbow.db.model.DataType;
 
 public class NeoBean {
 

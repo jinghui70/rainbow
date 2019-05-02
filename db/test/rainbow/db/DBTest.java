@@ -27,7 +27,7 @@ import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.modelx.ModelX;
+import rainbow.db.model.Model;
 
 public final class DBTest {
 
@@ -38,7 +38,7 @@ public final class DBTest {
 
 	public static MemoryDao createMemoryDao(Object source) throws IOException {
 		try (InputStream is = sourceToInputStream(source)) {
-			ModelX model = JSONObject.parseObject(is, ModelX.class);
+			Model model = JSONObject.parseObject(is, Model.class);
 			Map<String, Entity> entityMap = DaoUtils.loadModel(model);
 			return new MemoryDao(entityMap);
 		}

@@ -1,43 +1,21 @@
 package rainbow.db.model;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlType;
+public class Index {
 
-@XmlType(name = "Index", propOrder = { "name","unique","inxColumns"})
-public class Index implements Cloneable {
-
-	@XmlElement(required = true)
-	private String name;
+	private String code;
 
 	private boolean unique;
 
-	/**
-     * 索引属性列表
-     */
-    @XmlElementWrapper(name = "inxColumns")
-    @XmlElement(name = "inxColumn", required = true)
-    private List<IndexColumn> inxColumns;
-
-	public String getName() {
-		return name;
+    private List<String> fields;
+    
+	public String getCode() {
+		return code;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public List<IndexColumn> getInxColumns() {
-        if (inxColumns == null)
-        	inxColumns = new ArrayList<IndexColumn>();
-		return inxColumns;
-	}
-
-	public void setInxColumns(List<IndexColumn> inxColumns) {
-		this.inxColumns = inxColumns;
+	public void setCode(String code) {
+		this.code = code;
 	}
 
 	public boolean isUnique() {
@@ -48,19 +26,12 @@ public class Index implements Cloneable {
 		this.unique = unique;
 	}
 
-	@Override
-	public Index clone() {
-		try {
-            Index index = (Index) super.clone();
-            List<IndexColumn> newInxColumns = new ArrayList<IndexColumn>(getInxColumns().size());
-            for (IndexColumn inxColumn : getInxColumns()) {
-            	newInxColumns.add(inxColumn.clone());
-            }
-            index.setInxColumns(newInxColumns);
-            return index;
-		} catch (CloneNotSupportedException e) {
-			return null;
-		}
+	public List<String> getFields() {
+		return fields;
+	}
+
+	public void setFields(List<String> fields) {
+		this.fields = fields;
 	}
 
 }

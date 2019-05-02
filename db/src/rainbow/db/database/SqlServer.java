@@ -1,7 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.model.ColumnType;
-
 /**
  * 简单的建立sqlserver的方言，现在还不能正式使用
  * 
@@ -32,18 +30,5 @@ public class SqlServer extends AbstractDialect {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public String toDateSql(String field, ColumnType type) {
-		switch (type) {
-		case DATE:
-			return new StringBuilder().append("DATE(").append(field).append(")").toString();
-		case TIME:
-			return new StringBuilder().append("TIME(").append(field).append(")").toString();
-		case TIMESTAMP:
-			return new StringBuilder().append("TIMESTAMP(").append(field).append(")").toString();
-		default:
-			throw new IllegalArgumentException();
-		}
-	}
 
 }

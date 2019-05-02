@@ -14,10 +14,10 @@ import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
-import rainbow.db.modelx.ModelX;
-import rainbow.db.modelx.Tag;
-import rainbow.db.modelx.TagType;
-import rainbow.db.modelx.Unit;
+import rainbow.db.model.Model;
+import rainbow.db.model.Tag;
+import rainbow.db.model.TagType;
+import rainbow.db.model.Unit;
 
 public abstract class DaoUtils {
 
@@ -71,7 +71,7 @@ public abstract class DaoUtils {
 		return value;
 	}
 
-	public static HashMap<String, Entity> loadModel(ModelX model) {
+	public static HashMap<String, Entity> loadModel(Model model) {
 		HashMap<String, Entity> result = new HashMap<String, Entity>();
 		loadUnit(result, model);
 		List<Tag> linkTags = model.getFieldTags().stream().filter(tag -> tag.getType() == TagType.LINK)

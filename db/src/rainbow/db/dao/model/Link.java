@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import rainbow.core.model.object.NameObject;
-import rainbow.db.modelx.LinkField;
+import rainbow.db.model.LinkField;
 
 public class Link extends NameObject {
 

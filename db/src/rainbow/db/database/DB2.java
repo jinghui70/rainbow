@@ -1,7 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.model.ColumnType;
-
 public class DB2 extends AbstractDialect {
 
 	@Override
@@ -26,20 +24,6 @@ public class DB2 extends AbstractDialect {
 	@Override
 	public String wrapDirtyRead(String sql) {
 		return sql + " WITH UR";
-	}
-
-	@Override
-	public String toDateSql(String field, ColumnType type) {
-		switch (type) {
-		case DATE:
-			return new StringBuilder().append("DATE(").append(field).append(")").toString();
-		case TIME:
-			return new StringBuilder().append("TIME(").append(field).append(")").toString();
-		case TIMESTAMP:
-			return new StringBuilder().append("TIMESTAMP(").append(field).append(")").toString();
-		default:
-			throw new IllegalArgumentException();
-		}
 	}
 
 }
