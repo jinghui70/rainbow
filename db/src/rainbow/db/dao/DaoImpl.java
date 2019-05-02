@@ -270,7 +270,11 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public NeoBean fetch(String entityName, Object... keyValues) {
 		Entity entity = getEntity(entityName);
-		Sql sql = new Sql().append("select * from ").append(entity.getCode()).whereKey(entity, keyValues);
+		Sql sql = new Sql().append("select ");
+		entity.getColumns().forEach(c -> {
+			sql.append(c.getCode()).appendTempComma();
+		});
+		sql.clearTemp().append(" from ").append(entity.getCode()).whereKey(entity, keyValues);
 		return queryForObject(sql, new NeoBeanMapper(entity));
 	}
 
