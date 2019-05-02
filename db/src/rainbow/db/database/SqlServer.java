@@ -1,6 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.dao.Pager;
 import rainbow.db.model.ColumnType;
 
 /**
@@ -22,14 +21,14 @@ public class SqlServer extends AbstractDialect {
 	}
 
 	@Override
-	public String wrapPagedSql(String sql, Pager pager) {
+	public String wrapPagedSql(String sql, int pageSize, int pageNo) {
 		/* http://bbs.csdn.net/topics/340134909 */
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public String wrapDirtyRead(String sql) {
-		//在select 表名后面加 WITH (NOLOCK)
+		// 在select 表名后面加 WITH (NOLOCK)
 		throw new UnsupportedOperationException();
 	}
 

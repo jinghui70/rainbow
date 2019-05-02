@@ -1,6 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.dao.Pager;
 import rainbow.db.model.ColumnType;
 
 public class MySQL extends AbstractDialect {
@@ -15,12 +14,9 @@ public class MySQL extends AbstractDialect {
 		return String.format("%s LIMIT %d", sql, limit);
 	}
 
-	public String wrapPagedSql(String sql, Pager pager) {
-		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1, pager.getLimit());
-	}
-
-	public String wrapPagedSql(String sql, String select, Pager pager) {
-		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1 , pager.getLimit());
+	public String wrapPagedSql(String sql, int pageSize, int pageNo) {
+		int from = (pageNo - 1) * pageSize + 1;
+		return String.format("%s LIMIT %d, %d", sql, from - 1, pageSize);
 	}
 
 	public String wrapDirtyRead(String sql) {

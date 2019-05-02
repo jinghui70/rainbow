@@ -15,8 +15,8 @@ public class ObjectRowMapper<T> implements RowMapper<T> {
 
 	private ClassInfo<T> classInfo;
 
-	public ObjectRowMapper(Select select, Class<T> clazz) {
-		this.fields = select.getFields();
+	public ObjectRowMapper(List<Field> fields, Class<T> clazz) {
+		this.fields = fields;
 		this.classInfo = new ClassInfo<T>(clazz);
 	}
 

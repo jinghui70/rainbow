@@ -3,7 +3,6 @@ package rainbow.db.database;
 import java.util.List;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.Pager;
 import rainbow.db.model.Column;
 import rainbow.db.model.ColumnType;
 
@@ -42,7 +41,7 @@ public interface Dialect {
 	 *            分页信息
 	 * @return
 	 */
-	String wrapPagedSql(String sql, Pager pager);
+	String wrapPagedSql(String sql, int pageSize, int pageNo);
 
 	/**
 	 * 返回使用脏读的sql

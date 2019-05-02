@@ -58,42 +58,20 @@ public class TestDao {
 		return p;
 	}
 
-	private void assertPerson(_Person p, int id) {
-		assertEquals(Integer.valueOf(id), p.getId());
-		assertEquals("1", p.getName());
-		assertEquals(LocalDate.of(1970, 1, 27), p.getBirthday());
-		assertEquals(_Gender.女, p.getGender());
-		assertEquals(Integer.valueOf(5), p.getScore()[0]);
-		assertEquals(Integer.valueOf(4), p.getScore()[1]);
-		assertEquals(Integer.valueOf(3), p.getScore()[2]);
-	}
-
 	@Test
 	public void test() {
 		_Person p = createPerson(10);
 		dao.insert(p);
-		assertEquals(1, dao.count("_Person"));
+		assertEquals(1, dao.select().from("_Person").count());
 
 		dao.delete(p);
-		assertEquals(0, dao.count("_Person"));
+		assertEquals(0, dao.select().from("_Person").count());
 
 		dao.insert(p);
 		p = createPerson(20);
-		dao.replace(p);
-		assertEquals(2, dao.count("_Person"));
+		assertEquals(2, dao.select().from("_Person").count());
 
-		p = dao.fetch(_Person.class, 20);
-		assertPerson(p, 20);
-		p.getScore()[0] = 100;
-		p.getScore()[1] = 100;
-		p.getScore()[2] = 100;
-
-		dao.replace(p);
-		assertEquals(2, dao.count("_Person"));
-		p = dao.fetch(_Person.class, 20);
-		assertEquals(Integer.valueOf(100), p.getScore()[0]);
-		assertEquals(Integer.valueOf(100), p.getScore()[1]);
-		assertEquals(Integer.valueOf(100), p.getScore()[2]);
+		// TODO 重新设计同名多列字段的方法并测试
 	}
 
 	@Test
@@ -103,7 +81,7 @@ public class TestDao {
 			list.add(createPerson(i));
 		}
 		dao.insert(list, 5, null);
-		assertEquals(10, dao.count("_Person"));
+		assertEquals(10, dao.select().from("_Person").count());
 	}
 
 	@Test
@@ -120,8 +98,8 @@ public class TestDao {
 		neo.setValue("time", Dao.NOW);
 		dao.insert(neo);
 
-		_SaleRecord r = dao.queryForObject(new Select().from("_SaleRecord").where("time", Op.Greater, yesterday),
-				_SaleRecord.class);
+		_SaleRecord r = dao.select().from("_SaleRecord").where("time", Op.Greater, yesterday)
+				.queryForObject(_SaleRecord.class);
 		assertEquals(Integer.valueOf(1), r.getId());
 		assertTrue(r.getTime().equals(today));
 
@@ -131,9 +109,8 @@ public class TestDao {
 		dao.update(neo);
 		r = dao.fetch(_SaleRecord.class, 1);
 		assertEquals(today, r.getTime());
-		
-		r = dao.queryForObject(new Select().from("_SaleRecord").where("time", Op.LessEqual, Dao.NOW),
-				_SaleRecord.class);
+
+		r = dao.select().from("_SaleRecord").where("time", Op.LessEqual, Dao.NOW).queryForObject(_SaleRecord.class);
 		assertNotNull(r);
 
 	}

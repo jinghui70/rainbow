@@ -10,7 +10,6 @@ import com.google.common.collect.Maps;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.Pager;
 import rainbow.db.dao.Sql;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.model.Column;
@@ -29,12 +28,9 @@ public class H2 extends AbstractDialect {
 	}
 
 	@Override
-	public String wrapPagedSql(String sql, Pager pager) {
-		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1, pager.getLimit());
-	}
-
-	public String wrapPagedSql(String sql, String select, Pager pager) {
-		return String.format("%s LIMIT %d, %d", sql, pager.getFrom() - 1, pager.getLimit());
+	public String wrapPagedSql(String sql, int pageSize, int pageNo) {
+		int from = (pageNo - 1) * pageSize + 1;
+		return String.format("%s LIMIT %d, %d", sql, from - 1, pageSize);
 	}
 
 	@Override

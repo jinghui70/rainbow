@@ -2,7 +2,9 @@ package rainbow.db.dao;
 
 import static rainbow.core.util.Preconditions.checkState;
 
+import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,9 +17,10 @@ import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
+import rainbow.db.jdbc.DataAccessException;
 
 public class Select {
-	
+
 	private Dao dao;
 
 	private String[] select;
@@ -28,42 +31,19 @@ public class Select {
 
 	private C cnd = EmptyCondition.INSTANCE;
 
-	private Pager pager;
-
 	private List<OrderBy> orderBy;
 
 	private String[] groupBy;
 
 	private SelectBuildContext context = null;
 
-	public Select() {
-	}
-	
 	public Select(Dao dao) {
 		this.dao = dao;
 	}
 
-	public Select(String selectStr) {
+	public Select(Dao dao, String selectStr) {
+		this.dao = dao;
 		select = Utils.splitTrim(selectStr, ',');
-	}
-
-	public Select limit(int limit) {
-		pager = new Pager(1, limit);
-		return this;
-	}
-
-	public Select paging(int pageNo, int pageSize) {
-		pager = new Pager(pageNo, pageSize);
-		return this;
-	}
-
-	public Select setPager(Pager pager) {
-		this.pager = pager;
-		return this;
-	}
-
-	public Pager getPager() {
-		return pager;
 	}
 
 	public Select distinct() {
@@ -215,7 +195,7 @@ public class Select {
 		return context.getEntity();
 	}
 
-	public Sql build(Dao dao) {
+	public Sql build() {
 		context = new SelectBuildContext(dao, entityName, select);
 		if (!cnd.isEmpty())
 			context.setCnd(cnd);
@@ -300,7 +280,223 @@ public class Select {
 		sb.append("]");
 		return sb.toString();
 	}
-	
-	public void query(Consumer<Map<String, Object>> consumer) {
+
+	/**
+	 * 返回一个NeoBean，如果结果不是一个则返回空
+	 * 
+	 * @return
+	 */
+	public NeoBean queryForObject() {
+		Sql sql = build();
+		return dao.queryForObject(sql, new NeoBeanMapper(getEntity(), getFields()));
 	}
+
+	/**
+	 * 查询返回一个对象
+	 * 
+	 * @param clazz 返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
+	 * @return
+	 */
+	public <T> T queryForObject(Class<T> clazz) {
+		Sql sql = build();
+		if (getFields().size() == 1)
+			return dao.queryForObject(sql, clazz);
+		return dao.queryForObject(sql, new ObjectRowMapper<T>(getFields(), clazz));
+	}
+
+	/**
+	 * 查询返回一个Map
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> queryForMap() {
+		Sql sql = build();
+		return dao.queryForObject(sql, new MapRowMapper(getFields()));
+	}
+
+	/**
+	 * 查询返回一个整数
+	 * 
+	 * @return
+	 */
+	public int queryForInt() {
+		Integer result = queryForObject(Integer.class);
+		return result == null ? 0 : result.intValue();
+	}
+
+	/**
+	 * 返回符合条件的记录数
+	 * 
+	 * @return
+	 */
+	public int count() {
+		Sql sql = build();
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
+		return dao.queryForObject(countSql, Integer.class);
+	}
+
+	/**
+	 * 查询并把结果以Map的方式逐一调用消费函数
+	 * 
+	 * @param consumer
+	 */
+	public void query(Consumer<Map<String, Object>> consumer) {
+		Sql sql = build();
+		Map<String, Object> map = new HashMap<String, Object>();
+		dao.doQuery(sql, rs -> {
+			map.clear();
+			int index = 1;
+			for (Field field : getFields()) {
+				try {
+					Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
+					map.put(field.getName(), value);
+				} catch (SQLException e) {
+					throw new DataAccessException(e);
+				}
+			}
+			consumer.accept(map);
+		});
+	}
+
+	/**
+	 * 查询返回NeoBean列表
+	 * 
+	 * @return
+	 */
+	public List<NeoBean> queryForList() {
+		Sql sql = build();
+		return dao.queryForList(sql, new NeoBeanMapper(getEntity(), getFields()));
+	}
+
+	/**
+	 * 查询返回前几项NeoBean列表
+	 * 
+	 * @param limit 返回记录个数
+	 * @return
+	 */
+	public List<NeoBean> queryForList(int limit) {
+		Sql sql = build();
+		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
+		return dao.queryForList(sql, new NeoBeanMapper(getEntity(), getFields()));
+	}
+
+	/**
+	 * 查询返回一组列表
+	 * 
+	 * @param clazz 返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
+	 * @return
+	 */
+	public <T> List<T> queryForList(Class<T> clazz) {
+		Sql sql = build();
+		if (getFields().size() == 1)
+			return dao.queryForList(sql, clazz);
+		return dao.queryForList(sql, new ObjectRowMapper<T>(getFields(), clazz));
+	}
+
+	/**
+	 * 查询返回前几项对象列表
+	 * 
+	 * @param clazz 返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
+	 * @param limit 返回记录个数
+	 * @return
+	 */
+	public <T> List<T> queryForList(Class<T> clazz, int limit) {
+		Sql sql = build();
+		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
+		if (getFields().size() == 1)
+			return dao.queryForList(sql, clazz);
+		return dao.queryForList(sql, new ObjectRowMapper<T>(getFields(), clazz));
+	}
+
+	/**
+	 * 查询返回前几项对象列表
+	 * 
+	 * @param clazz    返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
+	 * @param pageSize 每页记录数
+	 * @param pageNo   第几页
+	 * @return
+	 */
+	public <T> List<T> queryForList(Class<T> clazz, int pageSize, int pageNo) {
+		Sql sql = build();
+		sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, pageNo));
+		if (getFields().size() == 1)
+			return dao.queryForList(sql, clazz);
+		return dao.queryForList(sql, new ObjectRowMapper<T>(getFields(), clazz));
+	}
+
+	/**
+	 * 分页查询第一页，返回的PageData对象包含总记录数
+	 * 
+	 * @param clazz
+	 * @param pageSize
+	 * @return
+	 */
+	public <T> PageData<T> pageQuery(Class<T> clazz, int pageSize) {
+		Sql sql = build();
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
+		int count = dao.queryForObject(countSql, Integer.class);
+		if (count == 0) {
+			return new PageData<T>();
+		} else {
+			sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
+			List<T> list = dao.queryForList(sql, clazz);
+			return new PageData<T>(count, list);
+		}
+	}
+	
+	/**
+	 * 查询返回一组Map列表
+	 * 
+	 * @return
+	 */
+	public List<Map<String, Object>> queryForMapList() {
+		Sql sql = build();
+		return dao.queryForList(sql, new MapRowMapper(getFields()));
+	}
+
+	/**
+	 * 查询返回一组Map列表
+	 * 
+	 * @param limit 返回记录个数
+	 * @return
+	 */
+	public List<Map<String, Object>> queryForMapList(int limit) {
+		Sql sql = build();
+		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
+		return dao.queryForList(sql, new MapRowMapper(getFields()));
+	}
+
+	/**
+	 * 查询返回一组Map列表
+	 * 
+	 * @param pageSize 每页记录数
+	 * @param pageNo 第几页
+	 * @return
+	 */
+	public List<Map<String, Object>> queryForMapList(int pageSize, int pageNo) {
+		Sql sql = build();
+		sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, pageNo));
+		return dao.queryForList(sql, new MapRowMapper(getFields()));
+	}
+	
+	/**
+	 * 分页查询第一页，返回PageData对象包含总记录数
+	 * 
+	 * @param clazz
+	 * @param pageSize
+	 * @return
+	 */
+	public PageData<Map<String, Object>> mapPageQuery(int pageSize) {
+		Sql sql = build();
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
+		int count = dao.queryForObject(countSql, Integer.class);
+		if (count == 0) {
+			return new PageData<Map<String, Object>>();
+		} else {
+			sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
+			List<Map<String, Object>> list = dao.queryForList(sql, new MapRowMapper(getFields()));
+			return new PageData<Map<String, Object>>(count, list);
+		}
+	}
+
 }

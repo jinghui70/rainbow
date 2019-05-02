@@ -2,7 +2,6 @@ package rainbow.db.dao;
 
 import java.sql.ResultSet;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import com.google.common.base.Supplier;
@@ -24,10 +23,6 @@ import rainbow.db.jdbc.RowMapper;
 public interface Dao extends INameObject {
 
 	public static final String NOW = "_now_";
-	
-	public static Select select() {
-		return new Select();
-	}
 
 	/**
 	 * 返回屏蔽数据库差异的数据库方言对象
@@ -163,17 +158,30 @@ public interface Dao extends INameObject {
 	int update(Object obj);
 
 	/**
-	 * 按条件可增减的更新
+	 * 发起一个查询
 	 * 
-	 * @param entityName
-	 * @param cnd
-	 * @param items
 	 * @return
 	 */
-	int update(String entityName, C cnd, U... items);
+	public Select select();
+
+	/**
+	 * 发起一个查询
+	 * 
+	 * @return
+	 */
+	public Select select(String selectStr);
+	
+	/**
+	 * 发起一个更新
+	 * 
+	 * @param entityName
+	 * @return
+	 */
+	public Update update(String entityName);
 
 	/**
 	 * 根据主键查询一个实体的NeoBean实例
+	 * 
 	 * @param entityName
 	 * @param keyValues
 	 * @return
@@ -181,83 +189,9 @@ public interface Dao extends INameObject {
 	NeoBean fetch(String entityName, Object... keyValues);
 
 	/**
-	 * 查询一个实体的NeoBean实例
-	 */
-	NeoBean fetch(String entityName, C cnd);
-
-	/**
 	 * 根据主键查询一个实体的实例
 	 */
 	<T> T fetch(Class<T> clazz, Object... keyValues);
-
-	/**
-	 * 查询并执行逐行的处理
-	 * 
-	 * @param select
-	 * @param consumer
-	 */
-	void query(Select select, Consumer<Map<String, Object>> consumer);
-
-	/**
-	 * 查询一个NeoBean实例
-	 * 
-	 * @param select
-	 * @return
-	 */
-	NeoBean queryForObject(Select select);
-
-	/**
-	 * 查询实体的NeoBean实例列表
-	 */
-	List<NeoBean> queryForList(Select select);
-
-	/**
-	 * 查询一个值
-	 * 
-	 * @param select 基于对象的查询语句
-	 * @param clazz  查询后记录需要转换的对象类型。如果只查询一个字段，该类型应该是数据库字段能转换的类型。
-	 * @return
-	 */
-	<T> T queryForObject(Select select, Class<T> clazz);
-
-	/**
-	 * 查询一个列表。参数与函数queryForObject类似。
-	 * 
-	 * 
-	 * @param select 查询语句，如果列表需要分页，在这里设置
-	 * @param clazz  查询后记录需要转换的对象类型。如果只查询一个字段，该类型应该是数据库字段能转换的类型。
-	 * @return
-	 */
-	<T> List<T> queryForList(Select select, Class<T> clazz);
-
-	/**
-	 * 查询一条数据，返回一个Map对象
-	 * 
-	 */
-	Map<String, Object> queryForMap(Select select);
-
-	/**
-	 * 查询返回一组Map对象
-	 * 
-	 */
-	List<Map<String, Object>> queryForMapList(Select select);
-
-	/** 根据条件求一个实体分页对象数据 */
-	<T> PageData<T> pageQuery(Select select, Class<T> clazz);
-
-	/** 根据条件求一个实体分页对象数据 */
-	<T> PageData<T> pageQuery(Select select, RowMapper<T> mapper);
-
-	/** 求一个整数值 */
-	int queryForInt(Select select);
-
-	/** 根据条件，计算某个对象在数据库中有多少条记录 */
-	int count(String entityName, C cnd);
-
-	/** 计算某个对象在数据库中有多少条记录 */
-	int count(String entityName);
-
-	int count(Select select);
 
 	/** 以下查询返回一个值 *********************************************************/
 
@@ -266,8 +200,6 @@ public interface Dao extends INameObject {
 
 	/** 查询一个对象 */
 	<T> T queryForObject(Sql sql, RowMapper<T> mapper);
-
-	int queryForInt(Sql sql);
 
 	/** 以下查询返回一组值 *********************************************************/
 

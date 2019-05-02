@@ -14,8 +14,8 @@ public class MapRowMapper implements RowMapper<Map<String, Object>> {
 
 	private List<Field> fields;
 
-	public MapRowMapper(Select select) {
-		this.fields = select.getFields();
+	public MapRowMapper(List<Field> fields) {
+		this.fields = fields;
 	}
 
 	public MapRowMapper(Entity entity) {

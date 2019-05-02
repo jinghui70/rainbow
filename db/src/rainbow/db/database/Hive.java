@@ -1,6 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.dao.Pager;
 import rainbow.db.model.ColumnType;
 
 public class Hive extends AbstractDialect {
@@ -16,9 +15,11 @@ public class Hive extends AbstractDialect {
 	}
 
 	@Override
-	public String wrapPagedSql(String sql, Pager pager) {
+	public String wrapPagedSql(String sql, int pageSize, int pageNo) {
+		int from = (pageNo - 1) * pageSize + 1;
+		int to = pageNo * pageSize;
 		return String.format("select * from (select ROWNUM AS RN,A.* from (%s) A where ROWNUM <=%d) where RN>=%d", sql,
-				pager.getTo(), pager.getFrom());
+				to, from);
 	}
 
 	@Override

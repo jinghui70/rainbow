@@ -6,7 +6,6 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -22,7 +21,6 @@ import com.google.common.collect.ImmutableMap;
 import rainbow.core.model.object.NameObject;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
-import rainbow.db.dao.condition.EmptyCondition;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.database.Dialect;
@@ -270,29 +268,9 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
-	public int update(String entityName, C cnd, U... items) {
-		Entity entity = getEntity(entityName);
-		Sql sql = new Sql("UPDATE ").append(entity.getCode()).append(" SET ");
-		for (U item : items) {
-			item.toSql(entity, sql);
-			sql.appendTempComma();
-		}
-		sql.clearTemp();
-		sql.whereCnd(this, entity, cnd);
-		return execSql(sql);
-	}
-
-	@Override
 	public NeoBean fetch(String entityName, Object... keyValues) {
 		Entity entity = getEntity(entityName);
 		Sql sql = new Sql().append("select * from ").append(entity.getCode()).whereKey(entity, keyValues);
-		return queryForObject(sql, new NeoBeanMapper(entity));
-	}
-
-	@Override
-	public NeoBean fetch(String entityName, C cnd) {
-		Entity entity = getEntity(entityName);
-		Sql sql = new Sql().append("select * from ").append(entity.getCode()).whereCnd(this, entity, cnd);
 		return queryForObject(sql, new NeoBeanMapper(entity));
 	}
 
@@ -303,111 +281,18 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
-	public void query(Select select, Consumer<Map<String, Object>> consumer) {
-		Sql sql = select.build(this);
-		Map<String, Object> map = new HashMap<String, Object>();
-		doQuery(sql, rs -> {
-			map.clear();
-			int index = 1;
-			for (Field field : select.getFields()) {
-				try {
-					Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
-					map.put(field.getName(), value);
-				} catch (SQLException e) {
-					throw new DataAccessException(e);
-				}
-			}
-			consumer.accept(map);
-		});
+	public Select select() {
+		return new Select(this);
 	}
 
 	@Override
-	public NeoBean queryForObject(Select select) {
-		Sql sql = select.build(this);
-		return queryForObject(sql, new NeoBeanMapper(select.getEntity(), select.getFields()));
+	public Select select(String selectStr) {
+		return new Select(this, selectStr);
 	}
 
 	@Override
-	public List<NeoBean> queryForList(Select select) {
-		Sql sql = select.build(this);
-		return queryForList(sql, new NeoBeanMapper(select.getEntity(), select.getFields()));
-	}
-
-	@Override
-	public <T> T queryForObject(Select select, Class<T> clazz) {
-		Sql sql = select.build(this);
-		if (select.getSelCount() == 1)
-			return queryForObject(sql, clazz);
-		return queryForObject(sql, new ObjectRowMapper<T>(select, clazz));
-	}
-
-	@Override
-	public <T> List<T> queryForList(Select select, Class<T> clazz) {
-		Sql sql = select.build(this);
-		if (select.getSelCount() == 1)
-			return queryForList(sql, clazz);
-		return queryForList(sql, new ObjectRowMapper<T>(select, clazz));
-	}
-
-	@Override
-	public Map<String, Object> queryForMap(Select select) {
-		Sql sql = select.build(this);
-		return queryForObject(sql, new MapRowMapper(select));
-	}
-
-	@Override
-	public List<Map<String, Object>> queryForMapList(Select select) {
-		Sql sql = select.build(this);
-		return queryForList(sql, new MapRowMapper(select));
-	}
-
-	@Override
-	public <T> PageData<T> pageQuery(Select select, Class<T> clazz) {
-		checkNotNull(select.getPager());
-		int count = count(select);
-		if (count == 0) {
-			return new PageData<T>();
-		} else {
-			List<T> list = queryForList(select, clazz);
-			return new PageData<T>(count, list);
-		}
-	}
-
-	@Override
-	public <T> PageData<T> pageQuery(Select select, RowMapper<T> mapper) {
-		checkNotNull(select.getPager());
-		int count = count(select);
-		if (count == 0) {
-			return new PageData<T>();
-		} else {
-			Sql sql = select.build(this);
-			List<T> list = queryForList(sql, mapper);
-			return new PageData<T>(count, list);
-		}
-	}
-
-	@Override
-	public int queryForInt(Select sb) {
-		return queryForInt(sb.build(this));
-	}
-
-	@Override
-	public int count(String entityName, C cnd) {
-		Entity entity = getEntity(entityName);
-		Sql sql = new Sql().append("select count(1) from ").append(entity.getCode()).whereCnd(this, entity, cnd);
-		return queryForInt(sql);
-	}
-
-	@Override
-	public int count(String entityName) {
-		return count(entityName, EmptyCondition.INSTANCE);
-	}
-
-	@Override
-	public int count(Select select) {
-		Sql sql = select.build(this);
-		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-		return queryForInt(countSql);
+	public Update update(String entityName) {
+		return new Update(this, entityName);
 	}
 
 	@Override
@@ -432,12 +317,6 @@ public class DaoImpl extends NameObject implements Dao {
 		} catch (IncorrectResultSizeDataAccessException e) {
 			return null;
 		}
-	}
-
-	@Override
-	public int queryForInt(Sql sql) {
-		Integer result = queryForObject(sql, Integer.class);
-		return result == null ? 0 : result.intValue();
 	}
 
 	@Override

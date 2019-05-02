@@ -45,41 +45,39 @@ public class TestQuery {
 
 	@Test
 	public void testSimple() {
-		_SaleRecord s = dao.queryForObject(new Select().from("_SaleRecord").where("id", 1), _SaleRecord.class);
+		_SaleRecord s = dao.select().from("_SaleRecord").where("id", 1).queryForObject(_SaleRecord.class);
 		assertEquals(1, s.getPerson());
 		assertEquals(1, s.getGoods());
 		assertEquals(1, s.getQty());
 		assertEquals(100d, s.getMoney());
 
-		List<_SaleRecord> list = dao.queryForList(
-				new Select().from("_SaleRecord").where("goods", 3).orderBy("qty desc, money"), _SaleRecord.class);
+		List<_SaleRecord> list = dao.select().from("_SaleRecord").where("goods", 3).orderBy("qty desc, money")
+				.queryForList(_SaleRecord.class);
 		assertEquals(10, list.size());
 		s = list.get(0);
 		assertEquals(2, s.getPerson());
 		assertEquals(10, s.getQty());
 		assertEquals(10d, s.getMoney());
 
-		PageData<_SaleRecord> page = dao.pageQuery(new Select().from("_SaleRecord").orderBy("id").paging(1, 5),
-				_SaleRecord.class);
+		PageData<_SaleRecord> page = dao.select().from("_SaleRecord").orderBy("id").pageQuery(_SaleRecord.class, 5);
 		assertEquals(5, page.getRows().size());
 		assertEquals(20, page.getTotal());
 
-		page = dao.pageQuery(new Select().from("_SaleRecord").orderBy("id").paging(2, 11), _SaleRecord.class);
+		list = dao.select().from("_SaleRecord").orderBy("id").queryForList(_SaleRecord.class, 11, 2);
 		assertEquals(9, page.getRows().size());
-		assertEquals(20, page.getTotal());
 
-		Select select = new Select("goods,person,min(qty) as min,max(qty) as max").from("_SaleRecord")
+		Select select = dao.select("goods,person,min(qty) as min,max(qty) as max").from("_SaleRecord")
 				.groupBy("goods, person").orderBy("goods");
 
 		// 用map的方式处理
-		List<Map<String, Object>> l = dao.queryForMapList(select);
+		List<Map<String, Object>> l = select.queryForMapList();
 		assertEquals(2, l.size());
 		Map<String, Object> m = l.get(0);
 		assertEquals(1, m.get("goods"));
 		assertEquals(1, m.get("min"));
 		assertEquals(10, m.get("max"));
 		// 用对象方式处理
-		List<_SaleRecordCalc> ll = dao.queryForList(select, _SaleRecordCalc.class);
+		List<_SaleRecordCalc> ll = select.queryForList(_SaleRecordCalc.class);
 		assertEquals(2, ll.size());
 		_SaleRecordCalc src = ll.get(0);
 		assertEquals(1, src.getGoods());
@@ -87,21 +85,20 @@ public class TestQuery {
 		assertEquals(10, src.getMax());
 
 		// 测试函数
-		_Goods g = dao.queryForObject(new Select().from("_Goods").where("UPPER(name)", "IPHONE"), _Goods.class);
+		_Goods g = dao.select().from("_Goods").where("UPPER(name)", "IPHONE").queryForObject(_Goods.class);
 		assertEquals(Integer.valueOf(3), g.getId());
 	}
 
 	@Test
 	public void testSimpleJoin() {
-		_JoinRecord j = dao.queryForObject(
-				new Select("qty,person.name:person,goods.name:goods").from("_SaleRecord").where("id", 1),
-				_JoinRecord.class);
+		_JoinRecord j = dao.select("qty,person.name:person,goods.name:goods").from("_SaleRecord").where("id", 1)
+				.queryForObject(_JoinRecord.class);
 		assertEquals("张三", j.getPerson());
 		assertEquals("Tesla ModelX", j.getGoods());
 		assertEquals(1, j.getQty());
 
-		List<Map<String, Object>> list = dao.queryForMapList(
-				new Select("person.name, goods.name").distinct().from("_SaleRecord").orderBy("goods.name desc"));
+		List<Map<String, Object>> list = dao.select("person.name, goods.name").distinct().from("_SaleRecord")
+				.orderBy("goods.name desc").queryForMapList();
 		assertEquals(2, list.size());
 		Map<String, Object> m = list.get(0);
 		assertEquals("李四", m.get("person.name"));

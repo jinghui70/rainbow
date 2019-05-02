@@ -1,6 +1,5 @@
 package rainbow.db.database;
 
-import rainbow.db.dao.Pager;
 import rainbow.db.model.ColumnType;
 
 public class DB2 extends AbstractDialect {
@@ -16,10 +15,12 @@ public class DB2 extends AbstractDialect {
 	}
 
 	@Override
-	public String wrapPagedSql(String sql, Pager pager) {
+	public String wrapPagedSql(String sql, int pageSize, int pageNo) {
+		int from = (pageNo - 1) * pageSize + 1;
+		int to = pageNo * pageSize;
 		return String.format(
 				"select * from (select rownumber() over() as row_next,t.* from (select * from (%s) fetch first %d rows only) as t) as temp where row_next between %d and %d",
-				sql, pager.getTo(), pager.getFrom(), pager.getTo());
+				sql, to, from, to);
 	}
 
 	@Override

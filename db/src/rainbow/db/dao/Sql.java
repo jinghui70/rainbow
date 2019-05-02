@@ -183,47 +183,6 @@ public class Sql implements Appendable {
 		return this;
 	}
 
-	/**
-	 * 取前几行
-	 * 
-	 * @param dao
-	 * @param limit
-	 * @return
-	 */
-	public Sql limit(Dao dao, int limit) {
-		if (limit > 0)
-			setSql(dao.getDialect().wrapLimitSql(getSql(), limit));
-		return this;
-	}
-
-	/**
-	 * 分页
-	 * 
-	 * @param dao
-	 * @param pager
-	 * @return
-	 */
-	public void paging(Dao dao, Pager pager) {
-		if (pager != null) {
-			if (pager.getPage() == 1)
-				setSql(dao.getDialect().wrapLimitSql(getSql(), pager.getLimit()));
-			else
-				setSql(dao.getDialect().wrapPagedSql(getSql(), pager));
-		}
-	}
-
-	/**
-	 * 分页
-	 * 
-	 * @param dao
-	 * @param pageNo
-	 * @param pageSize
-	 * @return
-	 */
-	public void paging(Dao dao, int pageNo, int pageSize) {
-		paging(dao, Pager.make(pageNo, pageSize));
-	}
-
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder(getSql());
