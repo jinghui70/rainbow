@@ -11,25 +11,16 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 import rainbow.core.util.Utils;
-import rainbow.db.dao.condition.C;
-import rainbow.db.dao.condition.EmptyCondition;
-import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
 import rainbow.db.jdbc.DataAccessException;
 
-public class Select implements ISelect {
-
-	private Dao dao;
+public class Select extends Where<Select> implements ISelect {
 
 	private String[] select;
 
-	private String entityName;
-
 	private boolean distinct = false;
-
-	private C cnd = EmptyCondition.INSTANCE;
 
 	private List<OrderBy> orderBy;
 
@@ -38,11 +29,11 @@ public class Select implements ISelect {
 	private SelectBuildContext context = null;
 
 	public Select(Dao dao) {
-		this.dao = dao;
+		super(dao);
 	}
 
 	public Select(Dao dao, String selectStr) {
-		this.dao = dao;
+		super(dao);
 		select = Utils.splitTrim(selectStr, ',');
 	}
 
@@ -52,113 +43,13 @@ public class Select implements ISelect {
 	}
 
 	public Select from(String entityName) {
-		this.entityName = entityName;
+		setEntity(dao.getEntity(entityName));
 		return this;
 	}
 
-	/**
-	 * 添加第一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Select where(String property, Op op, Object param) {
-		cnd = C.make(property, op, param);
+	public Select from(Entity entity) {
+		setEntity(entity);
 		return this;
-	}
-
-	/**
-	 * 添加第一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Select where(String property, Object param) {
-		cnd = C.make(property, param);
-		return this;
-	}
-
-	/**
-	 * 添加第一个条件
-	 * 
-	 * @param cnd
-	 * @return
-	 */
-	public Select where(C cnd) {
-		this.cnd = cnd;
-		return this;
-	}
-
-	/**
-	 * And一个条件
-	 * 
-	 * @param cnd
-	 * @return
-	 */
-	public Select and(C cnd) {
-		this.cnd = this.cnd.and(cnd);
-		return this;
-	}
-
-	/**
-	 * And一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Select and(String property, Op op, Object param) {
-		return and(C.make(property, op, param));
-	}
-
-	/**
-	 * And一个条件
-	 * 
-	 * @param property
-	 * @param param
-	 * @return
-	 */
-	public Select and(String property, Object param) {
-		return and(C.make(property, param));
-	}
-
-	/**
-	 * Or一个条件
-	 * 
-	 * @param cnd
-	 * @return
-	 */
-	public Select or(C cnd) {
-		this.cnd = this.cnd.or(cnd);
-		return this;
-	}
-
-	/**
-	 * Or一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Select or(String property, Op op, Object param) {
-		return or(C.make(property, op, param));
-	}
-
-	/**
-	 * Or一个相等条件
-	 * 
-	 * @param property
-	 * @param param
-	 * @return
-	 */
-	public Select or(String property, Object param) {
-		return or(C.make(property, param));
 	}
 
 	/**
@@ -196,7 +87,7 @@ public class Select implements ISelect {
 	}
 
 	public Sql build() {
-		context = new SelectBuildContext(dao, entityName, select);
+		context = new SelectBuildContext(dao, entity, select);
 		if (!cnd.isEmpty())
 			context.setCnd(cnd);
 		if (!Utils.isNullOrEmpty(orderBy))
@@ -263,22 +154,6 @@ public class Select implements ISelect {
 			sql.clearTemp();
 		}
 		return sql;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder("Select [").append("select ");
-		if (distinct)
-			sb.append("distinct ");
-		if (select == null)
-			sb.append("*");
-		else
-			sb.append(Arrays.toString(select));
-		sb.append(" from ").append(entityName);
-		if (cnd != null && !cnd.isEmpty())
-			sb.append(" where...");
-		sb.append("]");
-		return sb.toString();
 	}
 
 	@Override
@@ -409,11 +284,12 @@ public class Select implements ISelect {
 			return new PageData<T>();
 		} else {
 			sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
-			List<T> list = dao.queryForList(sql, clazz);
+			List<T> list = (getFields().size() == 1) ? dao.queryForList(sql, clazz)
+					: dao.queryForList(sql, new ObjectRowMapper<T>(getFields(), clazz));
 			return new PageData<T>(count, list);
 		}
 	}
-	
+
 	@Override
 	public List<Map<String, Object>> queryForMapList() {
 		Sql sql = build();
@@ -433,7 +309,7 @@ public class Select implements ISelect {
 		sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, pageNo));
 		return dao.queryForList(sql, new MapRowMapper(getFields()));
 	}
-	
+
 	@Override
 	public PageData<Map<String, Object>> mapPageQuery(int pageSize) {
 		Sql sql = build();

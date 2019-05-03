@@ -67,7 +67,7 @@ public class TestDao {
 
 		dao.insert(p);
 		p = createPerson(20);
-		assertEquals(2, dao.select().from("_Person").count());
+		assertEquals(1, dao.select().from("_Person").count());
 
 		// TODO 重新设计同名多列字段的方法并测试
 	}

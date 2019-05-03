@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import com.google.common.base.Supplier;
 
 import rainbow.core.model.object.INameObject;
-import rainbow.db.dao.condition.C;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.database.Dialect;
 import rainbow.db.jdbc.JdbcTemplate;
@@ -22,7 +21,8 @@ import rainbow.db.jdbc.RowMapper;
  */
 public interface Dao extends INameObject {
 
-	public static final String NOW = "_now_";
+	public static final String NOW = "_NOW_";
+	public static final String COUNT = "COUNT(1)";
 
 	/**
 	 * 返回屏蔽数据库差异的数据库方言对象
@@ -131,25 +131,6 @@ public interface Dao extends INameObject {
 	public int delete(Object object);
 
 	/**
-	 * 根据条件删除记录
-	 * 
-	 * @param entityName 实体名称
-	 * @param cnd        条件
-	 * @return
-	 */
-	public int delete(String entityName, C cnd);
-
-	/**
-	 * 根据主键，删除一个记录
-	 * 
-	 * @param entityName 实体名
-	 * @param values     主键值
-	 * 
-	 * @return
-	 */
-	public int delete(String entityName, Object... values);
-
-	/**
 	 * 更新一个对象，如果该对象不是NeoBean，则其类名为数据模型的实体名
 	 * 
 	 * @param obj
@@ -179,6 +160,14 @@ public interface Dao extends INameObject {
 	 */
 	public Update update(String entityName);
 
+	/**
+	 * 发起一个删除
+	 * 
+	 * @param entityName
+	 * @return
+	 */
+	public Delete delete(String entityName);
+	
 	/**
 	 * 根据主键查询一个实体的NeoBean实例
 	 * 

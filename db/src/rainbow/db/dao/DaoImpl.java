@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.model.object.NameObject;
 import rainbow.core.util.Utils;
-import rainbow.db.dao.condition.C;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.database.Dialect;
@@ -224,20 +223,6 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
-	public int delete(String entityName, C cnd) {
-		Entity entity = getEntity(entityName);
-		Sql sql = new Sql("delete from ").append(entity.getCode()).whereCnd(this, entity, cnd);
-		return execSql(sql);
-	}
-
-	@Override
-	public int delete(String entityName, Object... values) {
-		Entity entity = getEntity(entityName);
-		Sql sql = new Sql("delete from ").append(entity.getCode()).whereKey(entity, values);
-		return execSql(sql);
-	}
-
-	@Override
 	public int update(Object obj) {
 		NeoBean neo = toNeoBean(obj);
 		return update(neo);
@@ -296,6 +281,11 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public Update update(String entityName) {
 		return new Update(this, entityName);
+	}
+
+	@Override
+	public Delete delete(String entityName) {
+		return new Delete(this, entityName);
 	}
 
 	@Override

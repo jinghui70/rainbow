@@ -22,6 +22,8 @@ public class Field {
 
 	private Link link;
 
+	private String patch; // 临时加的补丁以支持NOW和COUNT(1),等待未来函数的进一步支持
+
 	public String getFunction() {
 		return function;
 	}
@@ -63,6 +65,10 @@ public class Field {
 	}
 
 	public void toSelectSql(Sql sql, SelectBuildContext context) {
+		if (patch != null) {
+			sql.append(patch);
+			return;
+		}
 		if (function != null)
 			sql.append(function).append("(");
 		if (context.isLinkSql())
@@ -75,13 +81,21 @@ public class Field {
 	}
 
 	public void toSql(Sql sql, SelectBuildContext context) {
-		if (alias != null) {
-			sql.append(alias);
+		if (patch != null) {
+			sql.append(patch);
 			return;
 		}
-		if (context.isLinkSql())
-			sql.append(link == null ? 'A' : context.getLinkAlias(link)).append('.');
-		sql.append(column.getCode());
+		if (function != null)
+			sql.append(function).append("(");
+		if (alias != null) {
+			sql.append(alias);
+		} else {
+			if (context.isLinkSql())
+				sql.append(link == null ? 'A' : context.getLinkAlias(link)).append('.');
+			sql.append(column.getCode());
+		}
+		if (function != null)
+			sql.append(')');
 	}
 
 	public boolean match(String linkStr, String nameStr) {
@@ -115,6 +129,10 @@ public class Field {
 			str = f[0];
 			field.alias = f[1];
 		}
+		if (str.equals(Dao.NOW) || str.equalsIgnoreCase(Dao.COUNT)) {
+			field.patch = str;
+			return field;
+		}
 		int inx = str.indexOf('(');
 		if (inx > 0) {
 			field.function = str.substring(0, inx);
@@ -134,7 +152,7 @@ public class Field {
 	}
 
 	/**
-	 * 这个是用于条件字段的解析
+	 * 这个是用于条件字段的解析,这种字段应该没有别名，但是可能会用到select里面的别名
 	 * 
 	 * @param str
 	 * @param context
@@ -142,6 +160,13 @@ public class Field {
 	 */
 	public static Field parse(String str, SelectBuildContext context) {
 		Field field = new Field();
+		int inx = str.indexOf('(');
+		if (inx > 0) {
+			field.function = str.substring(0, inx);
+			str = str.substring(inx + 1);
+			inx = str.indexOf(')');
+			str = str.substring(0, inx);
+		}
 		Entity entity = context.getEntity();
 		String[] f = Utils.split(str, '.');
 		if (f.length > 1) {

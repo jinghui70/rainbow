@@ -7,14 +7,10 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableSet;
 
-import rainbow.db.dao.condition.C;
-import rainbow.db.dao.condition.EmptyCondition;
-import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.model.Column;
-import rainbow.db.dao.model.Entity;
 import rainbow.db.model.DataType;
 
-public class Update {
+public class Update extends Where<Update> {
 
 	private static final ImmutableSet<Character> calcSet = ImmutableSet.of('+', '-', '*', '/');
 
@@ -30,17 +26,10 @@ public class Update {
 		}
 	}
 
-	private Dao dao;
-
-	private Entity entity;
-
 	private List<U> updates = new ArrayList<U>();
 
-	private C cnd = EmptyCondition.INSTANCE;
-
 	public Update(Dao dao, String entityName) {
-		this.dao = dao;
-		this.entity = dao.getEntity(entityName);
+		super(dao, entityName);
 	}
 
 	public Update set(String property, char calc, Object value) {
@@ -52,111 +41,6 @@ public class Update {
 	public Update set(String property, Object value) {
 		updates.add(new U(property, '\0', value));
 		return this;
-	}
-
-	/**
-	 * 添加第一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Update where(String property, Op op, Object param) {
-		cnd = C.make(property, op, param);
-		return this;
-	}
-
-	/**
-	 * 添加第一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Update where(String property, Object param) {
-		cnd = C.make(property, param);
-		return this;
-	}
-
-	/**
-	 * 添加第一个条件
-	 * 
-	 * @param cnd
-	 * @return
-	 */
-	public Update where(C cnd) {
-		this.cnd = cnd;
-		return this;
-	}
-
-	/**
-	 * And一个条件
-	 * 
-	 * @param cnd
-	 * @return
-	 */
-	public Update and(C cnd) {
-		this.cnd = this.cnd.and(cnd);
-		return this;
-	}
-
-	/**
-	 * And一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Update and(String property, Op op, Object param) {
-		return and(C.make(property, op, param));
-	}
-
-	/**
-	 * And一个条件
-	 * 
-	 * @param property
-	 * @param param
-	 * @return
-	 */
-	public Update and(String property, Object param) {
-		return and(C.make(property, param));
-	}
-
-	/**
-	 * Or一个条件
-	 * 
-	 * @param cnd
-	 * @return
-	 */
-	public Update or(C cnd) {
-		this.cnd = this.cnd.or(cnd);
-		return this;
-	}
-
-	/**
-	 * Or一个条件
-	 * 
-	 * @param property
-	 * @param op
-	 * @param param
-	 * @return
-	 */
-	public Update or(String property, Op op, Object param) {
-		return or(C.make(property, op, param));
-	}
-
-	/**
-	 * Or一个相等条件
-	 * 
-	 * @param property
-	 * @param param
-	 * @return
-	 */
-	public Update or(String property, Object param) {
-		return or(C.make(property, param));
 	}
 
 	public int excute() {

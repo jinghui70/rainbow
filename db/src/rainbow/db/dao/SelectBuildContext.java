@@ -20,9 +20,9 @@ public class SelectBuildContext {
 
 	private List<Field> selectFields;
 
-	public SelectBuildContext(Dao dao, String entityName, String[] select) {
+	public SelectBuildContext(Dao dao, Entity entity, String[] select) {
 		this.dao = dao;
-		this.entity = dao.getEntity(entityName);
+		this.entity = entity;
 		if (select == null || select.length == 0) {
 			selectFields = entity.getColumns().stream().map(Field::fromColumn).collect(Collectors.toList());
 		} else {
