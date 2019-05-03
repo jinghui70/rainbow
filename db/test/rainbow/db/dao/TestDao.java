@@ -1,8 +1,6 @@
 package rainbow.db.dao;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -80,7 +78,7 @@ public class TestDao {
 		for (int i = 1; i <= 10; i++) {
 			list.add(createPerson(i));
 		}
-		dao.insert(list, 5, null);
+		dao.insert(list, 5, false);
 		assertEquals(10, dao.select().from("_Person").count());
 	}
 

@@ -44,23 +44,22 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	/**
-	 * If this variable is set to a non-negative value, it will be used for
-	 * setting the fetchSize property on statements used for query processing.
+	 * If this variable is set to a non-negative value, it will be used for setting
+	 * the fetchSize property on statements used for query processing.
 	 */
 	private int fetchSize = -1;
 
 	/**
-	 * If this variable is set to a non-negative value, it will be used for
-	 * setting the maxRows property on statements used for query processing.
+	 * If this variable is set to a non-negative value, it will be used for setting
+	 * the maxRows property on statements used for query processing.
 	 */
 	private int maxRows = -1;
 
 	/**
-	 * Set the fetch size for this JdbcTemplate. This is important for
-	 * processing large result sets: Setting this higher than the default value
-	 * will increase processing speed at the cost of memory consumption; setting
-	 * this lower can avoid transferring row data that will never be read by the
-	 * application.
+	 * Set the fetch size for this JdbcTemplate. This is important for processing
+	 * large result sets: Setting this higher than the default value will increase
+	 * processing speed at the cost of memory consumption; setting this lower can
+	 * avoid transferring row data that will never be read by the application.
 	 * <p>
 	 * Default is -1, indicating to use the JDBC driver's default configuration
 	 * (i.e. to not pass a specific fetch size setting on to the driver).
@@ -83,11 +82,11 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	/**
-	 * Set the maximum number of rows for this JdbcTemplate. This is important
-	 * for processing subsets of large result sets, avoiding to read and hold
-	 * the entire result set in the database or in the JDBC driver if we're
-	 * never interested in the entire result in the first place (for example,
-	 * when performing searches that might return a large number of matches).
+	 * Set the maximum number of rows for this JdbcTemplate. This is important for
+	 * processing subsets of large result sets, avoiding to read and hold the entire
+	 * result set in the database or in the JDBC driver if we're never interested in
+	 * the entire result in the first place (for example, when performing searches
+	 * that might return a large number of matches).
 	 * <p>
 	 * Default is -1, indicating to use the JDBC driver's default configuration
 	 * (i.e. to not pass a specific max rows setting on to the driver).
@@ -114,13 +113,11 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	/**
-	 * Construct a new JdbcTemplate, given a DataSource to obtain connections
-	 * from.
+	 * Construct a new JdbcTemplate, given a DataSource to obtain connections from.
 	 * <p>
 	 * Note: This will not trigger initialization of the exception translator.
 	 * 
-	 * @param dataSource
-	 *            the JDBC DataSource to obtain connections from
+	 * @param dataSource the JDBC DataSource to obtain connections from
 	 */
 	public JdbcTemplate(DataSource dataSource) {
 		this.dataSource = dataSource;
@@ -149,8 +146,7 @@ public class JdbcTemplate implements JdbcOperations {
 	/**
 	 * 释放连接
 	 * 
-	 * @param con
-	 *            连接持有者
+	 * @param con 连接持有者
 	 */
 	public void releaseConnection(Connection con) {
 		if (con != null)
@@ -202,14 +198,11 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	/**
-	 * Prepare the given JDBC Statement (or PreparedStatement or
-	 * CallableStatement), applying statement settings such as fetch size, max
-	 * rows, and query timeout.
+	 * Prepare the given JDBC Statement (or PreparedStatement or CallableStatement),
+	 * applying statement settings such as fetch size, max rows, and query timeout.
 	 * 
-	 * @param stmt
-	 *            the JDBC Statement to prepare
-	 * @throws SQLException
-	 *             if thrown by JDBC API
+	 * @param stmt the JDBC Statement to prepare
+	 * @throws SQLException if thrown by JDBC API
 	 * @see #setFetchSize
 	 * @see #setMaxRows
 	 * @see #setQueryTimeout
@@ -292,7 +285,7 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	@Override
-	public void batchUpdate(final String sql, final BatchParamSetter pss, final int batchSize)
+	public void batchUpdate(final String sql, final BatchParamSetter pss, final int batchSize, boolean transaction)
 			throws DataAccessException {
 		logger.debug("Executing SQL batch update: {}", sql);
 		class BatchStatementCallback implements PreparedStatementCallback<Object> {
@@ -310,7 +303,7 @@ public class JdbcTemplate implements JdbcOperations {
 					}
 					ps.executeBatch();
 				} else {
-					while(pss.hasNext()) {
+					while (pss.hasNext()) {
 						pss.setValues(ps);
 						ps.executeUpdate();
 					}
@@ -318,12 +311,12 @@ public class JdbcTemplate implements JdbcOperations {
 				return null;
 			}
 		}
-		getTransactionManager().transaction(Connection.TRANSACTION_READ_COMMITTED, new Runnable() {
-			@Override
-			public void run() {
+		if (transaction)
+			getTransactionManager().transaction(Connection.TRANSACTION_READ_COMMITTED, () -> {
 				execute(sql, new BatchStatementCallback());
-			}
-		});
+			});
+		else
+			execute(sql, new BatchStatementCallback());
 	}
 
 	public int update(final String sql) throws DataAccessException {
@@ -396,7 +389,8 @@ public class JdbcTemplate implements JdbcOperations {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
-	public void query(String sql, PreparedStatementSetter pss, Consumer<ResultSet> consumer) throws DataAccessException {
+	public void query(String sql, PreparedStatementSetter pss, Consumer<ResultSet> consumer)
+			throws DataAccessException {
 		query(sql, pss, new RowConsumerResultSetExtractor(consumer));
 	}
 
@@ -459,13 +453,11 @@ public class JdbcTemplate implements JdbcOperations {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Throw a SQLException if we're not ignoring warnings, else log the
-	 * warnings (at debug level).
+	 * Throw a SQLException if we're not ignoring warnings, else log the warnings
+	 * (at debug level).
 	 * 
-	 * @param stmt
-	 *            the current JDBC statement
-	 * @throws SQLException
-	 *             if not ignoring warnings
+	 * @param stmt the current JDBC statement
+	 * @throws SQLException if not ignoring warnings
 	 * @see java.sql.SQLWarning
 	 */
 	private void handleWarnings(Statement stmt) throws SQLException {
@@ -480,11 +472,10 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	/**
-	 * Create a new ArgPreparedStatementSetter using the args passed in. This
-	 * method allows the creation to be overridden by sub-classes.
+	 * Create a new ArgPreparedStatementSetter using the args passed in. This method
+	 * allows the creation to be overridden by sub-classes.
 	 * 
-	 * @param args
-	 *            object array woth arguments
+	 * @param args object array woth arguments
 	 * @return the new ArgPreparedStatementSetter
 	 */
 	private ArgPreparedStatementSetter newArgPreparedStatementSetter(Object[] args) {
@@ -494,8 +485,7 @@ public class JdbcTemplate implements JdbcOperations {
 	/**
 	 * Determine SQL from potential provider object.
 	 * 
-	 * @param sqlProvider
-	 *            object that's potentially a SqlProvider
+	 * @param sqlProvider object that's potentially a SqlProvider
 	 * @return the SQL string, or <code>null</code>
 	 * @see SqlProvider
 	 */
@@ -508,12 +498,10 @@ public class JdbcTemplate implements JdbcOperations {
 	}
 
 	/**
-	 * Adapter to enable use of a RowCallbackHandler inside a
-	 * ResultSetExtractor.
+	 * Adapter to enable use of a RowCallbackHandler inside a ResultSetExtractor.
 	 * <p>
-	 * Uses a regular ResultSet, so we have to be careful when using it: We
-	 * don't use it for navigating since this could lead to unpredictable
-	 * consequences.
+	 * Uses a regular ResultSet, so we have to be careful when using it: We don't
+	 * use it for navigating since this could lead to unpredictable consequences.
 	 */
 	private static class RowConsumerResultSetExtractor implements ResultSetExtractor<Object> {
 
@@ -530,6 +518,7 @@ public class JdbcTemplate implements JdbcOperations {
 			return null;
 		}
 	}
+
 	private static <T> T requiredSingleResult(Collection<T> results) {
 		int size = (results == null ? 0 : results.size());
 		if (size == 0) {
@@ -600,8 +589,8 @@ public class JdbcTemplate implements JdbcOperations {
 				}
 				Map<String, Object> returnedResults = new LinkedHashMap<String, Object>();
 				if (retVal || updateCount != -1) {
-					returnedResults.putAll(extractReturnedResults(cs, updateCountParameters, resultSetParameters,
-							updateCount));
+					returnedResults.putAll(
+							extractReturnedResults(cs, updateCountParameters, resultSetParameters, updateCount));
 				}
 				returnedResults.putAll(extractOutputParameters(cs, callParameters));
 				return returnedResults;
@@ -612,19 +601,15 @@ public class JdbcTemplate implements JdbcOperations {
 	/**
 	 * Extract returned ResultSets from the completed stored procedure.
 	 * 
-	 * @param cs
-	 *            JDBC wrapper for the stored procedure
-	 * @param updateCountParameters
-	 *            Parameter list of declared update count parameters for the
-	 *            stored procedure
-	 * @param resultSetParameters
-	 *            Parameter list of declared resturn resultSet parameters for
-	 *            the stored procedure
+	 * @param cs                    JDBC wrapper for the stored procedure
+	 * @param updateCountParameters Parameter list of declared update count
+	 *                              parameters for the stored procedure
+	 * @param resultSetParameters   Parameter list of declared resturn resultSet
+	 *                              parameters for the stored procedure
 	 * @return Map that contains returned results
 	 */
-	protected Map<String, Object> extractReturnedResults(CallableStatement cs,
-			List<SqlParameter> updateCountParameters, List<SqlParameter> resultSetParameters, int updateCount)
-			throws SQLException {
+	protected Map<String, Object> extractReturnedResults(CallableStatement cs, List<SqlParameter> updateCountParameters,
+			List<SqlParameter> resultSetParameters, int updateCount) throws SQLException {
 
 		Map<String, Object> returnedResults = new HashMap<String, Object>();
 		int rsIndex = 0;
@@ -657,10 +642,8 @@ public class JdbcTemplate implements JdbcOperations {
 	/**
 	 * Extract output parameters from the completed stored procedure.
 	 * 
-	 * @param cs
-	 *            JDBC wrapper for the stored procedure
-	 * @param parameters
-	 *            parameter list for the stored procedure
+	 * @param cs         JDBC wrapper for the stored procedure
+	 * @param parameters parameter list for the stored procedure
 	 * @return Map that contains returned results
 	 */
 	protected Map<String, Object> extractOutputParameters(CallableStatement cs, List<SqlParameter> parameters)
@@ -701,10 +684,8 @@ public class JdbcTemplate implements JdbcOperations {
 	/**
 	 * Process the given ResultSet from a stored procedure.
 	 * 
-	 * @param rs
-	 *            the ResultSet to process
-	 * @param param
-	 *            the corresponding stored procedure parameter
+	 * @param rs    the ResultSet to process
+	 * @param param the corresponding stored procedure parameter
 	 * @return Map that contains returned results
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })

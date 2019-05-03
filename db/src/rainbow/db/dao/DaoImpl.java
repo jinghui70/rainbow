@@ -179,11 +179,11 @@ public class DaoImpl extends NameObject implements Dao {
 
 	@Override
 	public <T> void insert(List<T> list) {
-		insert(list, 1000, null);
+		insert(list, 250, true);
 	}
 
 	@Override
-	public <T> void insert(List<T> list, int batchSize, ObjectBatchParamSetter<T> setter) {
+	public <T> void insert(List<T> list, int batchSize, boolean transaction) {
 		if (Utils.isNullOrEmpty(list))
 			return;
 		Object obj = list.get(0);
@@ -204,10 +204,9 @@ public class DaoImpl extends NameObject implements Dao {
 			sql.append(",?");
 		sql.append(")");
 
-		if (setter == null)
-			setter = new ObjectBatchParamSetter<T>();
+		ObjectBatchParamSetter<T> setter = new ObjectBatchParamSetter<T>();
 		setter.init(entity, list);
-		jdbcTemplate.batchUpdate(sql.toString(), setter, batchSize);
+		jdbcTemplate.batchUpdate(sql.toString(), setter, batchSize, transaction);
 	}
 
 	@Override

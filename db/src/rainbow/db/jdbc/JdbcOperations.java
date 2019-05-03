@@ -298,5 +298,5 @@ public interface JdbcOperations {
 	 * @return an array of the number of rows affected by each statement
 	 * @throws DataAccessException if there is any problem issuing the update
 	 */
-	void batchUpdate(String sql, BatchParamSetter pss, int batchSize) throws DataAccessException;
+	void batchUpdate(String sql, BatchParamSetter pss, int batchSize, boolean transaction) throws DataAccessException;
 }

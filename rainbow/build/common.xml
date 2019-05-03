@@ -68,7 +68,7 @@
 		</junit>
 	</target>
 
-	<target name="build_dev" depends="compile_dev" description="build bundle for development">
+	<target name="build_dev" depends="compile_dev_test" description="build bundle for development">
 		<jar jarfile="${root}/${dest}/${project}.jar" basedir="${build}" />
 		<delete dir="${build}" />
 	</target>

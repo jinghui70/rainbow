@@ -113,7 +113,7 @@ public interface Dao extends INameObject {
 
 	<T> void insert(List<T> list);
 
-	<T> void insert(List<T> list, int batchSize, ObjectBatchParamSetter<T> setter);
+	<T> void insert(List<T> list, int batchSize, boolean transaction);
 
 	/**
 	 * 清空一个实体在数据库中的数据

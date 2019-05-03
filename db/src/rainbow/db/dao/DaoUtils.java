@@ -81,46 +81,48 @@ public abstract class DaoUtils {
 	}
 
 	private static void loadUnit(Map<String, Entity> model, Unit unit) {
-		unit.getTables().stream().map(Entity::new).forEach(e -> model.put(e.getName(), e));
+		if (unit.getTables() != null)
+			unit.getTables().stream().map(Entity::new).forEach(e -> model.put(e.getName(), e));
 		if (unit.getUnits() != null)
-			unit.getUnits().stream().forEach(u -> loadUnit(model, u));
+			unit.getUnits().forEach(u -> loadUnit(model, u));
 	}
 
 	private static void loadLink(Map<String, Entity> model, List<Tag> linkTags, Unit unit) {
-		unit.getTables().stream().forEach(e -> {
-			if (Utils.isNullOrEmpty(e.getLinkFields()))
-				return;
-			Entity entity = model.get(e.getName());
-			Map<String, Link> links = e.getLinkFields().stream().map(l -> new Link(model, entity, l))
-					.collect(Collectors.toMap(Link::getName, Function.identity()));
-			if (!linkTags.isEmpty()) {
-				for (Tag tag : linkTags) {
-					Entity targetEntity = model.get(tag.getLinkTable());
-					List<Column> targetColumns = ImmutableList.of(targetEntity.getColumn(tag.getLinkField()));
-					entity.getColumns().stream().forEach(column -> {
-						if (column.hasTag(tag.getName())) {
-							Link link = new Link();
-							link.setName(column.getName());
-							link.setLabel(column.getLabel());
-							link.setColumns(ImmutableList.of(column));
-							link.setTargetEntity(targetEntity);
-							link.setTargetColumns(targetColumns);
-							links.put(link.getName(), link);
-						}
-					});
+		if (unit.getTables() != null)
+			unit.getTables().forEach(e -> {
+				if (Utils.isNullOrEmpty(e.getLinkFields()))
+					return;
+				Entity entity = model.get(e.getName());
+				Map<String, Link> links = e.getLinkFields().stream().map(l -> new Link(model, entity, l))
+						.collect(Collectors.toMap(Link::getName, Function.identity()));
+				if (!linkTags.isEmpty()) {
+					for (Tag tag : linkTags) {
+						Entity targetEntity = model.get(tag.getLinkTable());
+						List<Column> targetColumns = ImmutableList.of(targetEntity.getColumn(tag.getLinkField()));
+						entity.getColumns().forEach(column -> {
+							if (column.hasTag(tag.getName())) {
+								Link link = new Link();
+								link.setName(column.getName());
+								link.setLabel(column.getLabel());
+								link.setColumns(ImmutableList.of(column));
+								link.setTargetEntity(targetEntity);
+								link.setTargetColumns(targetColumns);
+								links.put(link.getName(), link);
+							}
+						});
+					}
 				}
-			}
-			entity.setLinks(links);
-		});
+				entity.setLinks(links);
+			});
 		if (unit.getUnits() != null)
-			unit.getUnits().stream().forEach(u -> loadLink(model, linkTags, u));
+			unit.getUnits().forEach(u -> loadLink(model, linkTags, u));
 	}
 
 	public static String transform(Map<String, Entity> model) {
 		StringBuilder sb = new StringBuilder();
-		model.values().stream().forEach(entity -> {
+		model.values().forEach(entity -> {
 			sb.append("CREATE TABLE ").append(entity.getCode()).append("(");
-			entity.getColumns().stream().forEach(field -> {
+			entity.getColumns().forEach(field -> {
 				sb.append(field.getCode()).append("\t").append(field.getType());
 				switch (field.getType()) {
 				case CHAR:
