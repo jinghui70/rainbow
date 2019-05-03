@@ -170,21 +170,22 @@ public class DaoManagerImpl extends ActivatorAwareObject
 	}
 
 	private Map<String, Entity> loadModel(String name) {
-		Map<String, Entity> model = modelMap.get(name);
-		if (model != null)
-			return model;
+		Map<String, Entity> entityMap = modelMap.get(name);
+		if (entityMap != null)
+			return entityMap;
 		Path modelFile = activator.getConfigureFile(name + ".rdmx");
 		String fileName = modelFile.getFileName().toString();
 		checkState(Files.exists(modelFile), "database model file not exist:{}", fileName);
-		Model modelX = null;
+		Model model = null;
 		try (InputStream is = Files.newInputStream(modelFile)) {
-			modelX = JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
+			model = JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
 		} catch (Exception e) {
 			logger.error("load rdmx file {} faild", fileName);
 			throw new RuntimeException(e);
 		}
-		modelMap.put(name, DaoUtils.loadModel(modelX));
-		return model;
+		entityMap = DaoUtils.loadModel(model);
+		modelMap.put(name, entityMap);
+		return entityMap;
 	}
 
 	/**

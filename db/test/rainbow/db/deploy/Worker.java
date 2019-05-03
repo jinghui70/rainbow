@@ -98,15 +98,14 @@ public class Worker {
 	}
 
 	private void generateRDM(Writer writer) throws IOException {
-		try (PrintWriter pw = new PrintWriter(writer)) {
-			pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
-			pw.println("<model xmlns=\"http://rainbow/db/model\">");
-			pw.append("\t<name>").append(model.getName()).println("</name>");
-			pw.println("\t<entities>");
-			writeUnit(pw, model);
-			pw.println("\t</entities>");
-			pw.println("</model>");
-		}
+		PrintWriter pw = new PrintWriter(writer);
+		pw.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+		pw.println("<model xmlns=\"http://rainbow/db/model\">");
+		pw.append("\t<name>").append(model.getName()).println("</name>");
+		pw.println("\t<entities>");
+		writeUnit(pw, model);
+		pw.println("\t</entities>");
+		pw.println("</model>");
 	}
 
 	public void doWork(Work work)
@@ -239,6 +238,7 @@ public class Worker {
 						Object value = getValue(column, cell);
 						neo.setValue(column, value);
 					}
+					list.add(neo);
 				}
 				dao.insert(list, 500, false);
 			}
