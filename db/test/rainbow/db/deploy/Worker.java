@@ -113,6 +113,7 @@ public class Worker {
 			throws IOException, TransformerException, InstantiationException, IllegalAccessException {
 		String server = Utils.substringBetween(work.getUrl(), "jdbc:", ":").toLowerCase();
 		checkArgument(driverClassMap.containsKey(server), "jdbcUrl ({}) not support", work.getUrl());
+		System.out.append("process database ").println(server);
 		generateDDL(server);
 		Class<? extends Driver> driverClass = driverClassMap.get(server);
 		Driver driver = driverClass.newInstance();
@@ -121,6 +122,7 @@ public class Worker {
 		DaoImpl dao = new DaoImpl(dataSource, entityMap);
 		generateDatabase(dao, server);
 		if (preset != null) {
+			System.out.println("loading preset data ");
 			Files.list(preset).filter(f -> f.getFileName().toString().endsWith(".xlsx")).forEach(f -> {
 				try {
 					loadPresetDataFromExcel(dao, f);
@@ -129,6 +131,7 @@ public class Worker {
 				}
 			});
 		}
+		System.out.println("Done!");
 	}
 
 	private void writeUnit(PrintWriter writer, Unit unit) {
@@ -198,7 +201,6 @@ public class Worker {
 		Path ddlFile = output.resolve(server + ".sql");
 		String ddl = String.join("", Files.readAllLines(ddlFile));
 		dao.execSql(ddl);
-		System.out.println("Done!");
 	}
 
 	private void loadPresetDataFromExcel(Dao dao, Path file) throws IOException {
