@@ -18,7 +18,7 @@ public class Entity extends NameObject {
 
 	private Map<String, Object> tags;
 
-	private Map<String, Link> links;
+	private List<Link> links;
 
 	private Map<String, Column> columnMap;
 
@@ -56,11 +56,11 @@ public class Entity extends NameObject {
 		this.tags = tags;
 	}
 
-	public Map<String, Link> getLinks() {
+	public List<Link> getLinks() {
 		return links;
 	}
 
-	public void setLinks(Map<String, Link> links) {
+	public void setLinks(List<Link> links) {
 		this.links = links;
 	}
 
@@ -75,13 +75,13 @@ public class Entity extends NameObject {
 	public boolean hasColumn(String name) {
 		return columnMap.containsKey(name);
 	}
-	
+
 	public Column getColumn(String name) {
 		return columnMap.get(name);
 	}
 
 	public boolean hasTag(String tag) {
-		return tags!=null && tags.containsKey(tag);
+		return tags != null && tags.containsKey(tag);
 	}
 
 	public Object getTag(String tag) {
@@ -89,7 +89,13 @@ public class Entity extends NameObject {
 	}
 
 	public Link getLink(String link) {
-		return links == null ? null : links.get(link);
+		if (links == null)
+			return null;
+		for (Link l : links) {
+			if (l.getName().equals(link))
+				return l;
+		}
+		return null;
 	}
 
 	public Entity(Table src) {

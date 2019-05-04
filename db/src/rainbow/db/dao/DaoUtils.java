@@ -2,12 +2,22 @@ package rainbow.db.dao;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ImmutableList;
 
 import rainbow.core.util.Utils;
@@ -20,6 +30,8 @@ import rainbow.db.model.TagType;
 import rainbow.db.model.Unit;
 
 public abstract class DaoUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(DaoUtils.class);
 
 	public static Object getResultSetValue(ResultSet rs, int index, Column column) throws SQLException {
 		Object value = null;
@@ -71,7 +83,22 @@ public abstract class DaoUtils {
 		return value;
 	}
 
-	public static HashMap<String, Entity> loadModel(Model model) {
+	public static HashMap<String, Entity> resolveModel(Path modelFile) {
+		Model model = loadModel(modelFile);
+		return resolveModel(model);
+	}
+
+	public static Model loadModel(Path modelFile) {
+		try (InputStream is = Files.newInputStream(modelFile)) {
+			return JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
+		} catch (Exception e) {
+			logger.error("load rdmx file {} faild", modelFile.toString());
+			throw new RuntimeException(e);
+		}
+
+	}
+
+	public static HashMap<String, Entity> resolveModel(Model model) {
 		HashMap<String, Entity> result = new HashMap<String, Entity>();
 		loadUnit(result, model);
 		Map<String, Link> linkTags = model.getFieldTags().stream().filter(tag -> tag.getType() == TagType.LINK)
@@ -99,14 +126,7 @@ public abstract class DaoUtils {
 			unit.getTables().forEach(e -> {
 				Entity entity = model.get(e.getName());
 
-				Map<String, Link> links = new HashMap<String, Link>();
-
-				// linkField
-				if (!Utils.isNullOrEmpty(e.getLinkFields()))
-					e.getLinkFields().forEach(link -> {
-						links.put(link.getName(), new Link(model, entity, link));
-					});
-
+				List<Link> links = new ArrayList<Link>();
 				// linkTag
 				if (!linkTags.isEmpty()) {
 					entity.getColumns().stream().forEach(column -> {
@@ -121,13 +141,20 @@ public abstract class DaoUtils {
 								link.setColumns(ImmutableList.of(column));
 								link.setTargetEntity(taglink.getTargetEntity());
 								link.setTargetColumns(taglink.getTargetColumns());
-								links.put(link.getName(), link);
+								links.add(link);
 							}
 						}
 					});
 				}
-				if (!links.isEmpty())
+				// linkField
+				if (!Utils.isNullOrEmpty(e.getLinkFields()))
+					e.getLinkFields().forEach(link -> {
+						links.add(new Link(model, entity, link));
+					});
+
+				if (!links.isEmpty()) {
 					entity.setLinks(links);
+				}
 			});
 		if (unit.getUnits() != null)
 			unit.getUnits().forEach(u -> loadLink(model, linkTags, u));

@@ -39,7 +39,7 @@ public final class DBTest {
 	public static MemoryDao createMemoryDao(Object source) throws IOException {
 		try (InputStream is = sourceToInputStream(source)) {
 			Model model = JSONObject.parseObject(is, Model.class);
-			Map<String, Entity> entityMap = DaoUtils.loadModel(model);
+			Map<String, Entity> entityMap = DaoUtils.resolveModel(model);
 			return new MemoryDao(entityMap);
 		}
 	}

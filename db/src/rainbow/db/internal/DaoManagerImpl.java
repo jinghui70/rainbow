@@ -9,9 +9,7 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -29,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
@@ -52,7 +49,6 @@ import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.model.Model;
 
 @Bean(extension = InjectProvider.class)
 public class DaoManagerImpl extends ActivatorAwareObject
@@ -174,16 +170,8 @@ public class DaoManagerImpl extends ActivatorAwareObject
 		if (entityMap != null)
 			return entityMap;
 		Path modelFile = activator.getConfigureFile(name + ".rdmx");
-		String fileName = modelFile.getFileName().toString();
-		checkState(Files.exists(modelFile), "database model file not exist:{}", fileName);
-		Model model = null;
-		try (InputStream is = Files.newInputStream(modelFile)) {
-			model = JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
-		} catch (Exception e) {
-			logger.error("load rdmx file {} faild", fileName);
-			throw new RuntimeException(e);
-		}
-		entityMap = DaoUtils.loadModel(model);
+		checkState(Files.exists(modelFile), "database model file not exist:{}", modelFile.toString());
+		entityMap = DaoUtils.resolveModel(modelFile);
 		modelMap.put(name, entityMap);
 		return entityMap;
 	}

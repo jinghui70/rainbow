@@ -80,7 +80,7 @@ public class Worker {
 		if (Files.exists(modelFile) && Files.isRegularFile(modelFile)) {
 			try (InputStream is = Files.newInputStream(modelFile)) {
 				model = JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
-				entityMap = DaoUtils.loadModel(model);
+				entityMap = DaoUtils.resolveModel(model);
 			}
 		} else
 			throw new AppException("{} is not a valid model file", fileName);
