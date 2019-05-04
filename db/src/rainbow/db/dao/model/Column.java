@@ -155,6 +155,7 @@ public class Column extends NameObject {
 		this.length = src.getLength();
 		this.precision = src.getPrecision();
 		this.type = src.getType();
+		this.tags = src.getTags();
 	}
 
 }
