@@ -56,6 +56,10 @@ public class Field {
 		this.link = link;
 	}
 
+	public boolean isManyLink() {
+		return link != null && link.isMany();
+	}
+
 	public String getName() {
 		if (alias != null)
 			return alias;

@@ -50,9 +50,6 @@ public class TestDao {
 		p.setName("1");
 		p.setBirthday(LocalDate.of(1970, 1, 27));
 		p.setGender(_Gender.女);
-		p.getScore()[0] = 5;
-		p.getScore()[1] = 4;
-		p.getScore()[2] = 3;
 		return p;
 	}
 

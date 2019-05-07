@@ -14,9 +14,7 @@ import org.junit.jupiter.api.Test;
 import rainbow.db.DBTest;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.object._Goods;
-import rainbow.db.dao.object._JoinRecord;
 import rainbow.db.dao.object._SaleRecord;
-import rainbow.db.dao.object._SaleRecordCalc;
 
 public class TestQuery {
 
@@ -76,32 +74,10 @@ public class TestQuery {
 		assertEquals(1, m.get("goods"));
 		assertEquals(Double.valueOf(1), m.get("min"));
 		assertEquals(Double.valueOf(10), m.get("max"));
-		// 用对象方式处理
-		List<_SaleRecordCalc> ll = select.queryForList(_SaleRecordCalc.class);
-		assertEquals(2, ll.size());
-		_SaleRecordCalc src = ll.get(0);
-		assertEquals(1, src.getGoods());
-		assertEquals(1, src.getMin());
-		assertEquals(10, src.getMax());
 
 		// 测试函数
 		_Goods g = dao.select().from("_Goods").where("UPPER(name)", "IPHONE").queryForObject(_Goods.class);
 		assertEquals(Integer.valueOf(3), g.getId());
-	}
-
-	@Test
-	public void testSimpleJoin() {
-		_JoinRecord j = dao.select("qty,person.name:person,goods.name:goods").from("_SaleRecord").where("id", 1)
-				.queryForObject(_JoinRecord.class);
- 		assertEquals("Tesla ModelX", j.getGoods());
-		assertEquals(1, j.getQty());
-
-		List<Map<String, Object>> list = dao.select("person.name, goods.name").distinct().from("_SaleRecord")
-				.orderBy("goods.name desc").queryForMapList();
-		assertEquals(2, list.size());
-		Map<String, Object> m = list.get(0);
-		assertEquals("李四", m.get("person.name"));
-		assertEquals("iPhone", m.get("goods.name"));
 	}
 
 }
