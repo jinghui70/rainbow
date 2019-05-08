@@ -23,7 +23,7 @@ public class Link extends NameObject {
 
 	private List<Column> targetColumns;
 
-	private boolean many = true;
+	private boolean many;
 
 	public String getLabel() {
 		return label;
