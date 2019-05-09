@@ -103,6 +103,9 @@ public class Field {
 	}
 
 	public boolean match(String linkStr, String nameStr) {
+		if (function != null) {
+			return linkStr == null && Objects.equal(alias, nameStr);
+		}
 		if (linkStr == null && Objects.equal(alias, nameStr))
 			return true;
 		if (!Objects.equal(column.getName(), nameStr))
