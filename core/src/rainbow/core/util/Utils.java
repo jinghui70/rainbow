@@ -3,12 +3,15 @@ package rainbow.core.util;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -496,6 +499,8 @@ public abstract class Utils {
 	 * @return
 	 */
 	public static <F, T> List<T> transform(List<F> fromList, Function<? super F, ? extends T> function) {
+		if (fromList == null || fromList.isEmpty())
+			return Collections.emptyList();
 		List<T> result = (fromList instanceof RandomAccess) ? new ArrayList<T>(fromList.size()) : new LinkedList<T>();
 		for (F f : fromList) {
 			T t = function.apply(f);
@@ -513,13 +518,9 @@ public abstract class Utils {
 	 * @return
 	 */
 	public static <F, T> List<T> transform(F[] fromList, Function<? super F, ? extends T> function) {
-		List<T> result = new ArrayList<T>(fromList.length);
-		for (F f : fromList) {
-			T t = function.apply(f);
-			if (t != null)
-				result.add(t);
-		}
-		return result;
+		if (fromList == null || fromList.length == 0)
+			return Collections.emptyList();
+		return transform(Arrays.asList(fromList), function);
 	}
 
 	/**
@@ -551,12 +552,18 @@ public abstract class Utils {
 	 */
 	public static String streamToString(InputStream inputStream) throws IOException {
 		ByteArrayOutputStream result = new ByteArrayOutputStream();
-		byte[] buffer = new byte[1024];
-		int length;
-		while ((length = inputStream.read(buffer)) != -1) {
-			result.write(buffer, 0, length);
-		}
+		copy(inputStream, result);
 		return result.toString(StandardCharsets.UTF_8.name());
 	}
 
+	public static long copy(InputStream source, OutputStream sink) throws IOException {
+		long nread = 0L;
+		byte[] buf = new byte[8192];
+		int n;
+		while ((n = source.read(buf)) > 0) {
+			sink.write(buf, 0, n);
+			nread += n;
+		}
+		return nread;
+	}
 }
