@@ -16,12 +16,18 @@ import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
 import rainbow.db.jdbc.DataAccessException;
 
+/**
+ * 对一个对象查询的封装，只支持直接的属性链接
+ * 
+ * @author lijinghui
+ *
+ */
 public class Select extends Where<Select> implements ISelect {
 
 	private String[] select;
 
 	private boolean distinct = false;
-
+	
 	private List<OrderBy> orderBy;
 
 	private String[] groupBy;
@@ -41,7 +47,7 @@ public class Select extends Where<Select> implements ISelect {
 		distinct = true;
 		return this;
 	}
-
+	
 	public Select from(String entityName) {
 		setEntity(dao.getEntity(entityName));
 		return this;
@@ -74,7 +80,7 @@ public class Select extends Where<Select> implements ISelect {
 		return this;
 	}
 
-	public List<Field> getFields() {
+	public List<SelectField> getFields() {
 		return context.getSelectFields();
 	}
 
@@ -95,8 +101,8 @@ public class Select extends Where<Select> implements ISelect {
 		final Sql sql = new Sql().append("SELECT ");
 		if (distinct)
 			sql.append("DISTINCT ");
-		for (Field field : context.getSelectFields()) {
-			field.toSelectSql(sql, context);
+		for (SelectField field : context.getSelectFields()) {
+			field.toSql(sql, context);
 			sql.appendTempComma();
 		}
 		sql.clearTemp();
@@ -126,18 +132,10 @@ public class Select extends Where<Select> implements ISelect {
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
 			Arrays.asList(groupBy).forEach(g -> {
-				String linkStr = null;
-				String nameStr = null;
-				String[] f = Utils.split(g, '.');
-				if (f.length == 1) {
-					nameStr = f[0];
-				} else {
-					linkStr = f[0];
-					nameStr = f[1];
-				}
-				Optional<Field> field = context.selectField(linkStr, nameStr);
+				Optional<SelectField> field = context.getSelectFields().parallelStream()
+						.filter(f -> f.matchGroupBy(g)).findAny();
 				checkState(field.isPresent(), "group field {} not in select fields", g);
-				field.get().toSql(sql, context);
+				field.get().toGroupBySql(sql, context);
 				sql.appendTempComma();
 			});
 			sql.clearTemp();
@@ -224,7 +222,7 @@ public class Select extends Where<Select> implements ISelect {
 		dao.doQuery(sql, rs -> {
 			map.clear();
 			int index = 1;
-			for (Field field : getFields()) {
+			for (SelectField field : getFields()) {
 				try {
 					Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
 					map.put(field.getName(), value);

@@ -18,13 +18,13 @@ public class SelectBuildContext {
 
 	private List<Link> links = new ArrayList<Link>();
 
-	private List<Field> selectFields;
+	private List<SelectField> selectFields;
 
 	public SelectBuildContext(Dao dao, Entity entity, String[] select) {
 		this.dao = dao;
 		this.entity = entity;
 		if (select == null || select.length == 0) {
-			selectFields = entity.getColumns().stream().map(Field::fromColumn).collect(Collectors.toList());
+			selectFields = entity.getColumns().stream().map(SelectField::fromColumn).collect(Collectors.toList());
 		} else {
 			selectFields = Arrays.stream(select).map(this::createSelectField).collect(Collectors.toList());
 		}
@@ -46,32 +46,34 @@ public class SelectBuildContext {
 		orderBy.forEach(o -> o.initField(this::createField));
 	}
 
-	private Field createSelectField(String id) {
-		Field field = Field.parse(id, entity);
+	private SelectField createSelectField(String id) {
+		SelectField field = SelectField.parse(id, entity);
 		Link link = field.getLink();
 		if (link != null && !links.contains(link))
 			links.add(link);
 		return field;
 	}
 
-	private Field createField(String id) {
-		Field field = Field.parse(id, this);
+	private QueryField createField(String id) {
+		QueryField field = QueryField.parse(id, this);
 		Link link = field.getLink();
 		if (link != null && !links.contains(link))
 			links.add(link);
 		return field;
 	}
 
-	public List<Field> getSelectFields() {
+	public List<SelectField> getSelectFields() {
 		return selectFields;
 	}
 
-	public Optional<Field> alias2selectField(String alias) {
+	/**
+	 * 查找selectFields里面指定了别名的字段，主要用于翻译order by
+	 * 
+	 * @param alias
+	 * @return
+	 */
+	public Optional<SelectField> alias2selectField(String alias) {
 		return selectFields.parallelStream().filter(field -> alias.equals(field.getAlias())).findAny();
-	}
-
-	public Optional<Field> selectField(String link, String name) {
-		return selectFields.parallelStream().filter(f -> f.match(link, name)).findAny();
 	}
 
 	public List<Link> getLinks() {

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.Field;
+import rainbow.db.dao.QueryField;
 import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Column;
@@ -22,7 +22,7 @@ public class SimpleCondition extends C {
 
 	private Object param;
 	
-	private Field field;
+	private QueryField field;
 
 	public SimpleCondition(String property, Op op, Object param) {
 		this.property = property;
@@ -45,7 +45,7 @@ public class SimpleCondition extends C {
 	}
 
 	@Override
-	public void initField(Function<String, Field> fieldFunction) {
+	public void initField(Function<String, QueryField> fieldFunction) {
 		field = fieldFunction.apply(property);
 	}
 	

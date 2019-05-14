@@ -9,27 +9,35 @@ import java.util.Map;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.jdbc.RowMapper;
+import rainbow.db.refinery.Refinery;
+import rainbow.db.refinery.RefineryRegistry;
 
 public class MapRowMapper implements RowMapper<Map<String, Object>> {
 
-	private List<Field> fields;
+	private List<SelectField> fields;
 
-	public MapRowMapper(List<Field> fields) {
+	public MapRowMapper(List<SelectField> fields) {
 		this.fields = fields;
 	}
 
 	public MapRowMapper(Entity entity) {
-		this.fields = Utils.transform(entity.getColumns(), Field::fromColumn);
+		this.fields = Utils.transform(entity.getColumns(), SelectField::fromColumn);
 	}
 
 	@Override
 	public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
 		Map<String, Object> map = new HashMap<String, Object>(fields.size());
 		int index = 1;
-		for (Field field : fields) {
+		for (SelectField field : fields) {
 			Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
-			if (value != null) {
-				map.put(field.getName(), value);
+			String key = field.getName();
+			if (value != null) 
+				map.put(key, value);
+			if (field.getRefinery() != null) {
+				Refinery refinery = RefineryRegistry.getRefinery(field.getRefinery());
+				if (refinery != null) {
+					refinery.refine(field.getColumn(), map, key, field.getRefineryParam());
+				}
 			}
 		}
 		return map;

@@ -11,17 +11,17 @@ import rainbow.db.jdbc.RowMapper;
 
 public class ObjectRowMapper<T> implements RowMapper<T> {
 
-	private List<Field> fields;
+	private List<SelectField> fields;
 
 	private ClassInfo<T> classInfo;
 
-	public ObjectRowMapper(List<Field> fields, Class<T> clazz) {
+	public ObjectRowMapper(List<SelectField> fields, Class<T> clazz) {
 		this.fields = fields;
 		this.classInfo = new ClassInfo<T>(clazz);
 	}
 
 	public ObjectRowMapper(Entity entity, ClassInfo<T> classInfo) {
-		this.fields = Utils.transform(entity.getColumns(), Field::fromColumn);
+		this.fields = Utils.transform(entity.getColumns(), SelectField::fromColumn);
 		this.classInfo = classInfo;
 	}
 
@@ -29,7 +29,7 @@ public class ObjectRowMapper<T> implements RowMapper<T> {
 	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
 		T object = classInfo.makeInstance();
 		int index = 1;
-		for (Field field : fields) {
+		for (SelectField field : fields) {
 			Property p = classInfo.getProperty(field.getName());
 			if (p != null) {
 				Object value = DaoUtils.getResultSetValue(rs, index, field.getColumn());

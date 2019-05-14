@@ -4,7 +4,7 @@ package rainbow.db.dao.condition;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.Field;
+import rainbow.db.dao.QueryField;
 import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Entity;
@@ -31,7 +31,7 @@ public class EmptyCondition extends C {
 	}
 
 	@Override
-	public void initField(Function<String, Field> fieldFunction) {
+	public void initField(Function<String, QueryField> fieldFunction) {
 	}
 
 	@Override

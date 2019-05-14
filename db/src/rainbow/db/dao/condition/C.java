@@ -3,7 +3,7 @@ package rainbow.db.dao.condition;
 import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.Field;
+import rainbow.db.dao.QueryField;
 import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Entity;
@@ -46,7 +46,7 @@ public abstract class C {
 		return or(property, Op.Equal, param);
 	}
 
-	public abstract void initField(Function<String, Field> fieldFunction);
+	public abstract void initField(Function<String, QueryField> fieldFunction);
 
 	public abstract void toSql(SelectBuildContext context, Sql sql);
 

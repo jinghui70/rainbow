@@ -13,14 +13,14 @@ public class NeoBeanMapper implements RowMapper<NeoBean> {
 
 	private Entity entity;
 
-	private List<Field> fields;
+	private List<SelectField> fields;
 
 	public NeoBeanMapper(Entity entity) {
 		this.entity = entity;
-		this.fields = Utils.transform(entity.getColumns(), Field::fromColumn);
+		this.fields = Utils.transform(entity.getColumns(), SelectField::fromColumn);
 	}
 
-	public NeoBeanMapper(Entity entity, List<Field> fields) {
+	public NeoBeanMapper(Entity entity, List<SelectField> fields) {
 		this.entity = entity;
 		this.fields = fields;
 	}
@@ -29,7 +29,7 @@ public class NeoBeanMapper implements RowMapper<NeoBean> {
 	public NeoBean mapRow(ResultSet rs, int rowNum) throws SQLException {
 		NeoBean bean = new NeoBean(entity);
 		int index = 1;
-		for (Field field : fields) {
+		for (SelectField field : fields) {
 			try {
 				bean.setObject(field.getColumn(), DaoUtils.getResultSetValue(rs, index, field.getColumn()));
 			} catch (SQLException e) {

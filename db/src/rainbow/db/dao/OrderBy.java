@@ -13,7 +13,7 @@ public class OrderBy {
 
 	private boolean desc;
 	
-	private Field field;
+	private QueryField field;
 
 	public String getProperty() {
 		return property;
@@ -31,7 +31,7 @@ public class OrderBy {
 		this.desc = desc;
 	}
 
-	public Field getField() {
+	public QueryField getField() {
 		return field;
 	}
 
@@ -65,7 +65,7 @@ public class OrderBy {
 		return property;
 	}
 
-	public void initField(Function<String, Field> fieldFunction) {
+	public void initField(Function<String, QueryField> fieldFunction) {
 		field = fieldFunction.apply(property);
 	}
 	

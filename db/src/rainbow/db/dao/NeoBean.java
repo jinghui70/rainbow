@@ -5,6 +5,7 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,7 +60,7 @@ public class NeoBean {
 			Map map = (Map) obj;
 			for (Object key : map.keySet()) {
 				Column column = entity.getColumn(key.toString());
-				if (column==null) {
+				if (column == null) {
 					logger.warn("column {} of entity {} not found", key.toString(), entity.getName());
 				} else {
 					Object value = map.get(key);
@@ -168,8 +169,8 @@ public class NeoBean {
 	public NeoBean setValue(Column column, Object value) {
 		checkArgument(value != null || !column.isMandatory(), "property {} can not set null", column.getName());
 		if (Dao.NOW.equals(value)) {
-			checkArgument(java.util.Date.class.isAssignableFrom(column.dataClass()),
-					"property {} can't assign NOW", column.getName());
+			checkArgument(java.util.Date.class.isAssignableFrom(column.dataClass()), "property {} can't assign NOW",
+					column.getName());
 		} else
 			value = column.convert(value);
 		setObject(column, value);
@@ -225,6 +226,14 @@ public class NeoBean {
 			}
 		}
 		return object;
+	}
+
+	public Map<String, Object> toMap() {
+		Map<String, Object> result = new HashMap<String, Object>(valueMap.size());
+		for (Column column : valueMap.keySet()) {
+			result.put(column.getName(), valueMap.get(column));
+		}
+		return result;
 	}
 
 }

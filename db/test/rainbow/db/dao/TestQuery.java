@@ -23,7 +23,6 @@ public class TestQuery {
 	@BeforeAll
 	public static void setUpBeforeClass() throws Exception {
 		dao = DBTest.createMemoryDao(TestQuery.class.getResource("object/test.rdmx"));
-		DBTest.loadDataFromExcel(dao, TestQuery.class.getResource("object/TestData.xlsx"));
 	}
 
 	@AfterAll

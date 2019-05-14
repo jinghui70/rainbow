@@ -56,6 +56,9 @@ public class _SaleRecord extends IdObject<Integer>{
 		this.time = time;
 	}
 
+	public _SaleRecord() {
+	}
+
 	public _SaleRecord(int id, int person, int goods, int qty, double money, LocalDate time) {
 		this.id = id;
 		this.person = person;
