@@ -1,5 +1,6 @@
 package rainbow.core.util;
 
+import static rainbow.core.util.Preconditions.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,6 +13,7 @@ import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -565,5 +567,44 @@ public abstract class Utils {
 			nread += n;
 		}
 		return nread;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> shrink(Map<String, Object> map) {
+		Map<String, Object> result = new HashMap<String, Object>(map.size());
+		Map<String, Object> vmap = null;
+		for (String key : map.keySet()) {
+			Object value = map.get(key);
+			int inx = key.indexOf('.');
+			if (inx > 0) {
+				String sub = key.substring(0, inx);
+				if (value == null) {
+					vmap = new HashMap<String, Object>();
+					map.put(sub, vmap);
+				} else {
+					checkArgument(value instanceof Map, "invalid subkey when shrink map: {}", key);
+					vmap = (Map<String, Object>) value;
+				}
+				vmap.put(key.substring(inx + 1), map.get(key));
+			} else
+				result.put(key, value);
+		}
+		return result;
+	}
+
+	public static Map<String, Object> unshrink(Map<String, Object> map) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		for (String key : map.keySet()) {
+			Object value = map.get(key);
+			if (value instanceof Map) {
+				@SuppressWarnings("unchecked")
+				Map<String, Object> vmap = (Map<String, Object>) value;
+				for (String subkey : vmap.keySet()) {
+					result.put(key + "." + subkey, vmap.get(subkey));
+				}
+			} else
+				result.put(key, value);
+		}
+		return result;
 	}
 }
