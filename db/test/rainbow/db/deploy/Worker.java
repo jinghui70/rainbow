@@ -6,19 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.sql.Driver;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -26,13 +22,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.model.exception.AppException;
@@ -41,7 +32,6 @@ import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.NeoBean;
-import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.jdbc.SimpleDriverDataSource;
 import rainbow.db.model.Field;
@@ -49,6 +39,9 @@ import rainbow.db.model.Model;
 import rainbow.db.model.Unit;
 
 public class Worker {
+
+	private static Type MAP_TYPE = new TypeReference<Map<String, Object>>() {
+	}.getType();
 
 	private static Map<String, Class<? extends Driver>> driverClassMap = ImmutableMap
 			.<String, Class<? extends Driver>>builder().put("mysql", com.mysql.cj.jdbc.Driver.class) //
@@ -84,10 +77,6 @@ public class Worker {
 			}
 		} else
 			throw new AppException("{} is not a valid model file", fileName);
-		// 现在是从Excel中加载数据，所以暂时把Map用code来做主键
-		Map<String, Entity> tempMap = new HashMap<String, Entity>();
-		entityMap.values().forEach(e -> tempMap.put(e.getCode(), e));
-		entityMap = tempMap;
 	}
 
 	public void outputRdm() throws IOException {
@@ -122,15 +111,32 @@ public class Worker {
 		generateDatabase(dao, server);
 		if (preset != null) {
 			System.out.println("loading preset data ");
-			Files.list(preset).filter(f -> f.getFileName().toString().endsWith(".xlsx")).forEach(f -> {
+			Files.list(preset).filter(f -> f.getFileName().toString().endsWith(".json")).sorted().forEach(f -> {
 				try {
-					loadPresetDataFromExcel(dao, f);
+					loadPresetData(dao, f);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			});
 		}
 		System.out.println("Done!");
+	}
+
+	private void loadPresetData(Dao dao, Path file) throws IOException {
+		String entityName = Utils.substringBefore(file.getFileName().toString(), ".json");
+		System.out.print("processing ");
+		System.out.println(entityName);
+		Entity entity = dao.getEntity(entityName);
+		if (entity == null)
+			System.out.println("entity not defined");
+		else {
+			List<String> lines = Files.readAllLines(file);
+			List<NeoBean> neoList = Utils.transform(lines, line -> {
+				Map<String, Object> map = JSON.parseObject(line, MAP_TYPE);
+				return dao.makeNeoBean(entityName, map);
+			});
+			dao.insert(neoList);
+		}
 	}
 
 	private void writeUnit(PrintWriter writer, Unit unit) {
@@ -200,94 +206,6 @@ public class Worker {
 		Path ddlFile = output.resolve(server + ".sql");
 		String ddl = String.join("", Files.readAllLines(ddlFile));
 		dao.execSql(ddl);
-	}
-
-	private void loadPresetDataFromExcel(Dao dao, Path file) throws IOException {
-		System.out.append("processing file: ").println(file.getFileName().toString());
-		try (InputStream inStream = Files.newInputStream(file, StandardOpenOption.READ)) {
-			Workbook wb = WorkbookFactory.create(inStream);
-			for (int i = 0; i < wb.getNumberOfSheets(); i++) {
-				Sheet sheet = wb.getSheetAt(i);
-				String table = Utils.substringBefore(sheet.getSheetName(), "(");
-				if (table.startsWith("//"))
-					continue;
-				Entity entity = dao.getEntity(table);
-				System.out.println(Utils.format("loading table: {}", sheet.getSheetName()));
-
-				// 读取文件中的列
-				Map<String, Column> columnMap = entity.getColumns().stream()
-						.collect(Collectors.toMap(Column::getCode, Function.identity()));
-				List<Column> columns = new ArrayList<Column>();
-				Row row = sheet.getRow(1);
-				for (int col = 0; col < row.getLastCellNum(); col++) {
-					Cell cell = row.getCell(col);
-					String v = cell.getStringCellValue();
-					if (columnMap.containsKey(v))
-						columns.add(columnMap.get(v));
-					else
-						throw new AppException("field[{}] not defined at col[{}]", v, col);
-				}
-				// 读数据
-				List<NeoBean> list = new ArrayList<NeoBean>(sheet.getLastRowNum() - 2);
-				for (int rowInx = 2; rowInx <= sheet.getLastRowNum(); rowInx++) {
-					NeoBean neo = dao.newNeoBean(table);
-					row = sheet.getRow(rowInx);
-					for (int col = 0; col < columns.size(); col++) {
-						Cell cell = row.getCell(col);
-						Column column = columns.get(col);
-						Object value = getValue(column, cell);
-						neo.setValue(column, value);
-					}
-					list.add(neo);
-				}
-				dao.insert(list, 500, false);
-			}
-		}
-	}
-
-	private Object getValue(Column column, Cell cell) {
-		if (cell == null)
-			return null;
-		switch (cell.getCellType()) {
-		case NUMERIC:
-			switch (column.getType()) {
-			case DATE:
-				return cell.getDateCellValue();
-			case TIME:
-				return cell.getDateCellValue();
-			case TIMESTAMP:
-				return cell.getDateCellValue();
-			case INT:
-			case SMALLINT:
-				Double d = Double.valueOf(cell.getNumericCellValue());
-				return d.intValue();
-			case LONG:
-				d = Double.valueOf(cell.getNumericCellValue());
-				return d.longValue();
-			case DOUBLE:
-			case NUMERIC:
-				return cell.getNumericCellValue();
-			case CHAR:
-			case VARCHAR:
-			case CLOB:
-				String v = Double.toString(cell.getNumericCellValue());
-				if (v.contains(".")) {
-					if (v.contains(".")) {
-						v = v.replaceAll("0+$", "");// 去掉多余的0
-						v = v.replaceAll("[.]$", "");// 如最后一位是.则去掉
-					}
-				}
-				return v;
-			default:
-				return null;
-			}
-		case BLANK:
-			return null;
-		case STRING:
-			return cell.getStringCellValue();
-		default:
-			return null;
-		}
 	}
 
 }
