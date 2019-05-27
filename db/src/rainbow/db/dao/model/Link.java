@@ -13,12 +13,6 @@ public class Link extends NameObject {
 
 	private List<Column> columns;
 
-	private Entity interEntity;
-
-	private List<Column> leftColumns;
-
-	private List<Column> rightColumns;
-
 	private Entity targetEntity;
 
 	private List<Column> targetColumns;
@@ -39,30 +33,6 @@ public class Link extends NameObject {
 
 	public void setColumns(List<Column> columns) {
 		this.columns = columns;
-	}
-
-	public Entity getInterEntity() {
-		return interEntity;
-	}
-
-	public void setInterEntity(Entity interEntity) {
-		this.interEntity = interEntity;
-	}
-
-	public List<Column> getLeftColumns() {
-		return leftColumns;
-	}
-
-	public void setLeftColumns(List<Column> leftColumns) {
-		this.leftColumns = leftColumns;
-	}
-
-	public List<Column> getRightColumns() {
-		return rightColumns;
-	}
-
-	public void setRightColumns(List<Column> rightColumns) {
-		this.rightColumns = rightColumns;
 	}
 
 	public Entity getTargetEntity() {
@@ -97,11 +67,6 @@ public class Link extends NameObject {
 		this.label = link.getLabel();
 		this.many = link.isMany();
 		this.columns = link.getFields().stream().map(entity::getColumn).collect(Collectors.toList());
-		if (link.getInterTable() != null) {
-			this.interEntity = model.get(link.getInterTable());
-			this.leftColumns = link.getLeftFields().stream().map(this.interEntity::getColumn).collect(Collectors.toList());
-			this.rightColumns = link.getRightFields().stream().map(this.interEntity::getColumn).collect(Collectors.toList());
-		}
 		this.targetEntity = model.get(link.getTargetTable());
 		this.targetColumns = link.getTargetFields().stream().map(this.targetEntity::getColumn).collect(Collectors.toList());
 	}
