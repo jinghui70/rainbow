@@ -4,9 +4,7 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
@@ -124,18 +122,16 @@ public class ConfigData {
 	}
 
 	/**
-	 * 获取bundle配置单项内容,并转为Map
+	 * 获取bundle配置的对象
 	 * 
-	 * @param bundleId
 	 * @param key
+	 * @param type
 	 * @return
 	 */
-	public Map<String, String> getMap(String key) {
+	public <T> T getObject(String key, TypeReference<T> type) {
 		if (root == null)
-			return Collections.emptyMap();
-		Map<String, String> result = root.getObject(key, new TypeReference<LinkedHashMap<String, String>>() {
-		});
-		return result == null ? Collections.emptyMap() : result;
+			return null;
+		return root.getObject(key, type.getType());
 	}
 
 }
