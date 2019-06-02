@@ -5,38 +5,69 @@
 	"fieldTags": [],
 	"tables": [
 		{
+			"code": "ORG",
+			"label": "机构",
+			"name": "_Org",
+			"comment": "",
+			"fields": [
+				{
+					"code": "ID",
+					"name": "id",
+					"label": "ID",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 22,
+					"key": true,
+					"mandatory": true
+				},
+				{
+					"code": "PID",
+					"name": "pid",
+					"label": "PID",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 22
+				},
+				{
+					"code": "NAME",
+					"name": "name",
+					"label": "机构名称",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 20,
+					"mandatory": true
+				}
+			]
+		},
+		{
 			"code": "SP",
 			"label": "商品",
 			"name": "_Goods",
 			"comment": "",
 			"fields": [
 				{
-					"name": "id",
 					"code": "ID",
+					"name": "id",
 					"label": "ID",
-					"type": "INT",
-					"length": 0,
-					"precision": 0,
+					"type": "VARCHAR",
 					"comment": "",
+					"length": 10,
 					"key": true,
 					"mandatory": true
 				},
 				{
-					"name": "name",
 					"code": "NAME",
+					"name": "name",
 					"label": "商品名",
 					"type": "VARCHAR",
-					"length": 22,
-					"precision": 0,
-					"comment": ""
+					"comment": "",
+					"length": 22
 				},
 				{
-					"name": "price",
 					"code": "PRICE",
+					"name": "price",
 					"label": "价格",
 					"type": "DOUBLE",
-					"length": 0,
-					"precision": 0,
 					"comment": ""
 				}
 			]
@@ -48,46 +79,42 @@
 			"comment": "",
 			"fields": [
 				{
-					"name": "id",
 					"code": "ID",
+					"name": "id",
 					"label": "ID",
-					"type": "INT",
-					"precision": 0,
+					"type": "VARCHAR",
 					"comment": "",
+					"length": 10,
 					"key": true,
 					"mandatory": true
 				},
 				{
-					"name": "name",
 					"code": "NAME",
+					"name": "name",
 					"label": "姓名",
 					"type": "VARCHAR",
-					"length": 20,
-					"precision": 0,
-					"comment": ""
+					"comment": "",
+					"length": 20
 				},
 				{
-					"name": "birthday",
 					"code": "BIRTH",
+					"name": "birthday",
 					"label": "生日",
 					"type": "DATE",
-					"precision": 0,
 					"comment": ""
 				},
 				{
-					"name": "gender",
 					"code": "GENDER",
+					"name": "gender",
 					"label": "性别",
 					"type": "INT",
-					"precision": 0,
 					"comment": ""
 				},
 				{
-					"name": "mobile",
 					"code": "M",
+					"name": "mobile",
 					"label": "手机",
 					"type": "INT",
-					"precision": 0,
 					"comment": ""
 				}
 			],
@@ -123,61 +150,52 @@
 			"comment": "",
 			"fields": [
 				{
-					"name": "id",
 					"code": "ID",
+					"name": "id",
 					"label": "ID",
-					"type": "INT",
-					"length": 22,
-					"precision": 0,
+					"type": "VARCHAR",
 					"comment": "",
+					"length": 10,
 					"key": true,
 					"mandatory": true
 				},
 				{
-					"name": "person",
 					"code": "RY",
+					"name": "person",
 					"label": "销售员",
-					"type": "INT",
-					"length": 0,
-					"precision": 0,
+					"type": "VARCHAR",
 					"comment": "",
+					"length": 10,
 					"mandatory": true
 				},
 				{
-					"name": "goods",
 					"code": "SP",
+					"name": "goods",
 					"label": "商品",
-					"type": "INT",
-					"length": 0,
-					"precision": 0,
+					"type": "VARCHAR",
 					"comment": "",
+					"length": 10,
 					"mandatory": true
 				},
 				{
-					"name": "qty",
 					"code": "SL",
+					"name": "qty",
 					"label": "数量",
 					"type": "DOUBLE",
-					"length": 0,
-					"precision": 0,
 					"comment": ""
 				},
 				{
-					"name": "money",
 					"code": "JE",
+					"name": "money",
 					"label": "金额",
 					"type": "DOUBLE",
-					"length": 0,
-					"precision": 0,
 					"comment": ""
 				},
 				{
-					"name": "time",
 					"code": "SJ",
+					"name": "time",
 					"label": "时间",
 					"type": "TIMESTAMP",
-					"length": 0,
-					"precision": 0,
 					"comment": "",
 					"mandatory": true
 				}
@@ -207,5 +225,6 @@
 				}
 			]
 		}
-	]
+	],
+	"version": "1.0.3"
 }

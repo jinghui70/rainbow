@@ -230,10 +230,26 @@ public class NeoBean {
 
 	public Map<String, Object> toMap() {
 		Map<String, Object> result = new HashMap<String, Object>(valueMap.size());
-		for (Column column : valueMap.keySet()) {
+		for (Column column : valueMap.keySet())
 			result.put(column.getName(), valueMap.get(column));
-		}
 		return result;
 	}
 
+	@Override
+	public String toString() {
+		if (valueMap.isEmpty())
+			return "{}";
+		StringBuilder sb = new StringBuilder();
+		sb.append('{');
+		boolean first = true;
+		for (Column column : valueMap.keySet()) {
+			if (first)
+				first = false;
+			else
+				sb.append(',');
+			sb.append(column.getName()).append("=");
+			sb.append(valueMap.get(column));
+		}
+		return sb.toString();
+	}
 }

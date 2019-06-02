@@ -6,8 +6,8 @@ package rainbow.core.model.object;
  * @author lijinghui
  * 
  */
-public interface IIdObject<I> {
+public interface IIdObject {
 
-    public I getId();
+    public String getId();
 
 }

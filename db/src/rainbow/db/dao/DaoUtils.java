@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ImmutableList;
 
+import rainbow.core.model.object.TreeNode;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
@@ -83,11 +85,23 @@ public abstract class DaoUtils {
 		return value;
 	}
 
+	/**
+	 * 读取rdmx文件并解析
+	 * 
+	 * @param modelFile
+	 * @return
+	 */
 	public static HashMap<String, Entity> resolveModel(Path modelFile) {
 		Model model = loadModel(modelFile);
 		return resolveModel(model);
 	}
 
+	/**
+	 * 读取rdmx文件
+	 * 
+	 * @param modelFile
+	 * @return
+	 */
 	public static Model loadModel(Path modelFile) {
 		try (InputStream is = Files.newInputStream(modelFile)) {
 			return JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
@@ -98,6 +112,12 @@ public abstract class DaoUtils {
 
 	}
 
+	/**
+	 * 解析一个model
+	 * 
+	 * @param model
+	 * @return
+	 */
 	public static HashMap<String, Entity> resolveModel(Model model) {
 		HashMap<String, Entity> result = new HashMap<String, Entity>();
 		loadUnit(result, model);
@@ -194,4 +214,32 @@ public abstract class DaoUtils {
 		});
 		return sb.toString();
 	}
+	
+	/**
+	 * 把一个NeoBean列表转为树结构
+	 * 
+	 * @param data
+	 * @param strict 严格模式根结点的pid必须为空
+	 * @return
+	 */
+	public static List<TreeNode<NeoBean>> makeTree(List<NeoBean> data, boolean strict) {
+		Map<String, TreeNode<NeoBean>> map = new HashMap<String, TreeNode<NeoBean>>();
+		List<TreeNode<NeoBean>> result = new LinkedList<TreeNode<NeoBean>>();
+		data.forEach(v -> map.put(v.getString("id"), new TreeNode<NeoBean>(v)));
+		data.forEach(v -> {
+			String id = v.getString("id");
+			String pid = v.getString("pid");
+			TreeNode<NeoBean> node = map.get(id);
+			if (Utils.isNullOrEmpty(pid))
+				result.add(node);
+			else {
+				TreeNode<NeoBean> parent = map.get(pid);
+				if (strict && parent == null)
+					throw new RuntimeException(Utils.format("没找到节点{}的父节点{}", id, pid));
+				parent.addChild(node);
+			}
+		});
+		return result;
+	}
+	
 }

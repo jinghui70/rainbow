@@ -8,30 +8,30 @@ import java.util.Objects;
  * @author lijinghui
  * 
  */
-public abstract class IdObject<I> implements IIdObject<I> {
+public abstract class IdObject implements IIdObject {
 
-    protected I id;
+	protected String id;
 
-    public I getId() {
-        return id;
-    }
+	public String getId() {
+		return id;
+	}
 
-    public void setId(I id) {
-        this.id = id;
-    }
+	public void setId(String id) {
+		this.id = id;
+	}
 
-    @Override
-    public int hashCode() {
-        return id == null ? 0 : id.hashCode();
-    }
+	@Override
+	public int hashCode() {
+		return id == null ? 0 : id.hashCode();
+	}
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        return (getClass() == obj.getClass()) && Objects.equals(id, ((IdObject<?>) obj).getId());
-    }
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		return (getClass() == obj.getClass()) && Objects.equals(id, ((IdObject) obj).getId());
+	}
 
 }

@@ -72,11 +72,11 @@ public class TestJoin {
 
 	@Test
 	public void testMany() {
-		_SaleRecord r = new _SaleRecord(1, 3, 6, 1, 100, LocalDate.of(2019, 5, 5));
+		_SaleRecord r = new _SaleRecord("1", "3", "6", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		r = new _SaleRecord(2, 3, 7, 1, 100, LocalDate.of(2019, 5, 5));
+		r = new _SaleRecord("2", "3", "7", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		r = new _SaleRecord(3, 3, 30, 1, 100, LocalDate.of(2019, 5, 5));
+		r = new _SaleRecord("3", "3", "30", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
 	}
 

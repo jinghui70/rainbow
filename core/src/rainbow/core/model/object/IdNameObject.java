@@ -2,15 +2,14 @@ package rainbow.core.model.object;
 
 import rainbow.core.util.Utils;
 
-public class IdNameObject<I> extends IdObject<I> implements INameObject {
+public class IdNameObject extends IdObject implements INameObject {
 
 	protected String name;
 
     public IdNameObject() {
     }
 
-    public IdNameObject(I id, String name) {
-    	super();
+    public IdNameObject(String id, String name) {
     	setId(id);
         this.name = name;
     }
