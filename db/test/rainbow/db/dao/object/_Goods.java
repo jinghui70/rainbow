@@ -1,8 +1,8 @@
 package rainbow.db.dao.object;
 
-import rainbow.core.model.object.SimpleObject;
+import rainbow.core.model.object.IdNameObject;
 
-public class _Goods extends SimpleObject{
+public class _Goods extends IdNameObject{
 
 	private double price;
 

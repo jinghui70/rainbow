@@ -1,7 +1,7 @@
 package rainbow.db.database;
 
-import rainbow.core.model.object.SimpleObject;
+import rainbow.core.model.object.IdNameObject;
 
-public class TestObj extends SimpleObject {
+public class TestObj extends IdNameObject {
 
 }
