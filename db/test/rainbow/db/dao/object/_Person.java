@@ -2,9 +2,9 @@ package rainbow.db.dao.object;
 
 import java.time.LocalDate;
 
-import rainbow.core.model.object.IdNameObject;
+import rainbow.core.model.object.SimpleObject;
 
-public class _Person extends IdNameObject {
+public class _Person extends SimpleObject {
 
 	private LocalDate birthday;
 	

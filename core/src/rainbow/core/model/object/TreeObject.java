@@ -1,6 +1,6 @@
 package rainbow.core.model.object;
 
-public class TreeObject extends IdObject implements ITreeObject {
+public class TreeObject extends SimpleObject implements ITreeObject {
 
 	private String pid;
 	
