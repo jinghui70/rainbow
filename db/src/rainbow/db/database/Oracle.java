@@ -16,7 +16,7 @@ public class Oracle extends AbstractDialect {
 	public String wrapPagedSql(String sql, int pageSize, int pageNo) {
 		int from = (pageNo - 1) * pageSize + 1;
 		int to = pageNo * pageSize;
-		return String.format("select * from (select ROWNUM AS RN,A.* from (%s) A where ROWNUM <=%d) where RN>=%d", sql,
+		return String.format("select * from (select A.*,ROWNUM AS RNfrom (%s) A where ROWNUM <=%d) where RN>=%d", sql,
 				to, from);
 	}
 

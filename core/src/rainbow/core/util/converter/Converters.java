@@ -1,5 +1,10 @@
 package rainbow.core.util.converter;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.collect.HashBasedTable;
@@ -173,5 +178,79 @@ public class Converters {
 		addDefault(Timestamp2Date.class);
 		addDefault(Timestamp2LocalDate.class);
 		addDefault(Timestamp2LocalDateTime.class);
+	}
+
+	/**
+	 * 转换一个JavaBean为Map
+	 * 
+	 * @param object
+	 * @return
+	 */
+	public static <T> Map<String, Object> object2Map(T object) {
+		Map<String, Object> result = new HashMap<String, Object>();
+		try {
+			BeanInfo beanInfo = Introspector.getBeanInfo(object.getClass(), Object.class);
+			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				String key = pd.getName();
+				Method getter = pd.getReadMethod();
+				Object value = getter.invoke(object);
+				result.put(key, value);
+			}
+			return result;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * 转换一个Map为JavaBean
+	 * 
+	 * @param map
+	 * @param clazz
+	 * @return
+	 */
+	public static <T> T map2Object(Map<String, Object> map, Class<T> clazz) {
+		try {
+			T object = clazz.newInstance();
+			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
+			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				String key = pd.getName();
+				Method setter = pd.getWriteMethod();
+				Object value = map.get(key);
+				if (value != null)
+					value = Converters.convert(value, pd.getPropertyType());
+				setter.invoke(object, value);
+			}
+			return object;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * 转换一个Map为JavaBean
+	 * 
+	 * @param map
+	 * @param clazz
+	 * @return
+	 */
+	public static <T> T map2Object(Map<String, Object> map, BeanInfo beanInfo, Class<T> clazz) {
+		try {
+			T object = clazz.newInstance();
+			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+			for (PropertyDescriptor pd : pds) {
+				String key = pd.getName();
+				Method setter = pd.getWriteMethod();
+				Object value = map.get(key);
+				if (value != null)
+					value = Converters.convert(value, pd.getPropertyType());
+				setter.invoke(object, value);
+			}
+			return object;
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

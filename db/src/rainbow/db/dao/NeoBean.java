@@ -3,6 +3,9 @@ package rainbow.db.dao;
 import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -41,7 +44,6 @@ public class NeoBean {
 		init(obj);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void init(Object obj) {
 		if (obj == null) {
 			valueMap.clear();
@@ -55,9 +57,8 @@ public class NeoBean {
 					setValue(column, value);
 				}
 			}
-
 		} else if (obj instanceof Map) {
-			Map map = (Map) obj;
+			Map<?,?> map = (Map<?,?>) obj;
 			for (Object key : map.keySet()) {
 				Column column = entity.getColumn(key.toString());
 				if (column == null) {
@@ -68,23 +69,19 @@ public class NeoBean {
 				}
 			}
 		} else {
-			init(obj, new ClassInfo(obj.getClass()));
-		}
-	}
-
-	public void init(Object obj, ClassInfo<?> info) {
-		if (obj == null) {
-			valueMap.clear();
-			return;
-		}
-		for (Column column : entity.getColumns()) {
-			String propertyName = column.getName();
-			Property p = info.getProperty(propertyName);
-			if (p != null) {
-				Object value = p.getValue(obj);
-				if (value != null) {
-					setValue(column, value);
+			try {
+				BeanInfo beanInfo = Introspector.getBeanInfo(obj.getClass(), Object.class);
+				PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
+				for (PropertyDescriptor pd : pds) {
+					String key = pd.getName();
+					Column column = entity.getColumn(key);
+					if (column!=null) {
+						Object value = pd.getReadMethod().invoke(obj);
+						setValue(column, value);
+					}
 				}
+			} catch (Exception e) {
+				throw new RuntimeException(e);
 			}
 		}
 	}
@@ -204,28 +201,7 @@ public class NeoBean {
 	 * @return
 	 */
 	public <T> T bianShen(Class<T> clazz) {
-		return bianShen(new ClassInfo<T>(clazz));
-	}
-
-	public <T> T bianShen(ClassInfo<T> classInfo) {
-		T object = classInfo.makeInstance();
-		for (Column column : entity.getColumns()) {
-			String propertyName = column.getName();
-			Property p = classInfo.getProperty(propertyName);
-			if (p != null) {
-				Object value = getValue(column, p.getType());
-				if (value != null) {
-					try {
-						p.setValue(object, value);
-					} catch (Throwable e) {
-						logger.error("transfer neobean data {} to property {} failed", value, propertyName, e);
-						throw e;
-					}
-				}
-
-			}
-		}
-		return object;
+		return Converters.map2Object(toMap(), clazz);
 	}
 
 	public Map<String, Object> toMap() {

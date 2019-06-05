@@ -191,7 +191,7 @@ public class Select extends Where<Select> implements ISelect {
 	@Override
 	public int count() {
 		Sql sql = build();
-		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(")");
 		return dao.queryForObject(countSql, Integer.class);
 	}
 

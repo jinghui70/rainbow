@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSON;
 import com.google.common.collect.ImmutableList;
 
+import rainbow.core.model.object.Tree;
 import rainbow.core.model.object.TreeNode;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
@@ -214,7 +215,7 @@ public abstract class DaoUtils {
 		});
 		return sb.toString();
 	}
-	
+
 	/**
 	 * 把一个NeoBean列表转为树结构
 	 * 
@@ -222,16 +223,16 @@ public abstract class DaoUtils {
 	 * @param strict 严格模式根结点的pid必须为空
 	 * @return
 	 */
-	public static List<TreeNode<NeoBean>> makeTree(List<NeoBean> data, boolean strict) {
+	public static Tree<NeoBean> makeTree(List<NeoBean> data, boolean strict) {
 		Map<String, TreeNode<NeoBean>> map = new HashMap<String, TreeNode<NeoBean>>();
-		List<TreeNode<NeoBean>> result = new LinkedList<TreeNode<NeoBean>>();
+		List<TreeNode<NeoBean>> roots = new LinkedList<TreeNode<NeoBean>>();
 		data.forEach(v -> map.put(v.getString("id"), new TreeNode<NeoBean>(v)));
 		data.forEach(v -> {
 			String id = v.getString("id");
 			String pid = v.getString("pid");
 			TreeNode<NeoBean> node = map.get(id);
 			if (Utils.isNullOrEmpty(pid))
-				result.add(node);
+				roots.add(node);
 			else {
 				TreeNode<NeoBean> parent = map.get(pid);
 				if (strict && parent == null)
@@ -239,7 +240,7 @@ public abstract class DaoUtils {
 				parent.addChild(node);
 			}
 		});
-		return result;
+		return new Tree<NeoBean>(roots, map);
 	}
-	
+
 }

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 
+import rainbow.core.model.object.Tree;
 import rainbow.core.model.object.TreeNode;
 import rainbow.db.DBTest;
 import rainbow.db.dao.condition.Op;
@@ -125,9 +126,9 @@ public class TestDao {
 		dao.insert(new _Org("2-2", "2", "朝阳区"));
 
 		List<_Org> list = dao.select().from("_Org").orderBy("id").queryForList(_Org.class);
-		List<TreeNode<_Org>> tree = TreeNode.makeTree(list, true);
-		assertEquals(1, tree.size());
-		TreeNode<_Org> node = tree.get(0);
+		Tree<_Org> tree = Tree.makeTree(list, true);
+		assertEquals(1, tree.rootCount());
+		TreeNode<_Org> node = tree.getFirstRoot();
 		assertEquals("中国", node.getData().getName());
 		assertEquals(2, node.getChildren().size());
 
@@ -145,8 +146,8 @@ public class TestDao {
 		assertEquals("东城区", map.get("name"));
 		
 		List<NeoBean> neoList = dao.select().from("_Org").orderBy("id").queryForList();
-		List<TreeNode<NeoBean>> tree2 = DaoUtils.makeTree(neoList, true);
-		map = tree2.get(0).toMap(NeoBean::toMap);
+		Tree<NeoBean> tree2 = DaoUtils.makeTree(neoList, true);
+		map = tree2.getFirstRoot().toMap(NeoBean::toMap);
 		children = (List<Map<String, Object>>) map.get("children");
 		children = (List<Map<String, Object>>) children.get(0).get("children");
 		map = children.get(1);

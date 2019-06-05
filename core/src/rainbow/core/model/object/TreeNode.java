@@ -1,7 +1,6 @@
 package rainbow.core.model.object;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -47,30 +46,4 @@ public class TreeNode<T> {
 		}
 		return result;
 	}
-
-	/**
-	 * 把一个树形数据list转为树结构
-	 * 
-	 * @param data
-	 * @param strict 严格模式，pid不为空则必须有父节点
-	 * @return
-	 */
-	public static <T extends ITreeObject> List<TreeNode<T>> makeTree(List<T> data, boolean strict) {
-		Map<String, TreeNode<T>> map = new HashMap<String, TreeNode<T>>();
-		List<TreeNode<T>> result = new LinkedList<TreeNode<T>>();
-		data.forEach(v -> map.put(v.getId(), new TreeNode<T>(v)));
-		data.forEach(v -> {
-			TreeNode<T> node = map.get(v.getId());
-			if (Utils.isNullOrEmpty(v.getPid()))
-				result.add(node);
-			else {
-				TreeNode<T> parent = map.get(v.getPid());
-				if (strict && parent == null)
-					throw new RuntimeException(Utils.format("没找到节点{}的父节点{}", v.getId(), v.getPid()));
-				parent.addChild(node);
-			}
-		});
-		return result;
-	}
-
 }

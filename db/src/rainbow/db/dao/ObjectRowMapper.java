@@ -1,46 +1,37 @@
 package rainbow.db.dao;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
-import rainbow.core.util.Utils;
 import rainbow.core.util.converter.Converters;
-import rainbow.db.dao.model.Entity;
 import rainbow.db.jdbc.RowMapper;
 
 public class ObjectRowMapper<T> implements RowMapper<T> {
 
-	private List<SelectField> fields;
+	private Class<T> clazz;
 
-	private ClassInfo<T> classInfo;
+	private BeanInfo beanInfo;
+
+	private MapRowMapper mapRowMapper;
 
 	public ObjectRowMapper(List<SelectField> fields, Class<T> clazz) {
-		this.fields = fields;
-		this.classInfo = new ClassInfo<T>(clazz);
-	}
-
-	public ObjectRowMapper(Entity entity, ClassInfo<T> classInfo) {
-		this.fields = Utils.transform(entity.getColumns(), SelectField::fromColumn);
-		this.classInfo = classInfo;
+		this.mapRowMapper = new MapRowMapper(fields);
+		this.clazz = clazz;
+		try {
+			this.beanInfo = Introspector.getBeanInfo(clazz, Object.class);
+		} catch (IntrospectionException e) {
+		}
 	}
 
 	@Override
 	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
-		T object = classInfo.makeInstance();
-		int index = 1;
-		for (SelectField field : fields) {
-			Property p = classInfo.getProperty(field.getName());
-			if (p != null) {
-				Object value = DaoUtils.getResultSetValue(rs, index, field.getColumn());
-				if (value != null) {
-					value = Converters.convert(value, p.getType());
-					p.setValue(object, value);
-				}
-			}
-			index++;
-		}
-		return object;
+		Map<String, Object> map = mapRowMapper.mapRow(rs, rowNum);
+		return Converters.map2Object(map, beanInfo, clazz);
 	}
 
 }
