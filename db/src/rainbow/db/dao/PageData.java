@@ -13,41 +13,40 @@ public class PageData<T> {
 	/**
 	 * 查询的总记录数
 	 */
-	private int total;
+	private Integer count;
 
 	/**
 	 * 查询的结果列表
 	 */
-	private List<T> rows;
+	private List<T> data;
 
 	public PageData() {
-	    total = 0;
-	    rows = Collections.emptyList();
+	    data = Collections.emptyList();
 	}
 
 	public PageData(int count, List<T> data) {
-		this.total = count;
-		this.rows = data;
+		this.count = count;
+		this.data = data;
 	}
 
-	public int getTotal() {
-		return total;
-	}
-
-	public void setTotal(int total) {
-		this.total = total;
-	}
-
-	public List<T> getRows() {
-		return rows;
-	}
-
-	public void setRows(List<T> rows) {
-		this.rows = rows;
+	public PageData(List<T> data) {
+		this.data = data;
 	}
 	
-	public boolean isEmpty() {
-		return rows==null || rows.isEmpty();
+	public Integer getCount() {
+		return count;
+	}
+
+	public void setCount(Integer count) {
+		this.count = count;
+	}
+
+	public List<T> getData() {
+		return data;
+	}
+
+	public void setData(List<T> data) {
+		this.data = data;
 	}
 
 }

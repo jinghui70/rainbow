@@ -27,7 +27,7 @@ public class Select extends Where<Select> implements ISelect {
 	private String[] select;
 
 	private boolean distinct = false;
-	
+
 	private List<OrderBy> orderBy;
 
 	private String[] groupBy;
@@ -47,7 +47,7 @@ public class Select extends Where<Select> implements ISelect {
 		distinct = true;
 		return this;
 	}
-	
+
 	public Select from(String entityName) {
 		setEntity(dao.getEntity(entityName));
 		return this;
@@ -132,8 +132,8 @@ public class Select extends Where<Select> implements ISelect {
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
 			Arrays.asList(groupBy).forEach(g -> {
-				Optional<SelectField> field = context.getSelectFields().parallelStream()
-						.filter(f -> f.matchGroupBy(g)).findAny();
+				Optional<SelectField> field = context.getSelectFields().parallelStream().filter(f -> f.matchGroupBy(g))
+						.findAny();
 				checkState(field.isPresent(), "group field {} not in select fields", g);
 				field.get().toGroupBySql(sql, context);
 				sql.appendTempComma();
@@ -265,26 +265,24 @@ public class Select extends Where<Select> implements ISelect {
 	}
 
 	@Override
-	public <T> List<T> queryForList(Class<T> clazz, int pageSize, int pageNo) {
+	public <T> PageData<T> pageQuery(Class<T> clazz, int pageSize, int pageNo) {
 		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, pageNo));
-		if (getFields().size() == 1)
-			return dao.queryForList(sql, clazz);
-		return dao.queryForList(sql, new ObjectRowMapper<T>(getFields(), clazz));
-	}
-
-	@Override
-	public <T> PageData<T> pageQuery(Class<T> clazz, int pageSize) {
-		Sql sql = build();
-		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-		int count = dao.queryForObject(countSql, Integer.class);
-		if (count == 0) {
-			return new PageData<T>();
+		if (pageNo == 1) {
+			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(")");
+			int count = dao.queryForObject(countSql, Integer.class);
+			if (count == 0) {
+				return new PageData<T>();
+			} else {
+				sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
+				List<T> list = (getFields().size() == 1) ? dao.queryForList(sql, clazz)
+						: dao.queryForList(sql, new ObjectRowMapper<T>(getFields(), clazz));
+				return new PageData<T>(count, list);
+			}
 		} else {
-			sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
+			sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, pageNo));
 			List<T> list = (getFields().size() == 1) ? dao.queryForList(sql, clazz)
 					: dao.queryForList(sql, new ObjectRowMapper<T>(getFields(), clazz));
-			return new PageData<T>(count, list);
+			return new PageData<T>(list);
 		}
 	}
 
@@ -302,23 +300,22 @@ public class Select extends Where<Select> implements ISelect {
 	}
 
 	@Override
-	public List<Map<String, Object>> queryForMapList(int pageSize, int pageNo) {
+	public PageData<Map<String, Object>> pageQuery(int pageSize, int pageNo) {
 		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, pageNo));
-		return dao.queryForList(sql, new MapRowMapper(getFields()));
-	}
-
-	@Override
-	public PageData<Map<String, Object>> mapPageQuery(int pageSize) {
-		Sql sql = build();
-		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-		int count = dao.queryForObject(countSql, Integer.class);
-		if (count == 0) {
-			return new PageData<Map<String, Object>>();
+		if (pageNo == 1) {
+			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
+			int count = dao.queryForObject(countSql, Integer.class);
+			if (count == 0) {
+				return new PageData<Map<String, Object>>();
+			} else {
+				sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
+				List<Map<String, Object>> list = dao.queryForList(sql, new MapRowMapper(getFields()));
+				return new PageData<Map<String, Object>>(count, list);
+			}
 		} else {
-			sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
+			sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, pageNo));
 			List<Map<String, Object>> list = dao.queryForList(sql, new MapRowMapper(getFields()));
-			return new PageData<Map<String, Object>>(count, list);
+			return new PageData<Map<String, Object>>(list);
 		}
 	}
 

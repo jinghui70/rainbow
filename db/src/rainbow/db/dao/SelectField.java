@@ -146,8 +146,9 @@ public class SelectField {
 			checkNotNull(field.link, "link {} of entity {} not defined", str, entity.getName());
 			str = str.substring(inx + 1);
 			field.column = field.link.getTargetEntity().getColumn(str);
+			checkNotNull(field.column, "link column {} not defined", str);
 		} else
-			field.column = entity.getColumn(str);
+			field.column = checkNotNull(entity.getColumn(str),"column {} of entity {} not defined", str, entity.getName());
 		return field;
 	}
 

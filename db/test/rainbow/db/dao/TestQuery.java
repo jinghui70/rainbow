@@ -68,11 +68,11 @@ public class TestQuery {
 		assertEquals(200d, s.getMoney());
 		
 
-		PageData<_SaleRecord> page = dao.select().from("_SaleRecord").orderBy("id").pageQuery(_SaleRecord.class, 2);
-		assertEquals(2, page.getRows().size());
-		assertEquals(3, page.getTotal());
+		PageData<_SaleRecord> page = dao.select().from("_SaleRecord").orderBy("id").pageQuery(_SaleRecord.class, 2, 1);
+		assertEquals(2, page.getData().size());
+		assertEquals(3, page.getCount().intValue());
 
-		list = dao.select().from("_SaleRecord").orderBy("id").queryForList(_SaleRecord.class, 2, 2);
+		list = dao.select().from("_SaleRecord").orderBy("id").pageQuery(_SaleRecord.class, 2, 2).getData();
 		assertEquals(1, list.size());
 
 		Select select = dao.select("goods,person,min(qty):min,max(qty):max").from("_SaleRecord")

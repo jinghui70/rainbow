@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 public interface ISelect {
 
-
 	/**
 	 * 返回一个NeoBean，如果结果不是一个则返回空
 	 * 
@@ -49,7 +48,7 @@ public interface ISelect {
 	 * @return
 	 */
 	public NeoBean fetchFirst();
-	
+
 	/**
 	 * 返回符合条件的第一个对象
 	 * 
@@ -57,14 +56,14 @@ public interface ISelect {
 	 * @return
 	 */
 	public <T> T fetchFirst(Class<T> clazz);
-	
+
 	/**
 	 * 返回符合条件的第一个Map
 	 * 
 	 * @return
 	 */
 	public Map<String, Object> fetchMapFirst();
-	
+
 	/**
 	 * 查询并把结果以Map的方式逐一调用消费函数
 	 * 
@@ -112,17 +111,8 @@ public interface ISelect {
 	 * @param pageNo   第几页
 	 * @return
 	 */
-	public <T> List<T> queryForList(Class<T> clazz, int pageSize, int pageNo);
+	public <T> PageData<T> pageQuery(Class<T> clazz, int pageSize, int pageNo);
 
-	/**
-	 * 分页查询第一页，返回的PageData对象包含总记录数
-	 * 
-	 * @param clazz
-	 * @param pageSize
-	 * @return
-	 */
-	public <T> PageData<T> pageQuery(Class<T> clazz, int pageSize);
-	
 	/**
 	 * 查询返回一组Map列表
 	 * 
@@ -142,17 +132,9 @@ public interface ISelect {
 	 * 查询返回一组Map列表
 	 * 
 	 * @param pageSize 每页记录数
-	 * @param pageNo 第几页
+	 * @param pageNo   第几页
 	 * @return
 	 */
-	public List<Map<String, Object>> queryForMapList(int pageSize, int pageNo);
-	
-	/**
-	 * 分页查询第一页，返回PageData对象包含总记录数
-	 * 
-	 * @param clazz
-	 * @param pageSize
-	 * @return
-	 */
-	public PageData<Map<String, Object>> mapPageQuery(int pageSize);
+	public PageData<Map<String, Object>> pageQuery(int pageSize, int pageNo);
+
 }
