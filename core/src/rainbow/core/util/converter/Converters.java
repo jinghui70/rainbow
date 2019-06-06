@@ -1,6 +1,7 @@
 package rainbow.core.util.converter;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
@@ -194,8 +195,10 @@ public class Converters {
 			for (PropertyDescriptor pd : pds) {
 				String key = pd.getName();
 				Method getter = pd.getReadMethod();
-				Object value = getter.invoke(object);
-				result.put(key, value);
+				if (getter != null) {
+					Object value = getter.invoke(object);
+					result.put(key, value);
+				}
 			}
 			return result;
 		} catch (Exception e) {
@@ -212,23 +215,13 @@ public class Converters {
 	 */
 	public static <T> T map2Object(Map<String, Object> map, Class<T> clazz) {
 		try {
-			T object = clazz.newInstance();
 			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
-			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
-			for (PropertyDescriptor pd : pds) {
-				String key = pd.getName();
-				Method setter = pd.getWriteMethod();
-				Object value = map.get(key);
-				if (value != null)
-					value = Converters.convert(value, pd.getPropertyType());
-				setter.invoke(object, value);
-			}
-			return object;
-		} catch (Exception e) {
+			return map2Object(map, beanInfo, clazz);
+		} catch (IntrospectionException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	
+
 	/**
 	 * 转换一个Map为JavaBean
 	 * 
@@ -243,10 +236,13 @@ public class Converters {
 			for (PropertyDescriptor pd : pds) {
 				String key = pd.getName();
 				Method setter = pd.getWriteMethod();
-				Object value = map.get(key);
-				if (value != null)
-					value = Converters.convert(value, pd.getPropertyType());
-				setter.invoke(object, value);
+				if (setter != null) {
+					Object value = map.get(key);
+					if (value != null) {
+						value = Converters.convert(value, pd.getPropertyType());
+						setter.invoke(object, value);
+					}
+				}
 			}
 			return object;
 		} catch (Exception e) {

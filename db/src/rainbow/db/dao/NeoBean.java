@@ -7,6 +7,7 @@ import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class NeoBean {
 				}
 			}
 		} else if (obj instanceof Map) {
-			Map<?,?> map = (Map<?,?>) obj;
+			Map<?, ?> map = (Map<?, ?>) obj;
 			for (Object key : map.keySet()) {
 				Column column = entity.getColumn(key.toString());
 				if (column == null) {
@@ -75,9 +76,12 @@ public class NeoBean {
 				for (PropertyDescriptor pd : pds) {
 					String key = pd.getName();
 					Column column = entity.getColumn(key);
-					if (column!=null) {
-						Object value = pd.getReadMethod().invoke(obj);
-						setValue(column, value);
+					if (column != null) {
+						Method getter = pd.getReadMethod();
+						if (getter != null) {
+							Object value = pd.getReadMethod().invoke(obj);
+							setValue(column, value);
+						}
 					}
 				}
 			} catch (Exception e) {
