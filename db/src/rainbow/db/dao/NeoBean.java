@@ -95,8 +95,8 @@ public class NeoBean {
 	}
 
 	public Object getObject(String property) {
-		Column column = checkNotNull(entity.getColumn(property), "property {} not defined", property);
-		return valueMap.get(column);
+		Column column = entity.getColumn(property);
+		return (column==null) ? null : valueMap.get(column);
 	}
 
 	/**
