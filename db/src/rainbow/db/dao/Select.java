@@ -191,7 +191,7 @@ public class Select extends Where<Select> implements ISelect {
 	@Override
 	public int count() {
 		Sql sql = build();
-		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(")");
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
 		return dao.queryForObject(countSql, Integer.class);
 	}
 
@@ -268,7 +268,7 @@ public class Select extends Where<Select> implements ISelect {
 	public <T> PageData<T> pageQuery(Class<T> clazz, int pageSize, int pageNo) {
 		Sql sql = build();
 		if (pageNo == 1) {
-			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(")");
+			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
 			int count = dao.queryForObject(countSql, Integer.class);
 			if (count == 0) {
 				return new PageData<T>();
