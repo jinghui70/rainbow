@@ -1,12 +1,13 @@
 package rainbow.core.util.ioc;
 
-import static rainbow.core.util.Preconditions.checkNotNull;
+import static rainbow.core.util.Preconditions.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,6 +32,11 @@ public class Context {
 
 	private List<Context> parents;
 
+	public Context() {
+		this.beans = new HashMap<String, Bean>();
+		this.parents = Collections.emptyList();
+	}
+	
 	/**
 	 * 构造函数
 	 * 
@@ -46,6 +52,12 @@ public class Context {
 		this.parents = parents;
 	}
 
+	public Context addBean(String name, Bean bean) {
+		checkArgument(!beans.containsKey(name), "can't add bean {}, already exist", name);
+		beans.put(name, bean);
+		return this;
+	}
+	
 	/**
 	 * 加载所有的单例Bean
 	 */
