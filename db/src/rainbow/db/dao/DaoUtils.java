@@ -215,8 +215,9 @@ public abstract class DaoUtils {
 				sb.append(c.getCode()).append(",");
 			}
 			sb.setLength(sb.length() - 1);
+			sb.append(")");
 		}
-		sb.append("));");
+		sb.append(");");
 		return sb.toString();
 	}
 
