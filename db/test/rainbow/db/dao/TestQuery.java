@@ -91,4 +91,19 @@ public class TestQuery {
 		assertEquals(Integer.valueOf(3), g.getId());
 	}
 
+	@Test
+	public void testCount() {
+		_SaleRecord r = new _SaleRecord("1", "3", "6", 1, 200, LocalDate.of(2019, 5, 5));
+		dao.insert(r);
+		r = new _SaleRecord("2", "3", "6", 2, 400, LocalDate.of(2019, 5, 6));
+		dao.insert(r);
+		int count = dao.select().from("_SaleRecord").count();
+		assertEquals(2, count);
+		
+		Select select = dao.select("goods,goods.name,sum(qty):qty,sum(money):money").from("_SaleRecord").groupBy("goods");
+		assertEquals(1, select.count());
+		Map<String, Object> map = select.queryForMap();
+		assertEquals(3.0, map.get("qty"));
+		assertEquals(600.0, map.get("money"));
+	}
 }

@@ -167,6 +167,13 @@ public interface Dao extends INameObject {
 	 * @return
 	 */
 	public Delete delete(String entityName);
+
+	/**
+	 * 如果没有，就插入一个对象，如果有，就更新它
+	 * 
+	 * @param obj
+	 */
+	void replace(Object obj);
 	
 	/**
 	 * 根据主键查询一个实体的NeoBean实例

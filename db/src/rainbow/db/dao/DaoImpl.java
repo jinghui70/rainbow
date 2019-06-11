@@ -252,6 +252,18 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
+	public void replace(Object obj) {
+		NeoBean neo = toNeoBean(obj);
+		Entity entity = neo.getEntity();
+		Sql sql = new Sql().append("select count(1) from ").append(entity.getCode()).whereKey(neo);
+		int count = queryForObject(sql, int.class);
+		if (count == 0)
+			insert(neo);
+		else
+			update(neo);
+	}
+	
+	@Override
 	public NeoBean fetch(String entityName, Object... keyValues) {
 		Entity entity = getEntity(entityName);
 		Sql sql = new Sql().append("select ");
