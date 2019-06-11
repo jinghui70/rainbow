@@ -37,7 +37,7 @@ public class ConfigData {
 	 * 
 	 * @param root
 	 */
-	protected ConfigData(JSONObject root) {
+	public ConfigData(JSONObject root) {
 		this.root = root;
 	}
 
@@ -46,7 +46,7 @@ public class ConfigData {
 	 * 
 	 * @param path
 	 */
-	protected ConfigData(Path path) {
+	public ConfigData(Path path) {
 		this.path = path;
 		root = Utils.loadConfigFile(path);
 	}
