@@ -32,6 +32,25 @@ public class ConfigData {
 
 	private boolean standalone = true;
 
+	/**
+	 * 给测试用的构造函数
+	 * 
+	 * @param root
+	 */
+	protected ConfigData(JSONObject root) {
+		this.root = root;
+	}
+
+	/**
+	 * 给测试用的构造函数。测试通常用 Paths.get(xx.class.getResource("config.json").toURI())的方式获得配置文件
+	 * 
+	 * @param path
+	 */
+	protected ConfigData(Path path) {
+		this.path = path;
+		root = Utils.loadConfigFile(path);
+	}
+	
 	public ConfigData(String bundleId, boolean checkExist) {
 		init(bundleId);
 		if (checkExist)
