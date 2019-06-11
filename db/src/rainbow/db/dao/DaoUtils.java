@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -182,6 +183,18 @@ public abstract class DaoUtils {
 	}
 
 	/**
+	 * 转换一堆实体为DDL
+	 * 
+	 * @param entities
+	 * @return
+	 */
+	public static String transform(Collection<Entity> entities) {
+		StringBuilder sb = new StringBuilder();
+		entities.forEach(entity->doTransform(sb, entity));
+		return sb.toString();
+	}
+
+	/**
 	 * 转换一个实体为DDL字符串
 	 * 
 	 * @param entity
@@ -189,6 +202,11 @@ public abstract class DaoUtils {
 	 */
 	public static String transform(Entity entity) {
 		StringBuilder sb = new StringBuilder();
+		doTransform(sb, entity);
+		return sb.toString();
+	}
+	
+	private static void doTransform(StringBuilder sb, Entity entity) {
 		sb.append("CREATE TABLE ").append(entity.getCode()).append("(");
 		entity.getColumns().forEach(field -> {
 			sb.append(field.getCode()).append("\t").append(field.getType());
@@ -218,7 +236,6 @@ public abstract class DaoUtils {
 			sb.append(")");
 		}
 		sb.append(");");
-		return sb.toString();
 	}
 
 	/**
