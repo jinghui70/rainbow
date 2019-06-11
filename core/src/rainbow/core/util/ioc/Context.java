@@ -58,6 +58,19 @@ public class Context {
 		return this;
 	}
 	
+	public Context addBean(String name, Class<?> clazz) {
+		return addBean(name, Bean.singleton(clazz));
+	}
+	
+	public Context addBean(Class<?> clazz) {
+		String name = clazz.getSimpleName();
+		if (name.endsWith("Impl")) {
+			name = Utils.substringBefore(name, "Impl");
+		}
+		name = Utils.lowerFirstChar(name);
+		return addBean(name, clazz);
+	}
+	
 	/**
 	 * 加载所有的单例Bean
 	 */
