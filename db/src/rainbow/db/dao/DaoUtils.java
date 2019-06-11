@@ -181,38 +181,42 @@ public abstract class DaoUtils {
 			unit.getUnits().forEach(u -> loadLink(model, linkTags, u));
 	}
 
-	public static String transform(Map<String, Entity> model) {
+	/**
+	 * 转换一个实体为DDL字符串
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	public static String transform(Entity entity) {
 		StringBuilder sb = new StringBuilder();
-		model.values().forEach(entity -> {
-			sb.append("CREATE TABLE ").append(entity.getCode()).append("(");
-			entity.getColumns().forEach(field -> {
-				sb.append(field.getCode()).append("\t").append(field.getType());
-				switch (field.getType()) {
-				case CHAR:
-				case VARCHAR:
-					sb.append("(").append(field.getLength()).append(")");
-					break;
-				case NUMERIC:
-					sb.append("(").append(field.getLength()).append(",").append(field.getPrecision()).append(")");
-					break;
-				default:
-					break;
-				}
-				if (field.isMandatory())
-					sb.append(" NOT NULL");
-				sb.append(",");
-			});
-			if (entity.getKeyCount() == 0) {
-				sb.setLength(sb.length() - 1);
-			} else {
-				sb.append("	CONSTRAINT PK_").append(entity.getCode()).append(" PRIMARY KEY(");
-				for (Column c : entity.getKeyColumns()) {
-					sb.append(c.getCode()).append(",");
-				}
-				sb.setLength(sb.length() - 1);
+		sb.append("CREATE TABLE ").append(entity.getCode()).append("(");
+		entity.getColumns().forEach(field -> {
+			sb.append(field.getCode()).append("\t").append(field.getType());
+			switch (field.getType()) {
+			case CHAR:
+			case VARCHAR:
+				sb.append("(").append(field.getLength()).append(")");
+				break;
+			case NUMERIC:
+				sb.append("(").append(field.getLength()).append(",").append(field.getPrecision()).append(")");
+				break;
+			default:
+				break;
 			}
-			sb.append("));");
+			if (field.isMandatory())
+				sb.append(" NOT NULL");
+			sb.append(",");
 		});
+		if (entity.getKeyCount() == 0) {
+			sb.setLength(sb.length() - 1);
+		} else {
+			sb.append("	CONSTRAINT PK_").append(entity.getCode()).append(" PRIMARY KEY(");
+			for (Column c : entity.getKeyColumns()) {
+				sb.append(c.getCode()).append(",");
+			}
+			sb.setLength(sb.length() - 1);
+		}
+		sb.append("));");
 		return sb.toString();
 	}
 

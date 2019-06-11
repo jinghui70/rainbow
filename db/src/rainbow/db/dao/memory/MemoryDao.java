@@ -25,8 +25,10 @@ public class MemoryDao extends DaoImpl implements DisposableBean {
 
 	public MemoryDao(Map<String, Entity> model) {
 		this();
-		String ddl = DaoUtils.transform(model);
-		execSql(ddl);
+		model.values().forEach(entity -> {
+			String ddl = DaoUtils.transform(entity);
+			execSql(ddl);
+		});
 		setEntityMap(model);
 	}
 
