@@ -1,18 +1,25 @@
 package rainbow.core.util.converter.impl;
 
+import java.sql.Timestamp;
+
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
- * 字符串转为Timestamp, 格式为 yyyy-mm-dd hh:mm:ss[.fffffffff]
+ * 字符串转为Timestamp, 格式为 yyyy-mm-dd[ hh:mm:ss[.fffffffff]]
  * 
  * @author lijinghui
  *
  */
-public class String2Timestamp extends AbstractConverter<String, java.sql.Timestamp> {
+public class String2Timestamp extends AbstractConverter<String, Timestamp> {
 
 	@Override
-	public java.sql.Timestamp convert(String from, Class<?> toClass) {
-		return java.sql.Timestamp.valueOf(from);
+	public Timestamp convert(String from, Class<?> toClass) {
+		try {
+			return Timestamp.valueOf(from);
+		} catch (IllegalArgumentException e) {
+			java.sql.Date date = java.sql.Date.valueOf(from);
+			return new Timestamp(date.getTime());
+		}
 	}
-
+	
 }
