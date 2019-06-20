@@ -8,6 +8,7 @@ import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
+import rainbow.db.model.DataType;
 
 public class SelectField {
 
@@ -16,16 +17,16 @@ public class SelectField {
 	private String alias;
 
 	private Link link;
-	
+
 	private String refinery;
 
 	private String refineryParam;
 
 	private Column column;
-	
+
 	private String patch; // 临时加的补丁以支持NOW和COUNT(1),等待未来函数的进一步支持
-	
-	private	SelectField() {
+
+	private SelectField() {
 	}
 
 	public String getFunction() {
@@ -67,7 +68,7 @@ public class SelectField {
 	public String getNameWithOutLink() {
 		return alias == null ? column.getName() : alias;
 	}
-	
+
 	public void toSql(Sql sql, SelectBuildContext context) {
 		if (patch != null) {
 			sql.append(patch);
@@ -93,7 +94,7 @@ public class SelectField {
 			sql.append(column.getCode());
 		}
 	}
-	
+
 	public static SelectField fromColumn(Column column) {
 		SelectField field = new SelectField();
 		field.column = column;
@@ -104,7 +105,7 @@ public class SelectField {
 		this.refinery = Utils.substringBefore(str, "(");
 		this.refineryParam = Utils.substringBetween(str, "(", ")");
 	}
-	
+
 	/**
 	 * 这个是用于select字段的解析
 	 * 
@@ -148,16 +149,17 @@ public class SelectField {
 			field.column = field.link.getTargetEntity().getColumn(str);
 			checkNotNull(field.column, "link column {} not defined", str);
 		} else
-			field.column = checkNotNull(entity.getColumn(str),"column {} of entity {} not defined", str, entity.getName());
+			field.column = checkNotNull(entity.getColumn(str), "column {} of entity {} not defined", str,
+					entity.getName());
 		return field;
 	}
 
 	public boolean matchGroupBy(String name) {
 		if (Objects.equals(alias, name))
 			return true;
-		if (function != null) 
+		if (function != null)
 			return false;
-		
+
 		String linkStr = null;
 		String nameStr = null;
 		String[] f = Utils.split(name, '.');
@@ -175,4 +177,13 @@ public class SelectField {
 			return Objects.equals(link.getName(), linkStr);
 	}
 
+	public DataType getType() {
+		if (function != null) {
+			switch (function.toUpperCase()) {
+			case "COUNT":
+				return DataType.INT;
+			}
+		}
+		return column.getType();
+	}
 }

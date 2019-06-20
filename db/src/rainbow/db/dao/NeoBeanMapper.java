@@ -31,7 +31,7 @@ public class NeoBeanMapper implements RowMapper<NeoBean> {
 		int index = 1;
 		for (SelectField field : fields) {
 			try {
-				bean.setObject(field.getColumn(), DaoUtils.getResultSetValue(rs, index, field.getColumn()));
+				bean.setObject(field.getColumn(), DaoUtils.getResultSetValue(rs, index, field.getType()));
 			} catch (SQLException e) {
 				throw new DataAccessException(e);
 			}

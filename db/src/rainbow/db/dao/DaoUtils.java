@@ -28,6 +28,7 @@ import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
+import rainbow.db.model.DataType;
 import rainbow.db.model.Model;
 import rainbow.db.model.Tag;
 import rainbow.db.model.TagType;
@@ -37,10 +38,10 @@ public abstract class DaoUtils {
 
 	private static final Logger logger = LoggerFactory.getLogger(DaoUtils.class);
 
-	public static Object getResultSetValue(ResultSet rs, int index, Column column) throws SQLException {
+	public static Object getResultSetValue(ResultSet rs, int index, DataType dataType) throws SQLException {
 		Object value = null;
 		boolean wasNullCheck = false;
-		switch (column.getType()) {
+		switch (dataType) {
 		case SMALLINT:
 			value = rs.getShort(index);
 			wasNullCheck = true;
@@ -190,7 +191,7 @@ public abstract class DaoUtils {
 	 */
 	public static String transform(Collection<Entity> entities) {
 		StringBuilder sb = new StringBuilder();
-		entities.forEach(entity->doTransform(sb, entity));
+		entities.forEach(entity -> doTransform(sb, entity));
 		return sb.toString();
 	}
 
@@ -205,7 +206,7 @@ public abstract class DaoUtils {
 		doTransform(sb, entity);
 		return sb.toString();
 	}
-	
+
 	private static void doTransform(StringBuilder sb, Entity entity) {
 		sb.append("CREATE TABLE ").append(entity.getCode()).append("(");
 		entity.getColumns().forEach(field -> {
