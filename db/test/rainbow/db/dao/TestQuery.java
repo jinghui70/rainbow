@@ -12,9 +12,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import rainbow.core.model.object.IdNameObject;
 import rainbow.db.DBTest;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.object._Goods;
+import rainbow.db.dao.object._Person;
 import rainbow.db.dao.object._SaleRecord;
 
 public class TestQuery {
@@ -42,6 +44,17 @@ public class TestQuery {
 	}
 
 	@Test
+	public void testSelect() {
+		dao.insert(_Person.zhang3());
+		IdNameObject o = dao.select(new String[] { "id", "name" }).from("_Person").queryForObject(IdNameObject.class);
+		assertEquals("3", o.getId());
+		assertEquals("张三", o.getName());
+		o = dao.select("id,name").from("_Person").queryForObject(IdNameObject.class);
+		assertEquals("3", o.getId());
+		assertEquals("张三", o.getName());
+	}
+
+	@Test
 	public void testSimple() {
 		_SaleRecord r = new _SaleRecord("1", "3", "6", 1, 200, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
@@ -49,7 +62,7 @@ public class TestQuery {
 		dao.insert(r);
 		r = new _SaleRecord("3", "3", "30", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		
+
 		_SaleRecord s = dao.select().from("_SaleRecord").where("id", "1").queryForObject(_SaleRecord.class);
 		assertEquals("3", s.getPerson());
 		assertEquals("6", s.getGoods());
@@ -66,7 +79,6 @@ public class TestQuery {
 		s = list.get(2);
 		assertEquals("1", s.getId());
 		assertEquals(200d, s.getMoney());
-		
 
 		PageData<_SaleRecord> page = dao.select().from("_SaleRecord").orderBy("id").pageQuery(_SaleRecord.class, 2, 1);
 		assertEquals(2, page.getData().size());
@@ -99,8 +111,9 @@ public class TestQuery {
 		dao.insert(r);
 		int count = dao.select().from("_SaleRecord").count();
 		assertEquals(2, count);
-		
-		Select select = dao.select("goods,goods.name,sum(qty):qty,sum(money):money").from("_SaleRecord").groupBy("goods");
+
+		Select select = dao.select("goods,goods.name,sum(qty):qty,sum(money):money").from("_SaleRecord")
+				.groupBy("goods");
 		assertEquals(1, select.count());
 		Map<String, Object> map = select.queryForMap();
 		assertEquals(3.0, map.get("qty"));

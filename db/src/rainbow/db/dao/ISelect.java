@@ -1,5 +1,6 @@
 package rainbow.db.dao;
 
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -65,11 +66,11 @@ public interface ISelect {
 	public Map<String, Object> fetchMapFirst();
 
 	/**
-	 * 查询并把结果以Map的方式逐一调用消费函数
+	 * 查询并把结果逐一调用消费函数
 	 * 
 	 * @param consumer
 	 */
-	public void query(Consumer<Map<String, Object>> consumer);
+	public void query(Consumer<ResultSet> consumer);
 
 	/**
 	 * 查询返回NeoBean列表

@@ -262,7 +262,7 @@ public class DaoImpl extends NameObject implements Dao {
 		else
 			update(neo);
 	}
-	
+
 	@Override
 	public NeoBean fetch(String entityName, Object... keyValues) {
 		Entity entity = getEntity(entityName);
@@ -287,7 +287,12 @@ public class DaoImpl extends NameObject implements Dao {
 
 	@Override
 	public Select select(String selectStr) {
-		return new Select(this, selectStr);
+		return new Select(this, Utils.splitTrim(selectStr, ','));
+	}
+
+	@Override
+	public Select select(String[] fields) {
+		return new Select(this, fields);
 	}
 
 	@Override

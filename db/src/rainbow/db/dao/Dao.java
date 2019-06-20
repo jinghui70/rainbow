@@ -151,7 +151,14 @@ public interface Dao extends INameObject {
 	 * @return
 	 */
 	public Select select(String selectStr);
-	
+
+	/**
+	 * 发起一个查询
+	 * 
+	 * @return
+	 */
+	public Select select(String[] fields);
+
 	/**
 	 * 发起一个更新
 	 * 
@@ -174,7 +181,7 @@ public interface Dao extends INameObject {
 	 * @param obj
 	 */
 	void replace(Object obj);
-	
+
 	/**
 	 * 根据主键查询一个实体的NeoBean实例
 	 * 

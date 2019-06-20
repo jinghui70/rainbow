@@ -2,9 +2,8 @@ package rainbow.db.dao;
 
 import static rainbow.core.util.Preconditions.checkState;
 
-import java.sql.SQLException;
+import java.sql.ResultSet;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,7 +13,6 @@ import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
-import rainbow.db.jdbc.DataAccessException;
 
 /**
  * 对一个对象查询的封装，只支持直接的属性链接
@@ -38,9 +36,9 @@ public class Select extends Where<Select> implements ISelect {
 		super(dao);
 	}
 
-	public Select(Dao dao, String selectStr) {
+	public Select(Dao dao, String[] fields) {
 		super(dao);
-		select = Utils.splitTrim(selectStr, ',');
+		this.select = fields;
 	}
 
 	public Select distinct() {
@@ -224,22 +222,9 @@ public class Select extends Where<Select> implements ISelect {
 	}
 
 	@Override
-	public void query(Consumer<Map<String, Object>> consumer) {
+	public void query(Consumer<ResultSet> consumer) {
 		Sql sql = build();
-		Map<String, Object> map = new HashMap<String, Object>();
-		dao.doQuery(sql, rs -> {
-			map.clear();
-			int index = 1;
-			for (SelectField field : getFields()) {
-				try {
-					Object value = DaoUtils.getResultSetValue(rs, index++, field.getColumn());
-					map.put(field.getName(), value);
-				} catch (SQLException e) {
-					throw new DataAccessException(e);
-				}
-			}
-			consumer.accept(map);
-		});
+		dao.doQuery(sql, consumer);
 	}
 
 	@Override
