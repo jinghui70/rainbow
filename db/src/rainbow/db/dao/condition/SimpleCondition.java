@@ -8,6 +8,7 @@ import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.QueryField;
+import rainbow.db.dao.Select;
 import rainbow.db.dao.SelectBuildContext;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Column;
@@ -21,7 +22,7 @@ public class SimpleCondition extends C {
 	private Op op;
 
 	private Object param;
-	
+
 	private QueryField field;
 
 	public SimpleCondition(String property, Op op, Object param) {
@@ -48,7 +49,7 @@ public class SimpleCondition extends C {
 	public void initField(Function<String, QueryField> fieldFunction) {
 		field = fieldFunction.apply(property);
 	}
-	
+
 	@Override
 	public void toSql(SelectBuildContext context, Sql sql) {
 		field.toSql(sql, context);
@@ -57,14 +58,22 @@ public class SimpleCondition extends C {
 		} else
 			normalQuery(context.getDao(), field.getColumn(), sql);
 	}
+
 	@Override
-	public void toSql(Dao dao,Entity entity, Sql sql) {
+	public void toSql(Dao dao, Entity entity, Sql sql) {
 		Column c = entity.getColumn(property);
 		sql.append(c.getCode());
-		if (param != null && param instanceof Sql) {
-			subQuery((Sql) param, sql);
-		} else
+		Sql subSql = null;
+		if (param != null) {
+			if (param instanceof Select) {
+				subSql = ((Select) param).build();
+			} else if (param instanceof Sql)
+				subSql = (Sql) param;
+		}
+		if (subSql == null)
 			normalQuery(dao, c, sql);
+		else
+			subQuery(subSql, sql);
 	}
 
 	private void subQuery(Sql subSql, Sql sql) {
