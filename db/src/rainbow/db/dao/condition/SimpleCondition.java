@@ -53,10 +53,17 @@ public class SimpleCondition extends C {
 	@Override
 	public void toSql(SelectBuildContext context, Sql sql) {
 		field.toSql(sql, context);
-		if (param != null && param instanceof Sql) {
-			subQuery((Sql) param, sql);
-		} else
+		Sql subSql = null;
+		if (param != null) {
+			if (param instanceof Select) {
+				subSql = ((Select) param).build();
+			} else if (param instanceof Sql)
+				subSql = (Sql) param;
+		}
+		if (subSql == null)
 			normalQuery(context.getDao(), field.getColumn(), sql);
+		else
+			subQuery(subSql, sql);
 	}
 
 	@Override
