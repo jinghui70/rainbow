@@ -56,11 +56,11 @@ public class TestQuery {
 
 	@Test
 	public void testSimple() {
-		_SaleRecord r = new _SaleRecord("1", "3", "6", 1, 200, LocalDate.of(2019, 5, 5));
+		_SaleRecord r = new _SaleRecord("1", 1, "3", "6", 1, 200, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		r = new _SaleRecord("2", "3", "6", 10, 100, LocalDate.of(2019, 5, 5));
+		r = new _SaleRecord("2", 1, "3", "6", 10, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		r = new _SaleRecord("3", "3", "30", 1, 100, LocalDate.of(2019, 5, 5));
+		r = new _SaleRecord("3", 1, "3", "30", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
 
 		_SaleRecord s = dao.select().from("_SaleRecord").where("id", "1").queryForObject(_SaleRecord.class);
@@ -105,9 +105,9 @@ public class TestQuery {
 
 	@Test
 	public void testCount() {
-		_SaleRecord r = new _SaleRecord("1", "3", "6", 1, 200, LocalDate.of(2019, 5, 5));
+		_SaleRecord r = new _SaleRecord("1", 1, "3", "6", 1, 200, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		r = new _SaleRecord("2", "3", "6", 2, 400, LocalDate.of(2019, 5, 6));
+		r = new _SaleRecord("1", 2, "3", "6", 2, 400, LocalDate.of(2019, 5, 6));
 		dao.insert(r);
 		int count = dao.select().from("_SaleRecord").count();
 		assertEquals(2, count);

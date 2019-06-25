@@ -160,6 +160,15 @@
 					"mandatory": true
 				},
 				{
+					"code": "INX",
+					"name": "inx",
+					"label": "顺序号",
+					"type": "SMALLINT",
+					"comment": "",
+					"key": true,
+					"mandatory": true
+				},
+				{
 					"code": "RY",
 					"name": "person",
 					"label": "销售员",

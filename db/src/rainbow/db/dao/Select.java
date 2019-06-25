@@ -4,12 +4,14 @@ import static rainbow.core.util.Preconditions.checkState;
 
 import java.sql.ResultSet;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import rainbow.core.util.Utils;
+import rainbow.db.dao.condition.C;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
@@ -32,6 +34,8 @@ public class Select extends Where<Select> implements ISelect {
 
 	private SelectBuildContext context = null;
 
+	private Map<String, C> linkCnds = null;
+
 	public Select(Dao dao) {
 		super(dao);
 	}
@@ -53,6 +57,20 @@ public class Select extends Where<Select> implements ISelect {
 
 	public Select from(Entity entity) {
 		setEntity(entity);
+		return this;
+	}
+
+	/**
+	 * link时写在Join里的条件，如果这个条件写在where里面，因为我们用LeftJoin，如果不满足条件会导致记录数变少
+	 * 
+	 * @param link
+	 * @param cnd
+	 * @return
+	 */
+	public Select setLinkCnds(String link, C cnd) {
+		if (linkCnds == null)
+			linkCnds = new HashMap<String, C>();
+		linkCnds.put(link, cnd);
 		return this;
 	}
 
@@ -119,6 +137,9 @@ public class Select extends Where<Select> implements ISelect {
 					sql.append("A.").append(c.getCode()).append("=").append(alias).append('.').append(cl.getCode());
 					sql.appendTemp(" AND ");
 				}
+				C cnd = Utils.safeGet(linkCnds, link.getName());
+				if (cnd != null)
+					cnd.toSql(dao, link.getTargetEntity(), sql);
 				sql.clearTemp();
 			}
 		}

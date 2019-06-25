@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import rainbow.db.DBTest;
+import rainbow.db.dao.condition.C;
+import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.object._Gender;
 import rainbow.db.dao.object._Goods;
@@ -37,14 +39,6 @@ public class TestJoin {
 	@BeforeEach
 	public void setUp() throws Exception {
 		dao.getJdbcTemplate().getTransactionManager().beginTransaction();
-		dao.insert(_Person.zhang3());
-		dao.insert(_Person.li4());
-		dao.insert(_Person.wang5());
-		dao.insert(_Person.zhao6());
-		dao.insert(_Goods.iPhone6());
-		dao.insert(_Goods.iPhone7());
-		dao.insert(_Goods.iPhoneX());
-		dao.insert(_Goods.p30());
 	}
 
 	@AfterEach
@@ -54,6 +48,15 @@ public class TestJoin {
 
 	@Test
 	public void testSimple() {
+		dao.insert(_Person.zhang3());
+		dao.insert(_Person.li4());
+		dao.insert(_Person.wang5());
+		dao.insert(_Person.zhao6());
+		dao.insert(_Goods.iPhone6());
+		dao.insert(_Goods.iPhone7());
+		dao.insert(_Goods.iPhoneX());
+		dao.insert(_Goods.p30());
+
 		List<Map<String, Object>> list = dao.select("name,mobile.name:mobile").from("_Person")
 				.where("gender", _Gender.男).orderBy("mobile.price").queryForMapList();
 		assertEquals(2, list.size());
@@ -72,12 +75,48 @@ public class TestJoin {
 
 	@Test
 	public void testMany() {
-		_SaleRecord r = new _SaleRecord("1", "3", "6", 1, 100, LocalDate.of(2019, 5, 5));
+		_SaleRecord r = new _SaleRecord("1", 1, "3", "6", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		r = new _SaleRecord("2", "3", "7", 1, 100, LocalDate.of(2019, 5, 5));
+		r = new _SaleRecord("1", 2, "3", "7", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
-		r = new _SaleRecord("3", "3", "30", 1, 100, LocalDate.of(2019, 5, 5));
+		r = new _SaleRecord("1", 3, "3", "30", 1, 100, LocalDate.of(2019, 5, 5));
 		dao.insert(r);
 	}
 
+	/**
+	 * 测试一下当链接的对象没有数据的时候，条件放在不同位置的处理结果
+	 */
+	@Test
+	public void testJoinNull() {
+		_Person zhang3 = _Person.zhang3();
+		dao.insert(zhang3);
+		_Goods iPhone6 = _Goods.iPhone6();
+		dao.insert(iPhone6);
+
+		// 插入一条正常记录
+		_SaleRecord r = new _SaleRecord("1", 1).person(zhang3.getId()).goods(iPhone6.getId()).qty(100).money(1000)
+				.time(LocalDate.now());
+		dao.insert(r);
+		// 插入一条没有对应商品的记录
+		r = new _SaleRecord("1", 2).person(zhang3.getId()).goods("1").qty(100).money(1000).time(LocalDate.now());
+		dao.insert(r);
+
+		// 因为左链接，查出来两条记录
+		Select select = dao.select("person.name,goods.name:goods").from("_SaleRecord").orderBy("inx");
+		List<Map<String, Object>> list = select.queryForMapList();
+		assertEquals(2, list.size());
+		Map<String, Object> v = list.get(1);
+		assertNull(v.get("goods"));
+
+		// 条件加在where，只能查出来一条
+		select.where("goods.price", Op.Greater, 0);
+		list = select.queryForMapList();
+		assertEquals(1, list.size());
+		
+		// 条件加在join，能查出来两条
+		select.where(C.make()); // 清空条件
+		select.setLinkCnds("goods", C.make("price", Op.Greater, 0));
+		list = select.queryForMapList();
+		assertEquals(2, list.size());
+	}
 }
