@@ -108,12 +108,18 @@ public class Select extends Where<Select> implements ISelect {
 		return context.getEntity();
 	}
 
-	public Sql build() {
-		context = new SelectBuildContext(dao, entity, select);
+	protected SelectBuildContext buildContext() {
+		SelectBuildContext result = new SelectBuildContext(dao, entity, select);
 		if (!cnd.isEmpty())
-			context.setCnd(cnd);
+			result.setCnd(cnd);
 		if (!Utils.isNullOrEmpty(orderBy))
-			context.setOrderBy(orderBy);
+			result.setOrderBy(orderBy);
+		return result;
+	}
+
+	public Sql build() {
+		if (context == null)
+			context = buildContext();
 		final Sql sql = new Sql().append("SELECT ");
 		if (distinct)
 			sql.append("DISTINCT ");
