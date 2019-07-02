@@ -37,6 +37,13 @@ public interface ISelect {
 	public int queryForInt();
 
 	/**
+	 * 查询返回一个字符串
+	 * 
+	 * @return
+	 */
+	public String queryForString();
+	
+	/**
 	 * 返回符合条件的记录数
 	 * 
 	 * @return

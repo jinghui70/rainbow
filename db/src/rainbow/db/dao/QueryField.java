@@ -1,7 +1,6 @@
 package rainbow.db.dao;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
-import static rainbow.core.util.Preconditions.checkState;
 
 import java.util.Optional;
 
@@ -59,7 +58,7 @@ public class QueryField {
 		return new StringBuilder(link.getName()).append('.').append(column.getName()).toString();
 	}
 
-	public void toSql(Sql sql, SelectBuildContext context) {
+	public void toSql(Sql sql, Select context) {
 		if (alias != null) {
 			sql.append(alias);
 		} else {
@@ -70,26 +69,27 @@ public class QueryField {
 	}
 
 	/**
-	 * 解析
+	 * 从str解析
 	 * 
 	 * @param str
-	 * @param context
+	 * @param entity
+	 * @param alias2selectField
 	 * @return
 	 */
-	public static QueryField parse(String str, SelectBuildContext context) {
+	public static QueryField parse(String str, Select context) {
 		QueryField field = new QueryField();
-		Entity entity = context.getEntity();
 		int inx = str.indexOf('.');
 		if (inx > 0) {
-			field.link = entity.getLink(str.substring(0, inx));
-			checkNotNull(field.link, "link {} of entity {} not defined", str, entity.getName());
+			field.link = context.parseLink(str.substring(0, inx));
+			checkNotNull(field.link, "link {} not defined", str);
 			str = str.substring(inx + 1);
 			field.column = field.link.getTargetEntity().getColumn(str);
 		} else {
+			Entity entity = context.getEntity();
 			field.column = entity.getColumn(str);
 			if (field.column == null) {
 				Optional<SelectField> sf = context.alias2selectField(str);
-				checkState(sf.isPresent(), "bad field {}", str);
+				checkNotNull(sf.isPresent(), "bad query field {}", str);
 				field.alias = str;
 				field.column = sf.get().getColumn();
 			}

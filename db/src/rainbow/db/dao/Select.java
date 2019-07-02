@@ -3,15 +3,18 @@ package rainbow.db.dao;
 import static rainbow.core.util.Preconditions.checkState;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
+import rainbow.db.dao.condition.ComboCondition;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
@@ -24,7 +27,7 @@ import rainbow.db.dao.model.Link;
  */
 public class Select extends Where<Select> implements ISelect {
 
-	private String[] select;
+	protected String[] select;
 
 	private boolean distinct = false;
 
@@ -32,9 +35,9 @@ public class Select extends Where<Select> implements ISelect {
 
 	private String[] groupBy;
 
-	private SelectBuildContext context = null;
-
 	private Map<String, C> linkCnds = null;
+
+	private Map<String, Link> extraLinks = null;
 
 	public Select(Dao dao) {
 		super(dao);
@@ -60,6 +63,37 @@ public class Select extends Where<Select> implements ISelect {
 		return this;
 	}
 
+	/**
+	 * 添加一个并未定义在rdmx模型里面的额外的链接
+	 * 
+	 * @param link
+	 * @return
+	 */
+	public Select extraLink(String name, String fields, String targetEntityName, String targetFields) {
+		Entity targetEntity = dao.getEntity(targetEntityName);
+		return extraLink(name, fields, targetEntity, targetFields);
+	}
+
+	/**
+	 * 添加一个并未定义在rdmx模型里面的额外的链接
+	 * 
+	 * @param link
+	 * @return
+	 */
+	public Select extraLink(String name, String fields, Entity targetEntity, String targetFields) {
+		if (extraLinks == null)
+			extraLinks = new HashMap<String, Link>();
+		Link link = new Link();
+		link.setName(name);
+		List<Column> columns = Arrays.stream(Utils.splitTrim(fields, ',')).map(entity::getColumn).collect(Collectors.toList());
+		link.setColumns(columns);
+		link.setTargetEntity(targetEntity);
+		List<Column> targetColumns = Arrays.stream(Utils.splitTrim(targetFields, ',')).map(entity::getColumn).collect(Collectors.toList());
+		link.setTargetColumns(targetColumns);
+		extraLinks.put(name, link);
+		return this;
+	}
+	
 	/**
 	 * link时写在Join里的条件，如果这个条件写在where里面，因为我们用LeftJoin，如果不满足条件会导致记录数变少
 	 * 
@@ -96,44 +130,106 @@ public class Select extends Where<Select> implements ISelect {
 		return this;
 	}
 
+	private List<Link> links = new ArrayList<Link>();
+
+	private List<SelectField> selectFields;
+
 	public List<SelectField> getFields() {
-		return context.getSelectFields();
+		return selectFields;
 	}
 
 	public int getSelCount() {
 		return getFields().size();
 	}
 
-	public Entity getEntity() {
-		return context.getEntity();
+	/**
+	 * 从名字获取link，可能是后加的
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public Link parseLink(String name) {
+		Link link = entity.getLink(name);
+		if (link == null)
+			link = Utils.safeGet(extraLinks, name);
+		return link;
 	}
 
-	protected SelectBuildContext buildContext() {
-		SelectBuildContext result = new SelectBuildContext(dao, entity, select);
-		if (!cnd.isEmpty())
-			result.setCnd(cnd);
+	/**
+	 * 查找selectFields里面指定了别名的字段，主要用于翻译order by
+	 * 
+	 * @param alias
+	 * @return
+	 */
+	public Optional<SelectField> alias2selectField(String alias) {
+		return selectFields.parallelStream().filter(field -> alias.equals(field.getAlias())).findAny();
+	}
+
+	/**
+	 * 返回是否有链接
+	 * 
+	 * @return
+	 */
+	public boolean isLinkSql() {
+		return links.size() > 0;
+	}
+
+	/**
+	 * 返回链接对应的别名
+	 * 
+	 * @param link
+	 * @return
+	 */
+	public char getLinkAlias(Link link) {
+		int index = links.indexOf(link) + 1;
+		return (char) ('A' + index);
+	}
+
+	protected void prepareBuild() {
+		if (select == null || select.length == 0) {
+			selectFields = entity.getColumns().stream().map(SelectField::fromColumn).collect(Collectors.toList());
+		} else {
+			selectFields = Arrays.stream(select).map(this::createSelectField).collect(Collectors.toList());
+		}
+		if (!cnd.isEmpty()) {
+			cnd.initField(this::createField);
+		}
 		if (!Utils.isNullOrEmpty(orderBy))
-			result.setOrderBy(orderBy);
-		return result;
+			orderBy.forEach(o -> o.initField(this::createField));
+	}
+
+	private SelectField createSelectField(String id) {
+		SelectField field = SelectField.parse(id, this);
+		Link link = field.getLink();
+		if (link != null && !links.contains(link))
+			links.add(link);
+		return field;
+	}
+
+	private QueryField createField(String id) {
+		QueryField field = QueryField.parse(id, this);
+		Link link = field.getLink();
+		if (link != null && !links.contains(link))
+			links.add(link);
+		return field;
 	}
 
 	public Sql build() {
-		if (context == null)
-			context = buildContext();
+		prepareBuild();
 		final Sql sql = new Sql().append("SELECT ");
 		if (distinct)
 			sql.append("DISTINCT ");
-		for (SelectField field : context.getSelectFields()) {
-			field.toSql(sql, context);
+		for (SelectField field : selectFields) {
+			field.toSql(sql, this);
 			sql.appendTempComma();
 		}
 		sql.clearTemp();
 		sql.append(" FROM ");
-		sql.append(context.getEntity().getCode());
-		if (context.isLinkSql()) {
+		sql.append(entity.getCode());
+		if (isLinkSql()) {
 			sql.append(" AS A");
 			char alias = 'A';
-			for (Link link : context.getLinks()) {
+			for (Link link : links) {
 				alias++;
 				sql.append(" LEFT JOIN ").append(link.getTargetEntity().getCode());
 				sql.append(" AS ").append(alias).append(" ON ");
@@ -144,23 +240,34 @@ public class Select extends Where<Select> implements ISelect {
 					sql.appendTemp(" AND ");
 				}
 				C cnd = Utils.safeGet(linkCnds, link.getName());
-				if (cnd != null)
-					cnd.toSql(dao, link.getTargetEntity(), sql);
+				if (cnd != null) {
+					cnd.initField(field -> {
+						Column column = link.getTargetEntity().getColumn(field);
+						QueryField qf = new QueryField();
+						qf.setColumn(column);
+						qf.setLink(link);
+						return qf;
+					});
+					if (cnd instanceof ComboCondition) {
+						sql.append("(");
+						cnd.toSql(this, sql);
+						sql.append(")");
+					}
+				}
 				sql.clearTemp();
 			}
 		}
 
 		if (!cnd.isEmpty()) {
 			sql.append(" WHERE ");
-			cnd.toSql(context, sql);
+			cnd.toSql(this, sql);
 		}
 		if (groupBy != null) {
 			sql.append(" GROUP BY ");
 			Arrays.asList(groupBy).forEach(g -> {
-				Optional<SelectField> field = context.getSelectFields().parallelStream().filter(f -> f.matchGroupBy(g))
-						.findAny();
+				Optional<SelectField> field = selectFields.parallelStream().filter(f -> f.matchGroupBy(g)).findAny();
 				checkState(field.isPresent(), "group field {} not in select fields", g);
-				field.get().toGroupBySql(sql, context);
+				field.get().toGroupBySql(sql, this);
 				sql.appendTempComma();
 			});
 			sql.clearTemp();
@@ -169,7 +276,7 @@ public class Select extends Where<Select> implements ISelect {
 		if (orderBy != null) {
 			sql.append(" ORDER BY ");
 			orderBy.forEach(g -> {
-				g.getField().toSql(sql, context);
+				g.getField().toSql(sql, this);
 				if (g.isDesc())
 					sql.append(" DESC");
 				sql.appendTempComma();
@@ -202,15 +309,15 @@ public class Select extends Where<Select> implements ISelect {
 		return dao.queryForObject(sql, new MapRowMapper(getFields()));
 	}
 
-	/**
-	 * 查询返回一个整数
-	 * 
-	 * @return
-	 */
 	@Override
 	public int queryForInt() {
 		Integer result = queryForObject(Integer.class);
 		return result == null ? 0 : result.intValue();
+	}
+
+	@Override
+	public String queryForString() {
+		return queryForObject(String.class);
 	}
 
 	@Override

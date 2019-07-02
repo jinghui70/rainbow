@@ -69,7 +69,7 @@ public class SelectField {
 		return alias == null ? column.getName() : alias;
 	}
 
-	public void toSql(Sql sql, SelectBuildContext context) {
+	public void toSql(Sql sql, Select context) {
 		if (patch != null) {
 			sql.append(patch);
 			return;
@@ -85,7 +85,7 @@ public class SelectField {
 			sql.append(" AS ").append(alias);
 	}
 
-	public void toGroupBySql(Sql sql, SelectBuildContext context) {
+	public void toGroupBySql(Sql sql, Select context) {
 		if (alias != null) {
 			sql.append(alias);
 		} else {
@@ -113,7 +113,7 @@ public class SelectField {
 	 * @param entity
 	 * @return
 	 */
-	public static SelectField parse(String str, Entity entity) {
+	public static SelectField parse(String str, Select context) {
 		SelectField field = new SelectField();
 		// 首先判断是否有加工
 		String[] f = Utils.split(str, '|');
@@ -143,14 +143,16 @@ public class SelectField {
 		// 判断是否链接字段
 		inx = str.indexOf('.');
 		if (inx > 0) {
-			field.link = entity.getLink(str.substring(0, inx));
-			checkNotNull(field.link, "link {} of entity {} not defined", str, entity.getName());
+			field.link = context.parseLink(str.substring(0, inx));
+			checkNotNull(field.link, "link {} not defined", str);
 			str = str.substring(inx + 1);
 			field.column = field.link.getTargetEntity().getColumn(str);
 			checkNotNull(field.column, "link column {} not defined", str);
-		} else
+		} else {
+			Entity entity = context.getEntity();
 			field.column = checkNotNull(entity.getColumn(str), "column {} of entity {} not defined", str,
 					entity.getName());
+		}
 		return field;
 	}
 

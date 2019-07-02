@@ -93,6 +93,7 @@ public class TestDao {
 
 		NeoBean neo = dao.newNeoBean("_SaleRecord");
 		neo.setValue("id", 1);
+		neo.setValue("inx", 1);
 		neo.setValue("person", 1);
 		neo.setValue("goods", 1);
 		neo.setValue("qty", 1);
@@ -109,7 +110,7 @@ public class TestDao {
 		neo.setValue("id", 1);
 		neo.setValue("time", Dao.NOW);
 		dao.update(neo);
-		r = dao.fetch(_SaleRecord.class, "1");
+		r = dao.fetch(_SaleRecord.class, "1", 1);
 		assertEquals(today, r.getTime());
 
 		r = dao.select().from("_SaleRecord").where("time", Op.LessEqual, Dao.NOW).queryForObject(_SaleRecord.class);

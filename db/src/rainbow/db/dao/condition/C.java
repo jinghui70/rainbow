@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.QueryField;
-import rainbow.db.dao.SelectBuildContext;
+import rainbow.db.dao.Select;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Entity;
 
@@ -48,7 +48,7 @@ public abstract class C {
 
 	public abstract void initField(Function<String, QueryField> fieldFunction);
 
-	public abstract void toSql(SelectBuildContext context, Sql sql);
+	public abstract void toSql(Select context, Sql sql);
 
 	public abstract void toSql(Dao dao, Entity entity, Sql sql);
 

@@ -23,10 +23,18 @@ public class Where<T> {
 		this.entity = dao.getEntity(entityName);
 	}
 
+	public Dao getDao() {
+		return dao;
+	}
+	
 	protected void setEntity(Entity entity) {
 		this.entity = entity;
 	}
 
+	public Entity getEntity() {
+		return entity;
+	}
+	
 	/**
 	 * 添加第一个条件
 	 * 
