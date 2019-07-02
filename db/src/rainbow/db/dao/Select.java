@@ -85,15 +85,17 @@ public class Select extends Where<Select> implements ISelect {
 			extraLinks = new HashMap<String, Link>();
 		Link link = new Link();
 		link.setName(name);
-		List<Column> columns = Arrays.stream(Utils.splitTrim(fields, ',')).map(entity::getColumn).collect(Collectors.toList());
+		List<Column> columns = Arrays.stream(Utils.splitTrim(fields, ',')).map(entity::getColumn)
+				.collect(Collectors.toList());
 		link.setColumns(columns);
 		link.setTargetEntity(targetEntity);
-		List<Column> targetColumns = Arrays.stream(Utils.splitTrim(targetFields, ',')).map(entity::getColumn).collect(Collectors.toList());
+		List<Column> targetColumns = Arrays.stream(Utils.splitTrim(targetFields, ',')).map(entity::getColumn)
+				.collect(Collectors.toList());
 		link.setTargetColumns(targetColumns);
 		extraLinks.put(name, link);
 		return this;
 	}
-	
+
 	/**
 	 * link时写在Join里的条件，如果这个条件写在where里面，因为我们用LeftJoin，如果不满足条件会导致记录数变少
 	 * 
@@ -322,17 +324,9 @@ public class Select extends Where<Select> implements ISelect {
 
 	@Override
 	public int count() {
-		if (this.groupBy == null) {
-			String[] oldSelect = this.select;
-			this.select = new String[] { Dao.COUNT };
-			Sql sql = build();
-			this.select = oldSelect;
-			return dao.queryForObject(sql, Integer.class);
-		} else {
-			Sql sql = build();
-			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-			return dao.queryForObject(countSql, Integer.class);
-		}
+		Sql sql = build();
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
+		return dao.queryForObject(countSql, Integer.class);
 	}
 
 	@Override
