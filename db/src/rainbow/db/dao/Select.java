@@ -130,9 +130,9 @@ public class Select extends Where<Select> implements ISelect {
 		return this;
 	}
 
-	private List<Link> links = new ArrayList<Link>();
+	protected List<Link> links = new ArrayList<Link>();
 
-	private List<SelectField> selectFields;
+	protected List<SelectField> selectFields;
 
 	public List<SelectField> getFields() {
 		return selectFields;
