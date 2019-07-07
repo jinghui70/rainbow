@@ -2,6 +2,7 @@ package rainbow.core.util.converter.impl;
 
 import java.util.Date;
 
+import rainbow.core.util.Utils;
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
@@ -14,6 +15,8 @@ public class String2Date extends AbstractConverter<String, Date> {
 
 	@Override
 	public Date convert(String from, Class<?> toClass) {
+		if (Utils.isNullOrEmpty(from))
+			return null;
 		return java.sql.Date.valueOf(from);
 	}
 

@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 
+import rainbow.core.util.Utils;
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
@@ -29,6 +30,7 @@ public class String2LocalDate extends AbstractConverter<String, LocalDate> {
 	
 	@Override
 	public LocalDate convert(String from, Class<?> toClass) {
+		if (Utils.isNullOrEmpty(from)) return null;
 		return LocalDate.parse (from, formatter);
 	}
 

@@ -2,6 +2,7 @@ package rainbow.core.util.converter.impl;
 
 import java.sql.Timestamp;
 
+import rainbow.core.util.Utils;
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
@@ -14,6 +15,8 @@ public class String2Timestamp extends AbstractConverter<String, Timestamp> {
 
 	@Override
 	public Timestamp convert(String from, Class<?> toClass) {
+		if (Utils.isNullOrEmpty(from))
+			return null;
 		try {
 			return Timestamp.valueOf(from);
 		} catch (IllegalArgumentException e) {

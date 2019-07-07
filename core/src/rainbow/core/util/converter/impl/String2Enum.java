@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import rainbow.core.model.object.ICodeObject;
 import rainbow.core.util.converter.ConvertException;
+import rainbow.core.util.Utils;
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
@@ -18,6 +19,8 @@ public class String2Enum extends AbstractConverter<String, Enum> {
 	@SuppressWarnings("unchecked")
 	@Override
 	public Enum convert(String from, Class<?> toClass) {
+		if (Utils.isNullOrEmpty(from))
+			return null;
 		if (ICodeObject.class.isAssignableFrom(toClass)) {
 			EnumSet set = EnumSet.allOf((Class<Enum>) toClass);
 			for (Object o : set) {

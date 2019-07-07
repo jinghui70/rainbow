@@ -4,6 +4,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 
+import rainbow.core.util.Utils;
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
@@ -16,6 +17,8 @@ public class String2LocalDateTime extends AbstractConverter<String, LocalDateTim
 
 	@Override
 	public LocalDateTime convert(String from, Class<?> toClass) {
+		if (Utils.isNullOrEmpty(from))
+			return null;
 		try {
 			return LocalDateTime.parse(from);
 		} catch (DateTimeParseException e) {
