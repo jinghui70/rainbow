@@ -2,7 +2,7 @@
 <config xmlns="http://rainbow/db/config">
 	<physic id="demo">
 		<driverClass>org.h2.Driver</driverClass>
-		<jdbcUrl>jdbc:h2:~/db/DEMO;AUTO_SERVER=TRUE;IFEXISTS=TRUE</jdbcUrl>
+		<jdbcUrl>jdbc:h2:~/db/DEMO;AUTO_SERVER=TRUE;IFEXISTS=FALSE</jdbcUrl>
 		<username>sa</username>
 		<password></password>	
 	</physic>

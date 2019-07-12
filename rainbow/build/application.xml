@@ -9,8 +9,8 @@
 	<target name="upgrade-rainbow" description="upgrade rainbw">
 		<delete file="dev.zip" />
 		<delete file="deploy.zip" />
-		<get dest="." src="http://10.10.1.184/download/dev.zip" httpusecaches="false" />
-		<get dest="." src="http://10.10.1.184/download/deploy.zip" httpusecaches="false" />
+		<get dest="." src="http://218.241.210.54:11188/db/rainbow/dev.zip" httpusecaches="false" />
+		<get dest="." src="http://218.241.210.54:11188/db/rainbow/deploy.zip" httpusecaches="false" />
 		<delete dir="build" />
 		<delete dir="bundle" />
 		<delete file="lib/core.jar" />
@@ -18,10 +18,11 @@
 	</target>
 
 	<target name="library">
-		<!-- 如果用自己的库描述，在这里修改
-			<property name="libjson" location="自己的library.json" /> 
+		<ant antfile="build/library.xml" target="all" useNativeBasedir="true" />
+		<!-- 应用自己的库描述，放在应用的rainbow目录下
+		<ant antfile="build/library.xml" target="download-lib" />
 		-->
-		<ant antfile="build/library.xml" target="jenkins" useNativeBasedir="true" />
+		<ant antfile="build/library.xml" target="library-file" useNativeBasedir="true" />
 	</target>
 	
 	<target name="build" description="build">

@@ -9,10 +9,10 @@
 	<target name="init">
 		<delete dir="${lib}" />
 		<mkdir dir="${lib}"/>
-	</target>
-	<target name="download-lib">
 		<mkdir dir="${lib}/src"/>
 		<mkdir dir="${lib}/dev"/>
+	</target>
+	<target name="download-lib">
 		<script language="javascript"> <![CDATA[
 			var echo = project.createTask("echo");
 		    var file = new java.io.File(libjson);
@@ -26,7 +26,10 @@
 				url = item.group.split('.');
 				url.push(item.name);
 				url.push(item.version);
-				url.push(item.name + "-" + item.version + ".jar");
+				if (item.classifier) 
+				  url.push(item.name + "-" + item.version + "-" + item.classifier + ".jar");
+				else 
+				  url.push(item.name + "-" + item.version + ".jar");
 				return MavenServer + url.join("/");
 			}
 			var getSrcName = function(item) {
@@ -109,6 +112,5 @@
 		    </patternset>
 		</unzip>
 	</target>
-	<target name="all" depends="init, download-lib, refresh-rainbow, library-file" description="do all lib things" />
-	<target name="jenkins" depends="init, download-lib, refresh-rainbow" />
+	<target name="all" depends="init, download-lib, refresh-rainbow" description="make platform lib" />
 </project>

@@ -7,12 +7,10 @@
   ],
   "base": [
     { "group":"com.alibaba","name":"fastjson","version":"1.2.56", "source": true },
-    { "group":"com.google.guava","name":"guava","version":"27.0.1-jre", "source": true },
+    { "group":"com.google.guava","name":"guava","version":"28.0-jre", "source": true },
     { "group":"org.slf4j","name":"slf4j-api","version":"1.7.26" },
     { "group":"ch.qos.logback","name":"logback-core","version":"1.2.3" },
     { "group":"ch.qos.logback","name":"logback-classic","version":"1.2.3" },
-    { "group":"org.csource","name":"fastdfs-client-java","version":"1.27" },
-    { "group":"org.antlr","name":"antlr4","version":"4.7.2" }
   ],
   "poi": [
     { "group":"org.apache.poi","name":"poi","version":"4.0.1" },
@@ -37,8 +35,6 @@
   "db": [
     { "group":"com.alibaba","name":"druid","version":"1.1.14" },
     { "group":"com.h2database","name":"h2","version":"1.4.198" },
-    { "group":"mysql","name":"mysql-connector-java","version":"8.0.15" },
-    { "group":"com.oracle.jdbc","name":"ojdbc6","version":"11.1.0.6.0","ignore":"true" },
-    { "group":"com.ibm.db2.jcc","name":"db2jcc4","version":"10.1","ignore":"true" }
+    { "group": "mysql", "name": "mysql-connector-java", "version": "8.0.15" }
   ]
 }
