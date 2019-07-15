@@ -11,11 +11,11 @@ import java.util.Map;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
 
-import rainbow.core.util.converter.impl.Boolean2Int;
+import rainbow.core.util.converter.impl.Boolean2Number;
 import rainbow.core.util.converter.impl.Date2Long;
 import rainbow.core.util.converter.impl.Date2SqlDate;
 import rainbow.core.util.converter.impl.Date2Timestamp;
-import rainbow.core.util.converter.impl.Enum2Int;
+import rainbow.core.util.converter.impl.Enum2Number;
 import rainbow.core.util.converter.impl.Enum2String;
 import rainbow.core.util.converter.impl.LocalDate2SqlDate;
 import rainbow.core.util.converter.impl.LocalDate2Timestamp;
@@ -108,7 +108,7 @@ public class Converters {
 		if (c != null)
 			return c.convert(from, toClass);
 
-		if (Number.class.isAssignableFrom(toClass)) {
+		if (Number.class.isAssignableFrom(toClass2)) {
 			Converter<Number, T> c2 = (Converter<Number, T>) table.get(Number.class, toClass2);
 			if (c2 != null) {
 				Converter<F, Number> c1 = (Converter<F, Number>) getConverter(fromClass, Number.class);
@@ -145,11 +145,11 @@ public class Converters {
 	}
 
 	static {
-		addDefault(Boolean2Int.class);
+		addDefault(Boolean2Number.class);
 		addDefault(Date2Long.class);
 		addDefault(Date2SqlDate.class);
 		addDefault(Date2Timestamp.class);
-		addDefault(Enum2Int.class);
+		addDefault(Enum2Number.class);
 		addDefault(Enum2String.class);
 		addDefault(LocalDate2SqlDate.class);
 		addDefault(LocalDate2Timestamp.class);

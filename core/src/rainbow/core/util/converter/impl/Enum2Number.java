@@ -9,10 +9,10 @@ import rainbow.core.util.converter.AbstractConverter;
  *
  */
 @SuppressWarnings("rawtypes")
-public class Enum2Int extends AbstractConverter<Enum, Integer> {
+public class Enum2Number extends AbstractConverter<Enum, Number> {
 
 	@Override
-	public Integer convert(Enum from, Class<?> toClass) {
+	public Number convert(Enum from, Class<?> toClass) {
 		return from.ordinal();
 	}
 

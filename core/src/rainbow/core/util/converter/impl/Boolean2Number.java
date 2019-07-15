@@ -7,10 +7,10 @@ import rainbow.core.util.converter.AbstractConverter;
  * @author lijinghui
  *
  */
-public class Boolean2Int extends AbstractConverter<Boolean, Integer> {
+public class Boolean2Number extends AbstractConverter<Boolean, Number> {
 
 	@Override
-	public Integer convert(Boolean from, Class<?> toClass) {
+	public Number convert(Boolean from, Class<?> toClass) {
 		return from ? 1 : 0;
 	}
 

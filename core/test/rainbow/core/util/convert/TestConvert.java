@@ -51,6 +51,27 @@ public class TestConvert {
 
 		str = Converters.convert(Color2.BLUE, String.class);
 		assertEquals("03", str);
+		
+		short s = Converters.convert(Color2.RED, short.class);
+		assertEquals(0, s);
+		color = Converters.convert(s, Color.class);
+		assertEquals(Color.RED, color);
+		
+		Short ss = Converters.convert(Color2.RED, Short.class);
+		assertEquals(0, ss.intValue());
+		color = Converters.convert(ss, Color.class);
+		assertEquals(Color.RED, color);
+		
+		int i = Converters.convert(Color2.BLUE, int.class);
+		assertEquals(2, i);
+		color = Converters.convert(i, Color.class);
+		assertEquals(Color.BLUE, color);
+
 	}
 
+	@Test
+	public void testBoolean() {
+		short i = Converters.convert(Boolean.TRUE, short.class);
+		assertEquals(1, i);
+	}
 }
