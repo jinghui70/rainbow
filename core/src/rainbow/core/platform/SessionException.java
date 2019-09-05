@@ -6,13 +6,16 @@ public class SessionException extends RuntimeException {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-
-	public SessionException(String key, String error) {
-		super(String.format("rainbow session value [%s] %s", key, error));
-	}
 	
-	public SessionException() {
-		super("rainbow session is empty");
+	private String key;
+
+	public SessionException(String key) {
+		super(String.format("session value [%s] needed", key));
+		this.key = key;
+	}
+
+	public String getKey() {
+		return key;
 	}
 	
 }

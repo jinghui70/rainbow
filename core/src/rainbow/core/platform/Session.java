@@ -3,6 +3,8 @@ package rainbow.core.platform;
 import java.util.HashMap;
 import java.util.Map;
 
+import rainbow.core.util.converter.Converters;
+
 /**
  * 调用服务前，由环境设置的线程上下文
  * 
@@ -48,10 +50,10 @@ public final class Session {
 	public static Object getValue(String key) throws SessionException {
 		Map<String, Object> map = session.get();
 		if (map == null)
-			throw new SessionException();
+			throw new SessionException(key);
 		Object value = map.get(key);
 		if (value == null)
-			throw new SessionException(key, "not found");
+			throw new SessionException(key);
 		return value;
 	}
 
@@ -64,15 +66,7 @@ public final class Session {
 	 */
 	public static int getInt(String key) throws SessionException {
 		Object value = getValue(key);
-		if (value instanceof Integer)
-			return (Integer) value;
-		if (value instanceof String) {
-			try {
-				return Integer.parseInt((String) value);
-			} catch (NumberFormatException e) {
-			}
-		}
-		throw new SessionException(key, "is not an integer");
+		return Converters.convert(value, int.class);
 	}
 
 	/**

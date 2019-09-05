@@ -8,8 +8,7 @@
 	// 启用命令行工作台
  	// "console": true, 
  	
-	"web.gate": {
-		port: 8888,
-		prefix: "/"
+	"web": {
+		port: 8888
 	}
 }
