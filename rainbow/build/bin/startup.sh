@@ -40,5 +40,5 @@ CLASS_PATH="$RAINBOW_HOME/lib/bootstrap.jar"
 RAINBOWCMD="java $MEM_ARG -classpath $CLASS_PATH rainbow.Launcher" 
 echo $RAINBOWCMD
 
-nohup java $MEM_ARG -classpath $CLASS_PATH rainbow.Launcher  &
+java $MEM_ARG -classpath $CLASS_PATH rainbow.Launcher  &
 

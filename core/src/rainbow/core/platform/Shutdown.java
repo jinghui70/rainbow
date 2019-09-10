@@ -30,10 +30,12 @@ public class Shutdown {
 				String s = portStr.get();
 				int inx = s.indexOf(':');
 				if (inx > 0) {
+					s = s.substring(inx + 1);
 					if (s.charAt(s.length() - 1) == ',')
 						s = s.substring(0, s.length() - 1).trim();
 					jmxPort = Integer.parseInt(s);
-				}
+				} else 
+					System.out.println("bad jmxPort config: " + s);
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -51,12 +53,11 @@ public class Shutdown {
 		}
 	}
 
-	private static PlatformManagerMBean getMBean(int port) {
+	private static PlatformManagerMBean getMBean(int jmxPort) {
 		try {
-			StringBuilder sb = new StringBuilder("service:jmx:rmi:///jndi/rmi://127.0.0.1:");
-			sb.append(port).append("/").append("rainbow");
-			JMXServiceURL url = new JMXServiceURL(sb.toString());
-			JMXConnector connector = JMXConnectorFactory.connect(url);
+			String url = String.format("service:jmx:rmi:///jndi/rmi://localhost:%d/rainbow", jmxPort);
+			JMXServiceURL jmxurl = new JMXServiceURL(url);
+			JMXConnector connector = JMXConnectorFactory.connect(jmxurl);
 			MBeanServerConnection conn = connector.getMBeanServerConnection();
 			return MBeanServerInvocationHandler.newProxyInstance(conn, PlatformManager.getName(),
 					PlatformManagerMBean.class, false);

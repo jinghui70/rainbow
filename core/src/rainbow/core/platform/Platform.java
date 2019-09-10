@@ -1,12 +1,13 @@
 package rainbow.core.platform;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.rmi.registry.LocateRegistry;
 import java.util.Objects;
 
 import javax.management.MBeanServer;
-import javax.management.MBeanServerFactory;
 import javax.management.remote.JMXConnectorServer;
 import javax.management.remote.JMXConnectorServerFactory;
 import javax.management.remote.JMXServiceURL;
@@ -22,7 +23,6 @@ import rainbow.core.bundle.BundleManagerImpl;
 import rainbow.core.console.CommandProvider;
 import rainbow.core.console.Console;
 import rainbow.core.extension.ExtensionRegistry;
-import rainbow.core.util.JMXServiceURLBuilder;
 import rainbow.core.util.encrypt.Encryption;
 import rainbow.core.util.ioc.Bean;
 import rainbow.core.util.ioc.Context;
@@ -61,7 +61,7 @@ public final class Platform {
 	private JMXConnectorServer cs;
 
 	private Context context = new Context(ImmutableMap.of( //
-			"mBeanServer", Bean.singleton(MBeanServerFactory.createMBeanServer(), MBeanServer.class), //
+			"mBeanServer", Bean.singleton(ManagementFactory.getPlatformMBeanServer(), MBeanServer.class), //
 			"bundleLoader", Bean.singleton(BundleLoader.class), //
 			"bundleManager", Bean.singleton(BundleManagerImpl.class), //
 			"bundleCommandProvider", Bean.singleton(BundleCommandProvider.class) //
@@ -143,20 +143,24 @@ public final class Platform {
 	private void startLocalJmxServer(int jmxPort) {
 		logger.info("starting jmx server on port {}", jmxPort);
 		// MBeanServer
+		
 		MBeanServer mBeanServer = context.getBean("mBeanServer", MBeanServer.class);
-		try {
-			JMXServiceURL url = new JMXServiceURLBuilder(jmxPort, "rainbow").getJMXServiceURL();
-			cs = JMXConnectorServerFactory.newJMXConnectorServer(url, null, mBeanServer);
-			cs.start();
-			logger.info("jmx server started");
-		} catch (IOException e) {
-			logger.error("start jmx server failed", e);
-			throw new RuntimeException(e);
-		}
 		try {
 			mBeanServer.registerMBean(new PlatformManager(), PlatformManager.getName());
 		} catch (Exception e) {
 			logger.error("register PlatformManager failed", e);
+			throw new RuntimeException(e);
+		}
+
+		try {
+			LocateRegistry.createRegistry(jmxPort);
+			String url = String.format("service:jmx:rmi:///jndi/rmi://localhost:%d/rainbow", jmxPort);
+			JMXServiceURL jmxurl = new JMXServiceURL(url); 
+			cs = JMXConnectorServerFactory.newJMXConnectorServer(jmxurl, null, mBeanServer);
+			cs.start();
+			logger.info("jmx server started");
+		} catch (IOException e) {
+			logger.error("start jmx server failed", e);
 			throw new RuntimeException(e);
 		}
 	}
