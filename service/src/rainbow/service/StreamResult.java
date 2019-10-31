@@ -15,14 +15,22 @@ public class StreamResult extends NameObject {
 	 */
 	private InputStream inputStream;
 
+	private boolean download;
+
+	public StreamResult() {
+	}
+
 	public StreamResult(String name, InputStream inputStream) {
 		super(name);
 		this.inputStream = inputStream;
 	}
 
-	public StreamResult(InputStream inputStream) {
-		super("untitled");
-		this.inputStream = inputStream;
+	public boolean isDownload() {
+		return download;
+	}
+
+	public void setDownload(boolean download) {
+		this.download = download;
 	}
 
 	public InputStream getInputStream() {

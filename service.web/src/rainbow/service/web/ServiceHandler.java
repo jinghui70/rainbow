@@ -52,10 +52,9 @@ public class ServiceHandler implements RequestHandler {
 		try {
 			Object value = callService(target, param);
 			if (value != null && value instanceof StreamResult) {
-				StreamResult sr = (StreamResult) value;
-				writeStreamBack(baseRequest, response, sr.getInputStream(), sr.getName());
+				writeStreamResult(response, (StreamResult) value);
 			} else
-				writeJsonBack(baseRequest, response, value);
+				writeJsonBack(response, value);
 		} catch (SessionException e) {
 			response.sendError(401, e.getKey());
 		} catch (AppException e) {
@@ -63,6 +62,7 @@ public class ServiceHandler implements RequestHandler {
 		} catch (Throwable e) {
 			throw new ServletException(e);
 		}
+		handled(baseRequest);
 	}
 
 	protected Object callService(String target, String param) throws Throwable {
@@ -92,6 +92,15 @@ public class ServiceHandler implements RequestHandler {
 		for (String p : parts)
 			result.add(p);
 		return result;
+	}
+
+	private void writeStreamResult(HttpServletResponse response, StreamResult sr) throws IOException {
+		if (sr.getInputStream() == null) {
+			response.sendError(404, sr.getName());
+		} else if (sr.isDownload())
+			writeStreamDownload(response, sr.getInputStream(), sr.getName());
+		else
+			writeStreamBack(response, sr.getInputStream(), sr.getName());
 	}
 
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -30,7 +31,7 @@ public interface RequestHandler extends INameObject {
 	void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException;
 
-	default void writeJsonBack(Request baseRequest, HttpServletResponse response, Object result) throws IOException {
+	default void writeJsonBack(HttpServletResponse response, Object result) throws IOException {
 		response.setContentType("application/json");
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		try (Writer writer = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
@@ -39,14 +40,25 @@ public interface RequestHandler extends INameObject {
 			// content = AES.encode(request, content);
 			writer.write(content);
 		}
+	}
+
+	default void handled(Request baseRequest) {
 		baseRequest.setHandled(true);
 	}
 
-	default void writeStreamBack(Request baseRequest, HttpServletResponse response, InputStream stream, String name)
+	/**
+	 * 返回流内容
+	 * 
+	 * @param baseRequest
+	 * @param response
+	 * @param stream
+	 * @param name
+	 * @throws IOException
+	 */
+	default void writeStreamBack(HttpServletResponse response, InputStream stream, String name)
 			throws IOException {
-		response.setContentType("applicatoin/octet-stream");
-		response.addHeader("Content-Disposition",
-				String.format("attachment; filename=\"%s\"", URLEncoder.encode(name, "UTF-8")));
+		String mimeType = Utils.getMimeType(name);
+		response.setContentType(mimeType);
 		OutputStream outStream = response.getOutputStream();
 		try (InputStream is = stream) {
 			int len = 0;
@@ -55,6 +67,27 @@ public interface RequestHandler extends INameObject {
 				outStream.write(buffer, 0, len);
 			}
 		}
-		baseRequest.setHandled(true);
+	}
+
+	/**
+	 * 处理下载的流
+	 * 
+	 * @param baseRequest
+	 * @param response
+	 * @param stream
+	 * @param name 文件名，如果只有后缀，应该以点'.'开始
+	 * @throws IOException
+	 */
+	default void writeStreamDownload(HttpServletResponse response, InputStream stream, String name)
+			throws IOException {
+		try {
+			if (name.charAt(0) == '.')
+				response.setHeader("Content-Disposition", "attachment");
+			else
+				response.setHeader("Content-Disposition",
+						String.format("attachment; filename=\"%s\"", URLEncoder.encode(name, "UTF-8")));
+		} catch (UnsupportedEncodingException e) {
+		}
+		writeStreamBack(response, stream, name);
 	}
 }
