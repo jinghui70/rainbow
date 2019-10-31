@@ -25,8 +25,8 @@ import rainbow.core.platform.SessionException;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Inject;
 import rainbow.service.ServiceInvoker;
+import rainbow.service.StreamResult;
 import rainbow.web.RequestHandler;
-import rainbow.web.StreamResult;
 
 @Bean(extension = RequestHandler.class)
 public class ServiceHandler implements RequestHandler {
@@ -42,7 +42,7 @@ public class ServiceHandler implements RequestHandler {
 
 	@Override
 	public String getName() {
-		return "service";
+		return "s";
 	}
 
 	@Override
@@ -51,24 +51,25 @@ public class ServiceHandler implements RequestHandler {
 		String param = Utils.streamToString(request.getInputStream());
 		try {
 			Object value = callService(target, param);
-			if (value != null && value instanceof StreamResult)
-				writeStreamBack(baseRequest, response, (StreamResult) value);
-			else
-				writeJsonBack(baseRequest, response, ServiceResponse.success(value));
+			if (value != null && value instanceof StreamResult) {
+				StreamResult sr = (StreamResult) value;
+				writeStreamBack(baseRequest, response, sr.getInputStream(), sr.getName());
+			} else
+				writeJsonBack(baseRequest, response, value);
 		} catch (SessionException e) {
-			writeJsonBack(baseRequest, response, ServiceResponse.noSession(e.getKey()));
+			response.sendError(401, e.getKey());
 		} catch (AppException e) {
-			writeJsonBack(baseRequest, response, ServiceResponse.fail(e));
+			response.sendError(500, e.getMessage());
 		} catch (Throwable e) {
 			throw new ServletException(e);
 		}
 	}
 
-	protected Object callService(String entry, String param) throws Throwable {
-		Queue<String> target = splitTarget(entry);
-		checkArgument(target.size() >= 2);
-		String serviceId = target.poll();
-		String methodName = target.poll();
+	protected Object callService(String target, String param) throws Throwable {
+		Queue<String> queue = splitTarget(target);
+		checkArgument(queue.size() >= 2);
+		String serviceId = queue.poll();
+		String methodName = queue.poll();
 		Type[] types = serviceInvoker.getMethodParamTypes(serviceId, methodName);
 		switch (types.length) {
 		case 0:

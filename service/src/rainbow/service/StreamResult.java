@@ -1,4 +1,4 @@
-package rainbow.web;
+package rainbow.service;
 
 import java.io.InputStream;
 

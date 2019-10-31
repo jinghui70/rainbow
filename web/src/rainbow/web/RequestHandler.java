@@ -42,15 +42,15 @@ public interface RequestHandler extends INameObject {
 		baseRequest.setHandled(true);
 	}
 
-	default void writeStreamBack(Request baseRequest, HttpServletResponse response, StreamResult result)
+	default void writeStreamBack(Request baseRequest, HttpServletResponse response, InputStream stream, String name)
 			throws IOException {
 		response.setContentType("applicatoin/octet-stream");
 		response.addHeader("Content-Disposition",
-				String.format("attachment; filename=\"%s\"", URLEncoder.encode(result.getName(), "UTF-8")));
+				String.format("attachment; filename=\"%s\"", URLEncoder.encode(name, "UTF-8")));
 		OutputStream outStream = response.getOutputStream();
-		try (InputStream is = result.getInputStream()) {
+		try (InputStream is = stream) {
 			int len = 0;
-			byte[] buffer = new byte[1024];
+			byte[] buffer = new byte[8192];
 			while ((len = is.read(buffer)) > 0) {
 				outStream.write(buffer, 0, len);
 			}

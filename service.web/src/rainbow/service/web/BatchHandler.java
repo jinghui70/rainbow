@@ -27,7 +27,7 @@ public class BatchHandler extends ServiceHandler {
 		List<ClientRequest> clientRequests = JSON.parseObject(param, batchRequest);
 		final Map<String, Object> result = new HashMap<String, Object>();
 		for (ClientRequest cr : clientRequests) {
-			Object value = super.callService(entry, param);
+			Object value = super.callService(cr.getEntry(), param);
 			result.put(cr.getName(), value);
 		}
 		return result;

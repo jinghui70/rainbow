@@ -2,6 +2,7 @@ package rainbow.core.bundle;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -15,6 +16,9 @@ import javax.management.ObjectName;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 
 import rainbow.core.extension.Extension;
 import rainbow.core.extension.ExtensionRegistry;
@@ -222,6 +226,40 @@ public abstract class BundleActivator {
 	}
 
 	/**
+	 * 如果配置文件是一个json文件，直接解析为一个对象
+	 * 
+	 * @param fileName
+	 * @param clazz
+	 * @return
+	 * @throws IOException
+	 */
+	public final <T> T parseConfigFile(final String fileName, Class<T> clazz) {
+		Path file = getConfigureFile(fileName);
+		try (InputStream is = Files.newInputStream(file)) {
+			return JSON.parseObject(is, StandardCharsets.UTF_8, clazz);
+		} catch (IOException e) {
+			throw new RuntimeException(String.format("parse file %s error", fileName), e);
+		}
+	}
+
+	/**
+	 * 如果配置文件是一个json文件，直接解析为一个对象
+	 * 
+	 * @param fileName
+	 * @param tr
+	 * @return
+	 * @throws IOException
+	 */
+	public <T> T parseConfigFile(final String fileName, TypeReference<T> tr) {
+		Path file = getConfigureFile(fileName);
+		try (InputStream is = Files.newInputStream(file)) {
+			return JSON.parseObject(is, StandardCharsets.UTF_8, tr.getType());
+		} catch (IOException e) {
+			throw new RuntimeException(String.format("parse file %s error", fileName), e);
+		}
+	}
+
+	/**
 	 * 注册扩展点
 	 * 
 	 * @param clazz
@@ -255,7 +293,7 @@ public abstract class BundleActivator {
 	 * @param beanName 在context中的扩展对象名
 	 * @throws BundleException
 	 */
-	protected final <T> void registerExtension(Class<T> clazz, String beanName) throws BundleException {
+	protected final void registerExtension(Class<?> clazz, String beanName) throws BundleException {
 		registerExtension(clazz, null, getBean(beanName));
 	}
 

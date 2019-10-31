@@ -40,6 +40,8 @@ public abstract class ServiceBundleActivator extends BundleActivator {
 		getClassLoader().procClass(clazz -> {
 			if (clazz.isInterface() && clazz.getName().endsWith("Service")) {
 				String id = serviceId(clazz.getName());
+				if (id.startsWith("rainbow."))
+					id = id.substring(8);
 				Service service = new Service(id, clazz);
 				String name = Utils.lowerFirstChar(clazz.getSimpleName());
 				Object bean = checkNotNull(getBean(name), "service bean not found: {}", name);
