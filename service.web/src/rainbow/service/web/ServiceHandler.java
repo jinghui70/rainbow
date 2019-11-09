@@ -65,6 +65,14 @@ public class ServiceHandler implements RequestHandler {
 		handled(baseRequest);
 	}
 
+	/**
+	 * 调用具体服务函数，当参数为1个String的时候，可以用rest方式来处理调用
+	 * 
+	 * @param target
+	 * @param param
+	 * @return
+	 * @throws Throwable
+	 */
 	protected Object callService(String target, String param) throws Throwable {
 		Queue<String> queue = splitTarget(target);
 		checkArgument(queue.size() >= 2);
@@ -76,7 +84,12 @@ public class ServiceHandler implements RequestHandler {
 			return serviceInvoker.invoke(serviceId, methodName);
 		case 1:
 			Type type = types[0];
-			Object arg = type == String.class ? param : JSON.parseObject(param, type);
+			Object arg = param;
+			if (type == String.class) {
+				if (Utils.isNullOrEmpty(param) && !queue.isEmpty())
+					arg = queue.poll();
+			} else
+				arg = JSON.parseObject(param, type);
 			return serviceInvoker.invoke(serviceId, methodName, arg);
 		default:
 			DefaultJSONParser parser = new DefaultJSONParser(param, ParserConfig.getGlobalInstance());
@@ -99,8 +112,10 @@ public class ServiceHandler implements RequestHandler {
 			response.sendError(404, sr.getName());
 		} else if (sr.isDownload())
 			writeStreamDownload(response, sr.getInputStream(), sr.getName());
-		else
-			writeStreamBack(response, sr.getInputStream(), sr.getName());
+		else {
+			String mime = rainbow.web.Utils.getMimeType(sr.getName());
+			writeStreamBack(response, sr.getInputStream(), mime);
+		}
 	}
 
 }

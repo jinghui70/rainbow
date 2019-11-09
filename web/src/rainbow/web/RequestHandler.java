@@ -49,15 +49,13 @@ public interface RequestHandler extends INameObject {
 	/**
 	 * 返回流内容
 	 * 
-	 * @param baseRequest
 	 * @param response
 	 * @param stream
-	 * @param name
+	 * @param mimeType
 	 * @throws IOException
 	 */
-	default void writeStreamBack(HttpServletResponse response, InputStream stream, String name)
+	default void writeStreamBack(HttpServletResponse response, InputStream stream, String mimeType)
 			throws IOException {
-		String mimeType = Utils.getMimeType(name);
 		response.setContentType(mimeType);
 		OutputStream outStream = response.getOutputStream();
 		try (InputStream is = stream) {
