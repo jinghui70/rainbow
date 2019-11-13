@@ -16,15 +16,24 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
-import rainbow.core.bundle.Bean;
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.Session;
+import rainbow.core.util.Utils;
 import rainbow.web.RequestHandler;
 
-@Bean
 public class Gate extends AbstractHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(Gate.class);
+
+	private String rootPath;
+
+	public Gate(String rootPath) {
+		if (rootPath.charAt(0) != '/')
+			rootPath = "/" + rootPath;
+		if (rootPath.charAt(rootPath.length() - 1) != '/')
+			rootPath = rootPath + '/';
+		this.rootPath = rootPath;
+	}
 
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
@@ -45,9 +54,11 @@ public class Gate extends AbstractHandler {
 
 	private void handleRequest(String target, Request baseRequest, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
-		if (target.startsWith("/"))
-			target = target.substring(1);
-		if (target.isEmpty())
+		if (target.startsWith(rootPath))
+			target = target.substring(rootPath.length());
+		else
+			return;
+		if (Utils.isNullOrEmpty(target))
 			return;
 		int inx = target.indexOf('/');
 		String routeString = target;

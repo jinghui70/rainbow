@@ -93,6 +93,18 @@ public class ConfigData {
 	}
 
 	/**
+	 * 获取bundle配置单项内容，为空时返回默认值
+	 * 
+	 * @param key
+	 * @param defaultValue
+	 * @return
+	 */
+	public String getString(String key, String defaultValue) {
+		String value = getString(key);
+		return value == null ? defaultValue : value;
+	}
+	
+	/**
 	 * 获取bundle配置单项内容,并转为整数。如果没有配置，默认返回0
 	 * 
 	 * @param bundleId

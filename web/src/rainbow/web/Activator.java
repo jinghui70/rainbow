@@ -34,8 +34,9 @@ public class Activator extends BundleActivator {
 
 		server = new Server(port);
 		SessionHandler sessionHandler = new SessionHandler();
+		String root = config.getString("root", "/");
 		// GzipHandler gzipHandler = new GzipHandler();
-		sessionHandler.setHandler(getBean("gate", Gate.class));
+		sessionHandler.setHandler(new Gate(root));
 
 		server.setHandler(sessionHandler);
 		server.setErrorHandler(new RequestErrorHandler());
