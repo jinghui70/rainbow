@@ -42,10 +42,6 @@ public interface RequestHandler extends INameObject {
 		}
 	}
 
-	default void handled(Request baseRequest) {
-		baseRequest.setHandled(true);
-	}
-
 	/**
 	 * 返回流内容
 	 * 

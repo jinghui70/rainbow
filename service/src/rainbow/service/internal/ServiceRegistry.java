@@ -1,7 +1,6 @@
 package rainbow.service.internal;
 
 import static rainbow.core.util.Preconditions.checkArgument;
-import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -13,6 +12,8 @@ import rainbow.core.bundle.Bean;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.ActivatorAwareObject;
 import rainbow.core.util.ioc.InitializingBean;
+import rainbow.service.InvalidServiceException;
+import rainbow.service.InvalidServiceMethodException;
 
 /**
  * 服务注册表
@@ -35,14 +36,19 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 	 * 
 	 * @param id 服务的ID
 	 * @return 服务对象
+	 * @throws InvalidServiceException
 	 */
-	public Service getService(String id) {
-		return checkNotNull(serviceMap.get(id), "Service [{}] not exist", id);
+	public Service getService(String id) throws InvalidServiceException {
+		Service service = serviceMap.get(id);
+		if (service == null)
+			throw new InvalidServiceException(id);
+		return service;
 	}
 
-	public Method getMethod(String id, String methodName) {
+	public Method getMethod(String id, String methodName)
+			throws InvalidServiceException, InvalidServiceMethodException {
 		Service service = getService(id);
-		return checkNotNull(service.getMethod(methodName), "Service [{}-{}] not exist", id, methodName);
+		return service.getMethod(methodName);
 	}
 
 	/**

@@ -1,6 +1,8 @@
 package rainbow.core.platform;
 
-public class SessionException extends RuntimeException {
+import rainbow.core.model.exception.AppException;
+
+public class SessionException extends AppException {
 
 	/**
 	 * 
@@ -10,7 +12,7 @@ public class SessionException extends RuntimeException {
 	private String key;
 
 	public SessionException(String key) {
-		super(String.format("session value [%s] needed", key));
+		super("session value [{}] needed", key);
 		this.key = key;
 	}
 

@@ -24,6 +24,8 @@ import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.SessionException;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Inject;
+import rainbow.service.InvalidServiceException;
+import rainbow.service.InvalidServiceMethodException;
 import rainbow.service.ServiceInvoker;
 import rainbow.service.StreamResult;
 import rainbow.web.RequestHandler;
@@ -57,12 +59,13 @@ public class ServiceHandler implements RequestHandler {
 				writeJsonBack(response, value);
 		} catch (SessionException e) {
 			response.sendError(401, e.getKey());
+		} catch (InvalidServiceException | InvalidServiceMethodException e) {
+			response.sendError(400, e.getMessage());
 		} catch (AppException e) {
 			response.sendError(500, e.getMessage());
 		} catch (Throwable e) {
 			throw new ServletException(e);
 		}
-		handled(baseRequest);
 	}
 
 	/**

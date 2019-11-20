@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import rainbow.core.model.object.IdObject;
+import rainbow.service.InvalidServiceMethodException;
 
 public class Service extends IdObject {
 
@@ -51,8 +52,11 @@ public class Service extends IdObject {
 		methods = cacheMethods(serviceClass);
 	}
 
-	public Method getMethod(String methodName) {
-		return checkNotNull(methods.get(methodName), "method [{}] of service[{}] not defined", methodName, id);
+	public Method getMethod(String methodName) throws InvalidServiceMethodException {
+		Method method = methods.get(methodName);
+		if (method == null)
+			throw new InvalidServiceMethodException(id, methodName);
+		return method;
 	}
 
 	private Map<String, Method> cacheMethods(Class<?> serviceClass) {

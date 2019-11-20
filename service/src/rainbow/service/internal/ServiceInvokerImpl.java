@@ -12,6 +12,8 @@ import rainbow.core.bundle.Bean;
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.SessionException;
 import rainbow.core.util.ioc.Inject;
+import rainbow.service.InvalidServiceException;
+import rainbow.service.InvalidServiceMethodException;
 import rainbow.service.ServiceInterceptor;
 import rainbow.service.ServiceInvoker;
 
@@ -28,7 +30,8 @@ public class ServiceInvokerImpl implements ServiceInvoker {
 	}
 
 	@Override
-	public Type[] getMethodParamTypes(String serviceId, String methodName) {
+	public Type[] getMethodParamTypes(String serviceId, String methodName)
+			throws InvalidServiceException, InvalidServiceMethodException {
 		Method method = serviceRegistry.getMethod(serviceId, methodName);
 		return method.getGenericParameterTypes();
 	}
