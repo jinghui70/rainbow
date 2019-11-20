@@ -66,6 +66,7 @@ public class ServiceHandler implements RequestHandler {
 		} catch (Throwable e) {
 			throw new ServletException(e);
 		}
+		baseRequest.setHandled(true);
 	}
 
 	/**

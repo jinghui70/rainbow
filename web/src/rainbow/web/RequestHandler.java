@@ -8,6 +8,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -50,8 +52,7 @@ public interface RequestHandler extends INameObject {
 	 * @param mimeType
 	 * @throws IOException
 	 */
-	default void writeStreamBack(HttpServletResponse response, InputStream stream, String mimeType)
-			throws IOException {
+	default void writeStreamBack(HttpServletResponse response, InputStream stream, String mimeType) throws IOException {
 		response.setContentType(mimeType);
 		OutputStream outStream = response.getOutputStream();
 		try (InputStream is = stream) {
@@ -69,11 +70,10 @@ public interface RequestHandler extends INameObject {
 	 * @param baseRequest
 	 * @param response
 	 * @param stream
-	 * @param name 文件名，如果只有后缀，应该以点'.'开始
+	 * @param name        文件名，如果只有后缀，应该以点'.'开始
 	 * @throws IOException
 	 */
-	default void writeStreamDownload(HttpServletResponse response, InputStream stream, String name)
-			throws IOException {
+	default void writeStreamDownload(HttpServletResponse response, InputStream stream, String name) throws IOException {
 		try {
 			if (name.charAt(0) == '.')
 				response.setHeader("Content-Disposition", "attachment");
@@ -84,4 +84,18 @@ public interface RequestHandler extends INameObject {
 		}
 		writeStreamBack(response, stream, name);
 	}
+
+	/**
+	 * 下载一个文件的响应
+	 * 
+	 * @param response
+	 * @param file
+	 * @throws IOException
+	 */
+	default void writeFileDownload(HttpServletResponse response, Path file) throws IOException {
+		long size = Files.size(file);
+		response.setHeader("Content-Length", Long.toString(size));
+		writeStreamDownload(response, Files.newInputStream(file), file.getFileName().toString());
+	}
+
 }
