@@ -1,0 +1,543 @@
+
+<!DOCTYPE HTML>
+<html lang="zh-hans" >
+    <head>
+        <meta charset="UTF-8">
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <title>2 扩展与扩展点 · Rainbow 开发手册</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="">
+        <meta name="generator" content="GitBook 3.2.3">
+        <meta name="author" content="jinghui70">
+        
+        
+    
+    <link rel="stylesheet" href="gitbook/style.css">
+
+    
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-highlight/website.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-search/search.css">
+                
+            
+                
+                <link rel="stylesheet" href="gitbook/gitbook-plugin-fontsettings/website.css">
+                
+            
+        
+
+    
+
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+        
+    
+
+        
+    
+    
+    <meta name="HandheldFriendly" content="true"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="gitbook/images/apple-touch-icon-precomposed-152.png">
+    <link rel="shortcut icon" href="gitbook/images/favicon.ico" type="image/x-icon">
+
+    
+    <link rel="next" href="Config.html" />
+    
+    
+    <link rel="prev" href="Bundle.html" />
+    
+
+    </head>
+    <body>
+        
+<div class="book">
+    <div class="book-summary">
+        
+            
+<div id="book-search-input" role="search">
+    <input type="text" placeholder="输入并搜索" />
+</div>
+
+            
+                <nav role="navigation">
+                
+
+
+<ul class="summary">
+    
+    
+
+    
+
+    
+        
+        
+    
+        <li class="chapter " data-level="1.1" data-path="./">
+            
+                <a href="./">
+            
+                    
+                    简介
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="1.2" data-path="Develop.html">
+            
+                <a href="Develop.html">
+            
+                    
+                    建立开发环境
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">一、基础概念与核心代码</li>
+        
+        
+    
+        <li class="chapter " data-level="2.1" data-path="Bundle.html">
+            
+                <a href="Bundle.html">
+            
+                    
+                    1 插件
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter active" data-level="2.2" data-path="Extension.html">
+            
+                <a href="Extension.html">
+            
+                    
+                    2 扩展与扩展点
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.3" data-path="Config.html">
+            
+                <a href="Config.html">
+            
+                    
+                    3 配置文件
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.4" data-path="IOC.html">
+            
+                <a href="IOC.html">
+            
+                    
+                    4 依赖注入
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.5" data-path="Session.html">
+            
+                <a href="Session.html">
+            
+                    
+                    5 Session
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="2.6" data-path="Converter.html">
+            
+                <a href="Converter.html">
+            
+                    
+                    6 数据类型转换
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">二、数据库</li>
+        
+        
+    
+        <li class="chapter " data-level="3.1" data-path="Database.html">
+            
+                <a href="Database.html">
+            
+                    
+                    1 设计目标
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.2" data-path="RDM.html">
+            
+                <a href="RDM.html">
+            
+                    
+                    2 数据模型
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.3" data-path="DatabaseConfig.html">
+            
+                <a href="DatabaseConfig.html">
+            
+                    
+                    3 连接数据库
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.4" data-path="Dao.html">
+            
+                <a href="Dao.html">
+            
+                    
+                    3 数据库操作
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="3.5" data-path="DatabaseX.html">
+            
+                <a href="DatabaseX.html">
+            
+                    
+                    4 高级操作
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">三、服务</li>
+        
+        
+    
+        <li class="chapter " data-level="4.1" data-path="Service.html">
+            
+                <a href="Service.html">
+            
+                    
+                    1 服务开发
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.2" data-path="ServiceTest.html">
+            
+                <a href="ServiceTest.html">
+            
+                    
+                    2 服务测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.3" data-path="UnitTest.html">
+            
+                <a href="UnitTest.html">
+            
+                    
+                    3 怎么写单元测试
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="4.4" data-path="ExportService.html">
+            
+                <a href="ExportService.html">
+            
+                    
+                    4 对外提供服务
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+        
+        <li class="header">四、其它</li>
+        
+        
+    
+        <li class="chapter " data-level="5.1" data-path="Jetty.html">
+            
+                <a href="Jetty.html">
+            
+                    
+                    Web 插件
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.2" data-path="Deploy.html">
+            
+                <a href="Deploy.html">
+            
+                    
+                    部署
+            
+                </a>
+            
+
+            
+        </li>
+    
+        <li class="chapter " data-level="5.3" data-path="Maintain.html">
+            
+                <a href="Maintain.html">
+            
+                    
+                    运行监控
+            
+                </a>
+            
+
+            
+        </li>
+    
+
+    
+
+    <li class="divider"></li>
+
+    <li>
+        <a href="https://www.gitbook.com" target="blank" class="gitbook-link">
+            本书使用 GitBook 发布
+        </a>
+    </li>
+</ul>
+
+
+                </nav>
+            
+        
+    </div>
+
+    <div class="book-body">
+        
+            <div class="body-inner">
+                
+                    
+
+<div class="book-header" role="navigation">
+    
+
+    <!-- Title -->
+    <h1>
+        <i class="fa fa-circle-o-notch fa-spin"></i>
+        <a href="." >2 扩展与扩展点</a>
+    </h1>
+</div>
+
+
+
+
+                    <div class="page-wrapper" tabindex="-1" role="main">
+                        <div class="page-inner">
+                            
+<div id="book-search-results">
+    <div class="search-noresults">
+    
+                                <section class="normal markdown-section">
+                                
+                                <h1 id="&#x6269;&#x5C55;&#x4E0E;&#x6269;&#x5C55;&#x70B9;">&#x6269;&#x5C55;&#x4E0E;&#x6269;&#x5C55;&#x70B9;</h1>
+<p>&#x5F53;&#x6709;&#x4E00;&#x7C7B;&#x76F8;&#x4F3C;&#x7684;&#x4E8B;&#x60C5;&#x9700;&#x8981;&#x7EDF;&#x4E00;&#x7BA1;&#x7406;&#x7684;&#x65F6;&#x5019;&#xFF0C;&#x800C;&#x8FD9;&#x7C7B;&#x4E8B;&#x60C5;&#x672A;&#x6765;&#x8FD8;&#x53EF;&#x80FD;&#x4F1A;&#x589E;&#x52A0;&#xFF0C;&#x8FD9;&#x5C31;&#x662F;&#x4F7F;&#x7528;&#x6269;&#x5C55;&#x673A;&#x5236;&#x7684;&#x597D;&#x65F6;&#x673A;&#x3002;&#x6211;&#x4EEC;&#x73B0;&#x5728;&#x7684;&#x4EE3;&#x7801;&#x4E2D;&#x6709;&#x5F88;&#x591A;&#x7528;&#x5230;&#x6269;&#x5C55;&#x7684;&#x4F8B;&#x5B50;&#xFF1A;</p>
+<ul>
+<li>&#x4EFB;&#x52A1;&#x8C03;&#x5EA6;
+&#x8C03;&#x5EA6;&#x53EA;&#x8D1F;&#x8D23;&#x5904;&#x7406;&#x4EFB;&#x52A1;&#x6267;&#x884C;&#x76F8;&#x5173;&#x903B;&#x8F91;&#xFF0C;&#x5177;&#x4F53;&#x4EFB;&#x52A1;&#x7C7B;&#x578B;&#x6709;&#x5F88;&#x591A;&#xFF0C;&#x800C;&#x4E14;&#x672A;&#x6765;&#x8FD8;&#x4F1A;&#x589E;&#x52A0;&#x3002;&#x53EA;&#x8981;&#x5B9A;&#x4E49;&#x4EFB;&#x52A1;&#x7C7B;&#x578B;&#x6269;&#x5C55;&#x70B9;&#xFF0C;&#x672A;&#x6765;&#x65B0;&#x589E;&#x7684;&#x63D2;&#x4EF6;&#x4E2D;&#x5B9E;&#x73B0;&#x8FD9;&#x4E2A;&#x6269;&#x5C55;&#x70B9;&#x5B9A;&#x4E49;&#x7684;&#x63A5;&#x53E3;&#xFF0C;&#x5C31;&#x53EF;&#x4EE5;&#x81EA;&#x52A8;&#x589E;&#x52A0;&#x65B0;&#x7684;&#x4EFB;&#x52A1;&#x7C7B;&#x578B;&#xFF0C;&#x8BE5;&#x7C7B;&#x578B;&#x7684;&#x4EFB;&#x52A1;&#x5C31;&#x53EF;&#x4EE5;&#x52A0;&#x5165;&#x4EFB;&#x52A1;&#x6C60;&#x7531;&#x8C03;&#x5EA6;&#x7BA1;&#x7406;&#x4E86;&#x3002;</li>
+<li>&#x5F85;&#x529E;&#x4E8B;&#x9879;
+&#x5F85;&#x529E;&#x4E8B;&#x9879;&#x4E0E;&#x4EFB;&#x52A1;&#x8C03;&#x5EA6;&#x76F8;&#x4F3C;&#xFF0C;&#x5F85;&#x529E;&#x4E8B;&#x9879;&#x7C7B;&#x578B;&#x6269;&#x5C55;&#x70B9;&#x5B9A;&#x4E49;&#x4E86;&#x7BA1;&#x7406;&#x89C4;&#x8303;&#xFF0C;&#x5177;&#x4F53;&#x5B9E;&#x73B0;&#x7684;&#x6269;&#x5C55;&#x5904;&#x7406;&#x5404;&#x81EA;&#x4E2A;&#x6027;&#x5316;&#x7684;&#x4E1A;&#x52A1;&#x3002;</li>
+<li>&#x5B57;&#x6BB5;&#x52A0;&#x5DE5;&#x5382;(Refinery)
+&#x9488;&#x5BF9;&#x4E0D;&#x540C;&#x7684;&#x5B57;&#x6BB5;&#x7C7B;&#x578B;&#x505A;&#x52A0;&#x5DE5;&#xFF0C;&#x6BD4;&#x5982;&#x65E5;&#x671F;&#x578B;&#x7684;&#x53EF;&#x4EE5;&#x505A;&#x8BA1;&#x7B97;&#x540E;&#x8F6C;&#x4E49;&#xFF0C;&#x4EE3;&#x7801;&#x578B;&#x7684;&#x53EF;&#x4EE5;&#x7FFB;&#x8BD1;&#xFF0C;&#x968F;&#x7740;&#x9700;&#x8981;&#x53EF;&#x4EE5;&#x968F;&#x65F6;&#x589E;&#x52A0;&#x65B0;&#x7684;&#x52A0;&#x5DE5;&#x5382;&#x3002;&#x8FD9;&#x6837;&#x67E5;&#x8BE2;&#x7684;&#x65F6;&#x5019;&#x5C31;&#x53EF;&#x4EE5;&#x6709;&#x66F4;&#x4E30;&#x5BCC;&#x7684;&#x7ED3;&#x679C;&#x4E86;&#x3002;</li>
+</ul>
+<p>&#x6269;&#x5C55;&#x53EF;&#x4EE5;&#x5B58;&#x5728;&#x4E8E;&#x4E0D;&#x540C;&#x4E8E;&#x6269;&#x5C55;&#x70B9;&#x7684; Bundle &#x4E2D;&#xFF0C;&#x6240;&#x4EE5;&#x672A;&#x6765;&#x7684;&#x6269;&#x5C55;&#x662F;&#x901A;&#x8FC7;&#x4E0D;&#x65AD;&#x7684;&#x589E;&#x52A0;&#x63D2;&#x4EF6;&#x6765;&#x5B8C;&#x6210;&#x7684;&#xFF0C;&#x8FD9;&#x6837;&#x505A;&#x7684;&#x597D;&#x5904;&#x662F;&#x628A;&#x5904;&#x7406;&#x673A;&#x5236;&#x548C;&#x5177;&#x4F53;&#x7684;&#x5904;&#x7406;&#x903B;&#x8F91;&#x505A;&#x4E86;&#x5F88;&#x597D;&#x7684;&#x89E3;&#x8026;&#xFF0C;&#x7CFB;&#x7EDF;&#x53EF;&#x4EE5;&#x65E0;&#x9650;&#x6269;&#x5C55;&#x800C;&#x4E0D;&#x7528;&#x6539;&#x52A8;&#x539F;&#x6709;&#x4EE3;&#x7801;&#x3002;</p>
+<h2 id="&#x6269;&#x5C55;&#x70B9;&#x5B9A;&#x4E49;&#x4E0E;&#x4F7F;&#x7528;">&#x6269;&#x5C55;&#x70B9;&#x5B9A;&#x4E49;&#x4E0E;&#x4F7F;&#x7528;</h2>
+<p>&#x6269;&#x5C55;&#x70B9;&#x5B9A;&#x4E49;&#x7684;&#x662F;&#x8981;&#x7BA1;&#x7406;&#x7684;&#x89C4;&#x8303;&#xFF0C;&#x4E00;&#x822C;&#x60C5;&#x51B5;&#x4E0B;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x7B80;&#x5355;&#x7684; java &#x63A5;&#x53E3;&#x3002;&#x5EFA;&#x8BAE;&#x8FD9;&#x4E2A; java &#x63A5;&#x53E3;&#x5B9E;&#x73B0; INameObject&#xFF0C;&#x8FD9;&#x6837;&#x6BCF;&#x4E2A;&#x6269;&#x5C55;&#x90FD;&#x6709;&#x4E00;&#x4E2A; name &#x5C5E;&#x6027;&#xFF0C;&#x5C06;&#x6765;&#x53EF;&#x4EE5;&#x7528;&#x540D;&#x5B57;&#x6765;&#x627E;&#x5BF9;&#x5E94;&#x7684;&#x6269;&#x5C55;&#x3002;</p>
+<pre><code>public interface SampleExtensionPoint extends INameObject {
+    .....
+}
+</code></pre><p>&#x5B9A;&#x4E49;&#x597D;&#x6269;&#x5C55;&#x70B9;&#x63A5;&#x53E3;&#xFF0C;&#x9700;&#x8981;&#x5728;&#x63D2;&#x4EF6;&#x7684; Activator &#x7684; doStart &#x51FD;&#x6570;&#x91CC;&#x6CE8;&#x518C;&#x8FD9;&#x4E2A;&#x6269;&#x5C55;&#x70B9;&#x3002;</p>
+<pre><code>public class Activator extends ServiceBundleActivator {
+    @Override
+    protected void doStart() throws BundleException {
+        super.doStart();
+        registerExtensionPoint(SampleExtensionPoint.class);
+    }
+}
+</code></pre><p>&#x4F7F;&#x7528;&#x7684;&#x65F6;&#x5019;&#xFF0C;ExtensionRegistry &#x63D0;&#x4F9B;&#x4E86;&#x5F88;&#x591A;&#x83B7;&#x53D6;&#x6269;&#x5C55;&#x7684;&#x51FD;&#x6570;&#xFF0C;&#x53EF;&#x4EE5;&#x6839;&#x636E; name&#xFF0C;&#x6216;&#x8005; class &#x6765;&#x83B7;&#x53D6;&#x6307;&#x5B9A;&#x7684;&#x6269;&#x5C55;&#x5BF9;&#x8C61;&#xFF0C;&#x4E5F;&#x53EF;&#x4EE5;&#x83B7;&#x53D6;&#x6240;&#x6709;&#x5DF2;&#x6CE8;&#x518C;&#x7684;&#x6269;&#x5C55;&#x540D;&#x5B57;&#x6216;&#x5BF9;&#x8C61;&#x5217;&#x8868;&#x3002;&#x4E0B;&#x9762;&#x662F;&#x6700;&#x5E38;&#x7528;&#x7684;&#x4E09;&#x4E2A;&#x51FD;&#x6570;&#xFF1A;</p>
+<pre><code>ExtensionRegistry.getExtensionObject(SampleExtensionPoint.class, &quot;E&quot;) &#x5F97;&#x5230;name&#x4E3A;E&#x7684;SampleExtensionPoint&#x5BF9;&#x8C61;
+ExtensionRegistry.getExtensionObjects(SampleExtensionPoint.class) &#x5F97;&#x5230; List&lt;SampleExtensionPoint&gt;
+ExtensionRegistry.getExtensionNames(SampleExtensionPoint.class) &#x5F97;&#x5230; List&lt;String&gt;
+</code></pre><h2 id="&#x6269;&#x5C55;&#x5B9E;&#x73B0;">&#x6269;&#x5C55;&#x5B9E;&#x73B0;</h2>
+<p>&#x5177;&#x4F53;&#x7684;&#x6269;&#x5C55;&#x5BF9;&#x8C61;&#x5C31;&#x662F;&#x4E00;&#x4E2A;&#x7C7B;&#xFF0C;&#x53EA;&#x8981;&#x5B9E;&#x73B0;&#x4E86;&#x6269;&#x5C55;&#x70B9;&#x7684;&#x63A5;&#x53E3;&#xFF0C;&#x6CE8;&#x518C;&#x5728;&#x5E73;&#x53F0;&#x6269;&#x5C55;&#x6CE8;&#x518C;&#x8868;&#x5C31;&#x53EF;&#x4EE5;&#x4E86;&#x3002;
+&#x6269;&#x5C55;&#x5FC5;&#x987B;&#x662F;&#x5355;&#x4F8B;&#x7684;&#xFF0C;&#x6700;&#x7B80;&#x5355;&#x7684;&#x529E;&#x6CD5;&#x5C31;&#x662F;&#x5B9A;&#x4E49;&#x5B83;&#x4E3A;&#x4E00;&#x4E2A;&#x5355;&#x4F8B;&#x7684; Bean&#xFF0C;&#x5E76;&#x5728; @Bean &#x91CC;&#x9762;&#x6CE8;&#x660E;&#x5B83;&#x5B9E;&#x73B0;&#x4E86;&#x54EA;&#x4E2A;&#x6269;&#x5C55;&#x70B9;&#x63A5;&#x53E3;&#x3002;</p>
+<pre><code>@Bean(extention=SampleExtensionPoint.class)
+public class E implements SampleExtensionPoint {
+    @Override
+    public String getName() {
+        return &quot;E&quot;;
+    }
+    ....
+}
+</code></pre>
+                                
+                                </section>
+                            
+    </div>
+    <div class="search-results">
+        <div class="has-results">
+            
+            <h1 class="search-results-title"><span class='search-results-count'></span> results matching "<span class='search-query'></span>"</h1>
+            <ul class="search-results-list"></ul>
+            
+        </div>
+        <div class="no-results">
+            
+            <h1 class="search-results-title">No results matching "<span class='search-query'></span>"</h1>
+            
+        </div>
+    </div>
+</div>
+
+                        </div>
+                    </div>
+                
+            </div>
+
+            
+                
+                <a href="Bundle.html" class="navigation navigation-prev " aria-label="Previous page: 1 插件">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+                
+                
+                <a href="Config.html" class="navigation navigation-next " aria-label="Next page: 3 配置文件">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+                
+            
+        
+    </div>
+
+    <script>
+        var gitbook = gitbook || [];
+        gitbook.push(function() {
+            gitbook.page.hasChanged({"page":{"title":"2 扩展与扩展点","level":"2.2","depth":1,"next":{"title":"3 配置文件","level":"2.3","depth":1,"path":"Config.md","ref":"Config.md","articles":[]},"previous":{"title":"1 插件","level":"2.1","depth":1,"path":"Bundle.md","ref":"Bundle.md","articles":[]},"dir":"ltr"},"config":{"plugins":[],"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"pluginsConfig":{"highlight":{},"search":{},"lunr":{"maxIndexSize":1000000,"ignoreSpecialCharacters":false},"sharing":{"facebook":true,"twitter":true,"google":false,"weibo":false,"instapaper":false,"vk":false,"all":["facebook","google","twitter","weibo","instapaper"]},"fontsettings":{"theme":"white","family":"sans","size":2},"theme-default":{"styles":{"website":"styles/website.css","pdf":"styles/pdf.css","epub":"styles/epub.css","mobi":"styles/mobi.css","ebook":"styles/ebook.css","print":"styles/print.css"},"showLevel":false}},"theme":"default","author":"jinghui70","pdf":{"pageNumbers":true,"fontSize":12,"fontFamily":"Arial","paperSize":"a4","chapterMark":"pagebreak","pageBreaksBefore":"/","margin":{"right":62,"left":62,"top":56,"bottom":56}},"structure":{"langs":"LANGS.md","readme":"README.md","glossary":"GLOSSARY.md","summary":"SUMMARY.md"},"variables":{},"title":"Rainbow 开发手册","language":"zh-hans","gitbook":"*"},"file":{"path":"Extension.md","mtime":"2020-01-02T15:29:37.448Z","type":"markdown"},"gitbook":{"version":"3.2.3","time":"2020-01-03T19:09:59.191Z"},"basePath":".","book":{"language":""}});
+        });
+    </script>
+</div>
+
+        
+    <script src="gitbook/gitbook.js"></script>
+    <script src="gitbook/theme.js"></script>
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search-engine.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-search/search.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/lunr.min.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-lunr/search-lunr.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-sharing/buttons.js"></script>
+        
+    
+        
+        <script src="gitbook/gitbook-plugin-fontsettings/fontsettings.js"></script>
+        
+    
+
+    </body>
+</html>
+
