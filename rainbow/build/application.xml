@@ -9,8 +9,8 @@
 	<target name="upgrade-rainbow" description="upgrade rainbw">
 		<delete file="dev.zip" />
 		<delete file="deploy.zip" />
-		<get dest="." src="http://218.241.210.54:11188/db/rainbow/dev.zip" httpusecaches="false" />
-		<get dest="." src="http://218.241.210.54:11188/db/rainbow/deploy.zip" httpusecaches="false" />
+		<get dest="." src="http://118.26.136.6:11188/db/rainbow/dev.zip" httpusecaches="false" />
+		<get dest="." src="http://118.26.136.6:11188/db/rainbow/deploy.zip" httpusecaches="false" />
 		<delete dir="build" />
 		<delete dir="bundle" />
 		<delete file="lib/core.jar" />

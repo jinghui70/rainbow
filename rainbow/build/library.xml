@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="library" basedir="." default="all">
 
-	<property name="MavenServer" value="http://218.241.210.54:11188/nexus/content/groups/public/" />
+	<property name="MavenServer" value="http://118.26.136.6:11188/nexus/content/groups/public/" />
 	<property name="lib" location="../lib" />
 	<property name="libfile" location="${lib}/rainbow.userlibraries" />
 	<property name="libjson" location="library.json" />
