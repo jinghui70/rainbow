@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 
 import rainbow.db.DBTest;
 import rainbow.db.dao.condition.C;
-import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.object._Gender;
 import rainbow.db.dao.object._Goods;
@@ -141,5 +140,31 @@ public class TestJoin {
 		select.setLinkCnds("person", C.make("id", zhang3.getId()));
 		list = select.queryForMapList();
 		assertEquals(3, list.size());
+	}
+
+	@Test
+	void testExternalLink() {
+		_Person zhang3 = _Person.zhang3();
+		dao.insert(zhang3);
+		_Goods iPhone6 = _Goods.iPhone6();
+		dao.insert(iPhone6);
+
+		// 插入一条正常记录
+		_SaleRecord r = new _SaleRecord("1", 1) // 第一条记录
+				.person(zhang3.getId()) // 张三销售
+				.goods(iPhone6.getId()) // 卖了IPhone6
+				.qty(100) // 卖了100台
+				.money(1000) // 挣了1000元
+				.time(LocalDate.now());
+		NeoBean neo = dao.makeNeoBean("_SaleRecordNoLink", r);
+		dao.insert(neo);
+
+		Select select = dao.select("id,person.name:person").from("_SaleRecordNoLink")
+				.extraLink("person", "person", "_Person", "id")
+				.orderBy("inx");
+		List<Map<String, Object>> list = select.queryForMapList();
+		assertEquals(1, list.size());
+		Map<String, Object> map = list.get(0);
+		assertEquals("张三", map.get("person"));
 	}
 }

@@ -233,6 +233,73 @@
 					]
 				}
 			]
+		},
+		{
+			"code": "XSJL1",
+			"label": "销售记录",
+			"name": "_SaleRecordNoLink",
+			"comment": "",
+			"fields": [
+				{
+					"code": "ID",
+					"name": "id",
+					"label": "ID",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 10,
+					"key": true,
+					"mandatory": true
+				},
+				{
+					"code": "INX",
+					"name": "inx",
+					"label": "顺序号",
+					"type": "SMALLINT",
+					"comment": "",
+					"key": true,
+					"mandatory": true
+				},
+				{
+					"code": "RY",
+					"name": "person",
+					"label": "销售员",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 10,
+					"mandatory": true
+				},
+				{
+					"code": "SP",
+					"name": "goods",
+					"label": "商品",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 10,
+					"mandatory": true
+				},
+				{
+					"code": "SL",
+					"name": "qty",
+					"label": "数量",
+					"type": "DOUBLE",
+					"comment": ""
+				},
+				{
+					"code": "JE",
+					"name": "money",
+					"label": "金额",
+					"type": "DOUBLE",
+					"comment": ""
+				},
+				{
+					"code": "SJ",
+					"name": "time",
+					"label": "时间",
+					"type": "TIMESTAMP",
+					"comment": "",
+					"mandatory": true
+				}
+			],
 		}
 	],
 	"version": "1.0.3"
