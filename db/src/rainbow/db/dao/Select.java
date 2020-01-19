@@ -254,7 +254,8 @@ public class Select extends Where<Select> implements ISelect {
 						sql.append("(");
 						cnd.toSql(this, sql);
 						sql.append(")");
-					}
+					} else 
+						cnd.toSql(this, sql);
 				}
 				sql.clearTemp();
 			}

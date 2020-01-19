@@ -90,33 +90,56 @@ public class TestJoin {
 	public void testJoinNull() {
 		_Person zhang3 = _Person.zhang3();
 		dao.insert(zhang3);
+		_Person li4 = _Person.li4();
+		dao.insert(li4);
 		_Goods iPhone6 = _Goods.iPhone6();
 		dao.insert(iPhone6);
+		_Goods iPhoneX = _Goods.iPhoneX();
+		dao.insert(iPhoneX);
 
 		// 插入一条正常记录
-		_SaleRecord r = new _SaleRecord("1", 1).person(zhang3.getId()).goods(iPhone6.getId()).qty(100).money(1000)
+		_SaleRecord r = new _SaleRecord("1", 1) // 第一条记录
+				.person(zhang3.getId()) // 张三销售
+				.goods(iPhone6.getId()) // 卖了IPhone6
+				.qty(100) // 卖了100台
+				.money(1000) // 挣了1000元
 				.time(LocalDate.now());
 		dao.insert(r);
+
+		// 再插入一条正常记录
+		r = new _SaleRecord("1", 2) // 第二条记录
+				.person(li4.getId()) // 李四销售
+				.goods(iPhoneX.getId()) // 卖了IPhoneX
+				.qty(100) // 卖了100台
+				.money(1000) // 挣了1000元
+				.time(LocalDate.now());
+		dao.insert(r);
+
 		// 插入一条没有对应商品的记录
-		r = new _SaleRecord("1", 2).person(zhang3.getId()).goods("1").qty(100).money(1000).time(LocalDate.now());
+		r = new _SaleRecord("1", 3) // 第二条记录
+				.person(zhang3.getId()) // 张三销售
+				.goods("1") // 故意写错的商品
+				.qty(100) // 也卖了100台
+				.money(1000) // 挣了1000元
+				.time(LocalDate.now());
 		dao.insert(r);
 
 		// 因为左链接，查出来两条记录
 		Select select = dao.select("person.name,goods.name:goods").from("_SaleRecord").orderBy("inx");
 		List<Map<String, Object>> list = select.queryForMapList();
-		assertEquals(2, list.size());
-		Map<String, Object> v = list.get(1);
+		assertEquals(3, list.size());
+		Map<String, Object> v = list.get(2);
 		assertNull(v.get("goods"));
 
-		// 条件加在where，只能查出来一条
-		select.where("goods.price", Op.Greater, 0);
-		list = select.queryForMapList();
-		assertEquals(1, list.size());
-		
-		// 条件加在join，能查出来两条
-		select.where(C.make()); // 清空条件
-		select.setLinkCnds("goods", C.make("price", Op.Greater, 0));
+		// 条件加在where，只能查出来两条
+		select.where("person.id", zhang3.getId());
 		list = select.queryForMapList();
 		assertEquals(2, list.size());
+
+		// 条件加在join，能查出来三条
+		select.where(C.make()); // 清空条件
+		select.setLinkCnds("person", C.make("id", zhang3.getId()));
+		list = select.queryForMapList();
+		assertEquals(3, list.size());
 	}
 }
