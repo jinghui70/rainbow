@@ -66,7 +66,10 @@ public class Select extends Where<Select> implements ISelect {
 	/**
 	 * 添加一个并未定义在rdmx模型里面的额外的链接
 	 * 
-	 * @param link
+	 * @param name link的名称
+	 * @param fields 主对象属性列表，以逗号分割
+	 * @param targetEntityName 链接对象名
+	 * @param targetFields 链接对象属性列表，以逗号分隔
 	 * @return
 	 */
 	public Select extraLink(String name, String fields, String targetEntityName, String targetFields) {
@@ -77,7 +80,10 @@ public class Select extends Where<Select> implements ISelect {
 	/**
 	 * 添加一个并未定义在rdmx模型里面的额外的链接
 	 * 
-	 * @param link
+	 * @param name link的名称
+	 * @param fields 主对象属性列表，以逗号分割
+	 * @param targetEntityName 链接对象Entity
+	 * @param targetFields 链接对象属性列表，以逗号分隔
 	 * @return
 	 */
 	public Select extraLink(String name, String fields, Entity targetEntity, String targetFields) {
@@ -99,8 +105,8 @@ public class Select extends Where<Select> implements ISelect {
 	/**
 	 * link时写在Join里的条件，如果这个条件写在where里面，因为我们用LeftJoin，如果不满足条件会导致记录数变少
 	 * 
-	 * @param link
-	 * @param cnd
+	 * @param link 链接属性名
+	 * @param cnd 链接条件
 	 * @return
 	 */
 	public Select setLinkCnds(String link, C cnd) {
