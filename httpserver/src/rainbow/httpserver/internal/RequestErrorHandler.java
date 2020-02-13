@@ -1,4 +1,4 @@
-package rainbow.web.httpserver.internal;
+package rainbow.httpserver.internal;
 
 import java.io.IOException;
 import java.io.Writer;

@@ -1,4 +1,4 @@
-package rainbow.web.httpserver;
+package rainbow.httpserver;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -6,8 +6,8 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.BundleException;
 import rainbow.core.platform.ConfigData;
-import rainbow.web.httpserver.internal.Gate;
-import rainbow.web.httpserver.internal.RequestErrorHandler;
+import rainbow.httpserver.internal.Gate;
+import rainbow.httpserver.internal.RequestErrorHandler;
 
 /**
  * Web服务模块

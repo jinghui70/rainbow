@@ -1,15 +1,15 @@
 {
-	id: 1,
- 	jmxPort: 1109,
- 	
- 	// 用于加密的类
-	encryption: "", 
-	
-	// 启用命令行工作台
- 	// "console": true, 
- 	
-	"web": {
-		port: 8888,
-		root: "/"
-	}
+  "id": 1,
+  "jmxPort": 1109,
+
+  // 用于加密的类
+  "encryption": "",
+
+  // 启用命令行工作台
+  // "console": true,
+
+  "httpserver": {
+    "port": 8888,
+    "root": "/"
+  }
 }

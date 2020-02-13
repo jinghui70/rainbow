@@ -24,12 +24,12 @@ import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.SessionException;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Inject;
+import rainbow.httpserver.HttpUtils;
+import rainbow.httpserver.RequestHandler;
 import rainbow.service.InvalidServiceException;
 import rainbow.service.InvalidServiceMethodException;
 import rainbow.service.ServiceInvoker;
 import rainbow.service.StreamResult;
-import rainbow.web.httpserver.HttpUtils;
-import rainbow.web.httpserver.RequestHandler;
 
 @Bean(extension = RequestHandler.class)
 public class ServiceHandler implements RequestHandler {
@@ -118,7 +118,7 @@ public class ServiceHandler implements RequestHandler {
 		} else if (sr.isDownload())
 			HttpUtils.writeStreamDownload(response, sr.getInputStream(), sr.getName());
 		else {
-			String mime = rainbow.web.httpserver.HttpUtils.getMimeType(sr.getName());
+			String mime = rainbow.httpserver.HttpUtils.getMimeType(sr.getName());
 			HttpUtils.writeStreamBack(response, sr.getInputStream(), mime);
 		}
 	}

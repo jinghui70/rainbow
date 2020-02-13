@@ -1,4 +1,4 @@
-package rainbow.web.httpserver.internal;
+package rainbow.httpserver.internal;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,8 +23,8 @@ import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.Platform;
 import rainbow.core.platform.Session;
 import rainbow.core.util.Utils;
-import rainbow.web.httpserver.HttpUtils;
-import rainbow.web.httpserver.RequestHandler;
+import rainbow.httpserver.HttpUtils;
+import rainbow.httpserver.RequestHandler;
 
 public class Gate extends AbstractHandler {
 

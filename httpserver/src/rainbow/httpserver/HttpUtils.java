@@ -1,4 +1,4 @@
-package rainbow.web.httpserver;
+package rainbow.httpserver;
 
 import java.io.IOException;
 import java.io.InputStream;
