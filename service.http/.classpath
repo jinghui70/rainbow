@@ -5,6 +5,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Rainbow Library"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/core"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/service"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/web"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/httpserver"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

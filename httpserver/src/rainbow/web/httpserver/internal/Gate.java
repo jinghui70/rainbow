@@ -1,6 +1,9 @@
-package rainbow.web.internal;
+package rainbow.web.httpserver.internal;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.Map;
 
@@ -17,9 +20,11 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.extension.ExtensionRegistry;
+import rainbow.core.platform.Platform;
 import rainbow.core.platform.Session;
 import rainbow.core.util.Utils;
-import rainbow.web.RequestHandler;
+import rainbow.web.httpserver.HttpUtils;
+import rainbow.web.httpserver.RequestHandler;
 
 public class Gate extends AbstractHandler {
 
@@ -27,12 +32,18 @@ public class Gate extends AbstractHandler {
 
 	private String rootPath;
 
+	private Path webdir;
+
 	public Gate(String rootPath) {
 		if (rootPath.charAt(0) != '/')
 			rootPath = "/" + rootPath;
 		if (rootPath.charAt(rootPath.length() - 1) != '/')
 			rootPath = rootPath + '/';
 		this.rootPath = rootPath;
+
+		webdir = Platform.getHome().resolve("web");
+		if (!Files.exists(webdir, LinkOption.NOFOLLOW_LINKS))
+			webdir = null;
 	}
 
 	@Override
@@ -58,23 +69,31 @@ public class Gate extends AbstractHandler {
 			target = target.substring(rootPath.length());
 		else
 			return;
-		if (Utils.isNullOrEmpty(target))
-			return;
-		int inx = target.indexOf('/');
-		String routeString = target;
-		if (inx > 0) {
-			routeString = target.substring(0, inx);
-			target = target.substring(inx + 1);
+
+		RequestHandler route = null;
+		int inx = -1;
+		if (Utils.isNullOrEmpty(target)) {
+			target = "index.html";
 		} else {
-			routeString = target;
-			target = "";
+			inx = target.indexOf('/');
+			String routeString = inx > 0 ? target.substring(0, inx) : target;
+			route = ExtensionRegistry.getExtensionObject(RequestHandler.class, routeString);
 		}
-		RequestHandler route = ExtensionRegistry.getExtensionObject(RequestHandler.class, routeString);
-		if (route == null)
-			return;
-		// 获取Session
-		prepareSession(request.getSession());
-		route.handle(target, baseRequest, request, response);
+		if (route == null) {
+			if (webdir != null) {
+				Path file = webdir.resolve(target);
+				if (Files.exists(file) && !Files.isDirectory(file)) {
+					HttpUtils.writeFileBack(response, file);
+					baseRequest.setHandled(true);
+					return;
+				}
+			}
+		} else {
+			// 获取Session
+			prepareSession(request.getSession());
+			target = inx > 0 ? target.substring(inx + 1) : Utils.NULL_STR;
+			route.handle(target, baseRequest, request, response);
+		}
 	}
 
 	private void prepareSession(HttpSession session) {

@@ -1,4 +1,4 @@
-package rainbow.web;
+package rainbow.web.httpserver;
 
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
@@ -6,8 +6,8 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.BundleException;
 import rainbow.core.platform.ConfigData;
-import rainbow.web.internal.Gate;
-import rainbow.web.internal.RequestErrorHandler;
+import rainbow.web.httpserver.internal.Gate;
+import rainbow.web.httpserver.internal.RequestErrorHandler;
 
 /**
  * Web服务模块
@@ -22,7 +22,7 @@ import rainbow.web.internal.RequestErrorHandler;
 public class Activator extends BundleActivator {
 
 	private Server server;
-
+	
 	@Override
 	protected void doStart() throws BundleException {
 		super.doStart();

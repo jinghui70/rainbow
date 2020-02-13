@@ -1,4 +1,4 @@
-package rainbow.web.internal;
+package rainbow.web.httpserver.internal;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;

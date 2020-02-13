@@ -1,4 +1,4 @@
-package rainbow.service.web;
+package rainbow.service.http;
 
 import rainbow.core.util.Utils;
 

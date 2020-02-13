@@ -1,4 +1,4 @@
-package rainbow.service.web;
+package rainbow.service.http;
 
 import static rainbow.core.util.Preconditions.checkArgument;
 
@@ -28,7 +28,8 @@ import rainbow.service.InvalidServiceException;
 import rainbow.service.InvalidServiceMethodException;
 import rainbow.service.ServiceInvoker;
 import rainbow.service.StreamResult;
-import rainbow.web.RequestHandler;
+import rainbow.web.httpserver.HttpUtils;
+import rainbow.web.httpserver.RequestHandler;
 
 @Bean(extension = RequestHandler.class)
 public class ServiceHandler implements RequestHandler {
@@ -56,7 +57,7 @@ public class ServiceHandler implements RequestHandler {
 			if (value != null && value instanceof StreamResult) {
 				writeStreamResult(response, (StreamResult) value);
 			} else
-				writeJsonBack(response, value);
+				HttpUtils.writeJsonBack(response, value);
 		} catch (SessionException e) {
 			response.sendError(401, e.getKey());
 		} catch (InvalidServiceException | InvalidServiceMethodException e) {
@@ -115,10 +116,10 @@ public class ServiceHandler implements RequestHandler {
 		if (sr.getInputStream() == null) {
 			response.sendError(404, sr.getName());
 		} else if (sr.isDownload())
-			writeStreamDownload(response, sr.getInputStream(), sr.getName());
+			HttpUtils.writeStreamDownload(response, sr.getInputStream(), sr.getName());
 		else {
-			String mime = rainbow.web.Utils.getMimeType(sr.getName());
-			writeStreamBack(response, sr.getInputStream(), mime);
+			String mime = rainbow.web.httpserver.HttpUtils.getMimeType(sr.getName());
+			HttpUtils.writeStreamBack(response, sr.getInputStream(), mime);
 		}
 	}
 
