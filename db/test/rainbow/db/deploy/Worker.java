@@ -64,8 +64,13 @@ public class Worker {
 	}
 
 	public void setPresetDir(String presetDir) {
-		this.preset = Paths.get(presetDir);
-		checkArgument(Files.exists(this.preset) && Files.isDirectory(this.preset), "bad preset dir {}", preset);
+		if (Utils.isNullOrEmpty(presetDir))
+			this.preset = null;
+		else {
+			this.preset = Paths.get(presetDir);
+			if (!Files.exists(this.preset) && !Files.isDirectory(this.preset))
+				this.preset = null;
+		}
 	}
 
 	public void setModelFile(String fileName) throws IOException {
