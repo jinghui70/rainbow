@@ -1,4 +1,4 @@
-package rainbow.service;
+package rainbow.service.exception;
 
 import rainbow.core.util.Utils;
 
@@ -15,8 +15,8 @@ public class InvalidServiceException extends Exception {
 	 */
     private static final long serialVersionUID = 1L;
 
-    public InvalidServiceException(String serviceId) {
-        super(Utils.format("service [{}] not exist", serviceId));
+    public InvalidServiceException(String service) {
+        super(Utils.format("service not exist: {}", service));
     }
 
 }

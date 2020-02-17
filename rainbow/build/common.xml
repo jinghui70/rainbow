@@ -27,6 +27,7 @@
 		<javac srcdir="${src}" destdir="${build}" encoding="UTF-8" includeAntRuntime="no">
 			<classpath refid="compile.classpath" />
 			<compilerarg value="-Xlint:deprecation" />
+			<compilerarg value="-parameters" />
 		</javac>
 	</target>
 
@@ -42,6 +43,7 @@
 		<javac srcdir="${src}" destdir="${build}" encoding="UTF-8" debug="on" includeAntRuntime="no">
 			<classpath refid="compile.classpath" />
 			<compilerarg value="-Xlint:deprecation" />
+			<compilerarg value="-parameters" />
 		</javac>
 		<copy todir="${build}">
 			<fileset dir="${src}" />

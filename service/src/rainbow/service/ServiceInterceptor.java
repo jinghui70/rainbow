@@ -1,9 +1,5 @@
 package rainbow.service;
 
-import java.lang.reflect.Method;
-
-import rainbow.service.internal.Service;
-
 /**
  * 服务拦截器接口
  * 
@@ -12,7 +8,7 @@ import rainbow.service.internal.Service;
  */
 public interface ServiceInterceptor {
 
-	void beforeService(Service service, Method method, Object[] args);
+	void beforeService(ServiceMethod method, Object[] args);
 
 	/**
 	 * 如果beforeService 发生异常，是否继续执行服务请求
@@ -29,6 +25,6 @@ public interface ServiceInterceptor {
 	 * @param args
 	 * @param result 服务执行结果对象，如果有错是个Throwable对象
 	 */
-	void afterService(Service service, Method method, Object[] args, Object result);
+	void afterService(ServiceMethod method, Object[] args, Object result);
 
 }

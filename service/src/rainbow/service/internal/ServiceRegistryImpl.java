@@ -2,18 +2,17 @@ package rainbow.service.internal;
 
 import static rainbow.core.util.Preconditions.checkArgument;
 
-import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 import rainbow.core.bundle.Bean;
 import rainbow.core.util.Utils;
-import rainbow.core.util.ioc.ActivatorAwareObject;
-import rainbow.core.util.ioc.InitializingBean;
-import rainbow.service.InvalidServiceException;
-import rainbow.service.InvalidServiceMethodException;
+import rainbow.service.Service;
+import rainbow.service.ServiceRegistry;
+import rainbow.service.exception.InvalidServiceException;
 
 /**
  * 服务注册表
@@ -22,14 +21,15 @@ import rainbow.service.InvalidServiceMethodException;
  * 
  */
 @Bean
-public final class ServiceRegistry extends ActivatorAwareObject implements InitializingBean {
+public final class ServiceRegistryImpl implements ServiceRegistry {
 
 	/** 本地服务 */
 	private ConcurrentMap<String, Service> serviceMap = new ConcurrentHashMap<String, Service>();
-
-	@Override
-	public void afterPropertiesSet() {
-	}
+	
+	/**
+	 * 
+	 */
+	private Map<String, List<Service>> bundleServices = new HashMap<String, List<Service>>();
 
 	/**
 	 * 返回指定名称的本地服务
@@ -45,20 +45,15 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 		return service;
 	}
 
-	public Method getMethod(String id, String methodName)
-			throws InvalidServiceException, InvalidServiceMethodException {
-		Service service = getService(id);
-		return service.getMethod(methodName);
-	}
-
 	/**
 	 * 注册一组服务
 	 * 
 	 * @param services
 	 */
-	public void registerServices(List<Service> services) {
+	public void registerServices(String bundleId, List<Service> services) {
 		if (Utils.isNullOrEmpty(services))
 			return;
+		bundleServices.put(bundleId, services);
 		for (Service service : services) {
 			checkArgument(!serviceMap.containsKey(service.getId()), "duplicated service id of [{}]", service.getId());
 			serviceMap.put(service.getId(), service);
@@ -70,16 +65,16 @@ public final class ServiceRegistry extends ActivatorAwareObject implements Initi
 	 * 
 	 * @param serviceId
 	 */
-	public void unregisterServices(List<Service> services) {
+	public void unregisterServices(String bundleId) {
+		List<Service> services = bundleServices.get(bundleId);
 		if (Utils.isNullOrEmpty(services))
 			return;
 		for (Service service : services)
 			serviceMap.remove(service.getId());
 	}
 
-	public List<Service> getServices(final String prefix) {
-		return serviceMap.values().stream().filter(service -> service.getId().startsWith(prefix))
-				.collect(Collectors.toList()); // TODO 排序
+	public Map<String, List<Service>> getServices() {
+		return bundleServices;
 	}
 
 }

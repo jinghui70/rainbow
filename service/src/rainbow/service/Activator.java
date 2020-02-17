@@ -2,7 +2,7 @@ package rainbow.service;
 
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.BundleException;
-import rainbow.service.internal.ServiceRegistry;
+import rainbow.service.internal.ServiceRegistryImpl;
 
 public class Activator extends BundleActivator {
 	
@@ -18,7 +18,7 @@ public class Activator extends BundleActivator {
 		registerExtensionPoint(ServiceInterceptor.class);
 	}
 
-	public static ServiceRegistry getServiceRegistry() {
-		return activator.context.getBean(ServiceRegistry.class);
+	public static ServiceRegistryImpl getServiceRegistry() {
+		return activator.context.getBean(ServiceRegistryImpl.class);
 	}
 }

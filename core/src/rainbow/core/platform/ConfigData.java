@@ -42,7 +42,8 @@ public class ConfigData {
 	}
 
 	/**
-	 * 给测试用的构造函数。测试通常用 Paths.get(xx.class.getResource("config.json").toURI())的方式获得配置文件
+	 * 给测试用的构造函数。测试通常用
+	 * Paths.get(xx.class.getResource("config.json").toURI())的方式获得配置文件
 	 * 
 	 * @param path
 	 */
@@ -50,7 +51,7 @@ public class ConfigData {
 		this.path = path;
 		root = Utils.loadConfigFile(path);
 	}
-	
+
 	public ConfigData(String bundleId, boolean checkExist) {
 		init(bundleId);
 		if (checkExist)
@@ -103,7 +104,7 @@ public class ConfigData {
 		String value = getString(key);
 		return value == null ? defaultValue : value;
 	}
-	
+
 	/**
 	 * 获取bundle配置单项内容,并转为整数。如果没有配置，默认返回0
 	 * 
@@ -135,7 +136,22 @@ public class ConfigData {
 	 * @return
 	 */
 	public boolean getBool(String key) {
-		return "true".equals(getString(key));
+		if (root == null)
+			return false;
+		return Boolean.TRUE.equals(root.getBoolean(key));
+	}
+
+	/**
+	 * 获取bundle配置单项内容,为空返回缺省值
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public boolean getBool(String key, boolean defaultVal) {
+		if (root == null)
+			return defaultVal;
+		Boolean val = root.getBoolean(key);
+		return val == null ? defaultVal : val.booleanValue();
 	}
 
 	/**

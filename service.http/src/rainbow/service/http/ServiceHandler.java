@@ -1,11 +1,6 @@
 package rainbow.service.http;
 
-import static rainbow.core.util.Preconditions.checkArgument;
-
 import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,8 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.parser.DefaultJSONParser;
-import com.alibaba.fastjson.parser.ParserConfig;
+import com.alibaba.fastjson.JSONObject;
 
 import rainbow.core.bundle.Bean;
 import rainbow.core.model.exception.AppException;
@@ -26,41 +20,65 @@ import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Inject;
 import rainbow.httpserver.HttpUtils;
 import rainbow.httpserver.RequestHandler;
-import rainbow.service.InvalidServiceException;
-import rainbow.service.InvalidServiceMethodException;
-import rainbow.service.ServiceInvoker;
+import rainbow.service.Service;
+import rainbow.service.ServiceMethod;
+import rainbow.service.ServiceParam;
+import rainbow.service.ServiceRegistry;
 import rainbow.service.StreamResult;
+import rainbow.service.exception.InvalidServiceException;
 
 @Bean(extension = RequestHandler.class)
 public class ServiceHandler implements RequestHandler {
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
-	private ServiceInvoker serviceInvoker;
+	private ServiceRegistry serviceRegistry;
 
 	@Inject
-	public void setServiceInvoker(ServiceInvoker serviceInvoker) {
-		this.serviceInvoker = serviceInvoker;
+	public void setServiceRegistry(ServiceRegistry serviceRegistry) {
+		this.serviceRegistry = serviceRegistry;
 	}
 
 	@Override
 	public String getName() {
-		return "s";
+		return "service";
 	}
 
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
-		String param = Utils.streamToString(request.getInputStream());
 		try {
-			Object value = callService(target, param);
+			String[] parts = Utils.split(target, '/');
+			if (parts.length < 2)
+				throw new InvalidServiceException(target);
+			Service service = serviceRegistry.getService(parts[0]);
+			ServiceMethod method = service.getMethod(parts[1]);
+
+			Object value = null;
+			if (method.paramCount() == 0) {
+				value = method.invoke();
+			} else {
+				Object[] args = new Object[method.paramCount()];
+				if (method.paramCount() == 1 && parts.length == 3) {
+					args[0] = parts[2];
+				} else {
+					String param = Utils.streamToString(request.getInputStream());
+					JSONObject jo = JSON.parseObject(param);
+					args = new Object[method.paramCount()];
+					int i = 0;
+					for (ServiceParam p : method.getParams()) {
+						args[i++] = jo.getObject(p.getName(), p.getType());
+					}
+				}
+				value = method.invoke(args);
+			}
 			if (value != null && value instanceof StreamResult) {
 				writeStreamResult(response, (StreamResult) value);
 			} else
 				HttpUtils.writeJsonBack(response, value);
 		} catch (SessionException e) {
 			response.sendError(401, e.getKey());
-		} catch (InvalidServiceException | InvalidServiceMethodException e) {
+		} catch (InvalidServiceException e) {
 			response.sendError(400, e.getMessage());
 		} catch (AppException e) {
 			response.sendError(500, e.getMessage());
@@ -68,48 +86,6 @@ public class ServiceHandler implements RequestHandler {
 			throw new ServletException(e);
 		}
 		baseRequest.setHandled(true);
-	}
-
-	/**
-	 * 调用具体服务函数，当参数为1个String的时候，可以用rest方式来处理调用
-	 * 
-	 * @param target
-	 * @param param
-	 * @return
-	 * @throws Throwable
-	 */
-	protected Object callService(String target, String param) throws Throwable {
-		Queue<String> queue = splitTarget(target);
-		checkArgument(queue.size() >= 2);
-		String serviceId = queue.poll();
-		String methodName = queue.poll();
-		Type[] types = serviceInvoker.getMethodParamTypes(serviceId, methodName);
-		switch (types.length) {
-		case 0:
-			return serviceInvoker.invoke(serviceId, methodName);
-		case 1:
-			Type type = types[0];
-			Object arg = param;
-			if (type == String.class) {
-				if (Utils.isNullOrEmpty(param) && !queue.isEmpty())
-					arg = queue.poll();
-			} else
-				arg = JSON.parseObject(param, type);
-			return serviceInvoker.invoke(serviceId, methodName, arg);
-		default:
-			DefaultJSONParser parser = new DefaultJSONParser(param, ParserConfig.getGlobalInstance());
-			Object[] args = parser.parseArray(types);
-			parser.close();
-			return serviceInvoker.invoke(serviceId, methodName, args);
-		}
-	}
-
-	private Queue<String> splitTarget(String target) {
-		String[] parts = Utils.split(target, '/');
-		LinkedList<String> result = new LinkedList<String>();
-		for (String p : parts)
-			result.add(p);
-		return result;
 	}
 
 	private void writeStreamResult(HttpServletResponse response, StreamResult sr) throws IOException {

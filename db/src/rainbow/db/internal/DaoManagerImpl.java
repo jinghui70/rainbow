@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,15 +61,22 @@ public class DaoManagerImpl extends ActivatorAwareObject
 
 	private Map<String, DruidDataSource> physicMap;
 
-	private Map<String, Dao> logicMap;
+	private Map<String, Dao> daoMap;
 
 	private Dao onlyDao;
 
 	private Context ctx;
+	
+	private List<Logic> logics;
 
 	@Override
+	public List<Logic> getLogics() {
+		return logics;
+	}
+	
+	@Override
 	public Dao getDao(String name) {
-		return logicMap.get(name);
+		return daoMap.get(name);
 	}
 
 	private Config loadConfig(String filename) throws FileNotFoundException, JAXBException, IOException {
@@ -91,7 +99,8 @@ public class DaoManagerImpl extends ActivatorAwareObject
 
 		physicMap = readPhysicConfig(config);
 		try {
-			logicMap = readLogicConfig(config);
+			logics = config.getLogics();
+			daoMap = readLogicConfig();
 		} finally {
 			if (ctx != null) {
 				try {
@@ -183,9 +192,9 @@ public class DaoManagerImpl extends ActivatorAwareObject
 	 * @param entityMaps 数据模型Map
 	 * @return
 	 */
-	private Map<String, Dao> readLogicConfig(Config config) {
+	private Map<String, Dao> readLogicConfig() {
 		ImmutableMap.Builder<String, Dao> logicBuilder = ImmutableMap.builder();
-		for (Logic logic : config.getLogics()) {
+		for (Logic logic : logics) {
 			String model = logic.getModel();
 			if (model == null)
 				model = logic.getId();
@@ -208,8 +217,8 @@ public class DaoManagerImpl extends ActivatorAwareObject
 
 	@Override
 	public void destroy() throws Exception {
-		if (logicMap != null)
-			logicMap = null;
+		if (daoMap != null)
+			daoMap = null;
 		if (physicMap != null) {
 			for (DruidDataSource ds : physicMap.values()) {
 				ds.close();
@@ -220,7 +229,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 
 	@Override
 	public Collection<String> getLogicSources() {
-		return logicMap.keySet();
+		return daoMap.keySet();
 	}
 
 	private DataSource getDataSource(String name) {
@@ -255,7 +264,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 				if (onlyDao != null)
 					return onlyDao;
 				// 未来考虑在配置中根据类名注入对应的Dao
-				return logicMap.get(name);
+				return daoMap.get(name);
 			}
 		};
 	}
