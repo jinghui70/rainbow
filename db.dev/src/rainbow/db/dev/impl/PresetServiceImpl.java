@@ -23,6 +23,7 @@ import rainbow.core.bundle.Bean;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.ActivatorAwareObject;
+import rainbow.core.util.ioc.Inject;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.Select;
@@ -40,6 +41,11 @@ public class PresetServiceImpl extends ActivatorAwareObject implements PresetSer
 	private static Type MAP_TYPE = new TypeReference<Map<String, Object>>() {
 	}.getType();
 
+	@Inject
+	public void setDao(Dao dao) {
+		this.dao = dao;
+	}
+	
 	/**
 	 * 返回数据组列表
 	 * 
