@@ -138,17 +138,21 @@ public abstract class DaoUtils {
 						if (Utils.isNullOrEmpty(table))
 							return;
 						Entity targetEntity = entityMap.get(table);
-						if (targetEntity.getKeyCount() != 1) {
-							logger.warn("'{}[{}]' tag '{}-{}' should have one key field", entity.getName(),
+						if (targetEntity == null) {
+							logger.error("'{}[{}]' tag '{}-{}' not exist", entity.getName(),
 									column.getName(), tag.getName(), table);
+						} else if (targetEntity.getKeyCount() != 1) {
+							logger.error("'{}[{}]' tag '{}-{}' should have one key field", entity.getName(),
+									column.getName(), tag.getName(), table);
+						} else {
+							Link link = new Link();
+							link.setName(column.getName());
+							link.setLabel(column.getLabel());
+							link.setColumns(ImmutableList.of(column));
+							link.setTargetEntity(targetEntity);
+							link.setTargetColumns(targetEntity.getKeyColumns());
+							entity.addLink(link);
 						}
-						Link link = new Link();
-						link.setName(column.getName());
-						link.setLabel(column.getLabel());
-						link.setColumns(ImmutableList.of(column));
-						link.setTargetEntity(targetEntity);
-						link.setTargetColumns(targetEntity.getKeyColumns());
-						entity.addLink(link);
 					});
 				});
 			}
