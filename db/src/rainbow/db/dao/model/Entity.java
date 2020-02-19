@@ -1,5 +1,6 @@
 package rainbow.db.dao.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -16,7 +17,7 @@ public class Entity extends NameObject {
 
 	private List<Column> columns;
 
-	private Map<String, Object> tags;
+	private Map<String, String> tags;
 
 	private List<Link> links;
 
@@ -48,11 +49,11 @@ public class Entity extends NameObject {
 		this.columns = columns;
 	}
 
-	public Map<String, Object> getTags() {
+	public Map<String, String> getTags() {
 		return tags;
 	}
 
-	public void setTags(Map<String, Object> tags) {
+	public void setTags(Map<String, String> tags) {
 		this.tags = tags;
 	}
 
@@ -60,8 +61,10 @@ public class Entity extends NameObject {
 		return links;
 	}
 
-	public void setLinks(List<Link> links) {
-		this.links = links;
+	public void addLink(Link link) {
+		if (this.links == null)
+			this.links = new ArrayList<Link>();
+		this.links.add(link);
 	}
 
 	public List<Column> getKeyColumns() {

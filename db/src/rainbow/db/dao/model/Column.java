@@ -24,7 +24,7 @@ public class Column extends NameObject {
 
 	private boolean mandatory;
 
-	private Map<String, Object> tags;
+	private Map<String, String> tags;
 
 	public String getCode() {
 		return code;
@@ -82,11 +82,11 @@ public class Column extends NameObject {
 		this.mandatory = mandatory;
 	}
 
-	public Map<String, Object> getTags() {
+	public Map<String, String> getTags() {
 		return tags;
 	}
 
-	public void setTags(Map<String, Object> tags) {
+	public void setTags(Map<String, String> tags) {
 		this.tags = tags;
 	}
 
@@ -94,7 +94,7 @@ public class Column extends NameObject {
 		return tags != null && tags.containsKey(tag);
 	}
 
-	public Object getTag(String tag) {
+	public String getTagValue(String tag) {
 		return tags == null ? null : tags.get(tag);
 	}
 

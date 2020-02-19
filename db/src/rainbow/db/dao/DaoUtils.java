@@ -1,20 +1,16 @@
 package rainbow.db.dao;
 
-import static rainbow.core.util.Preconditions.checkNotNull;
-
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +26,8 @@ import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
 import rainbow.db.model.DataType;
 import rainbow.db.model.Model;
-import rainbow.db.model.Tag;
-import rainbow.db.model.TagType;
+import rainbow.db.model.TagDef;
+import rainbow.db.model.TagParamType;
 import rainbow.db.model.Unit;
 
 public abstract class DaoUtils {
@@ -124,17 +120,39 @@ public abstract class DaoUtils {
 	public static HashMap<String, Entity> resolveModel(Model model) {
 		HashMap<String, Entity> result = new HashMap<String, Entity>();
 		loadUnit(result, model);
-		Map<String, Link> linkTags = model.getFieldTags().stream().filter(tag -> tag.getType() == TagType.LINK)
-				.collect(Collectors.toMap(Tag::getName, tag -> {
-					Link link = new Link();
-					Entity targetEntity = checkNotNull(result.get(tag.getLinkTable()));
-					Column targetColumn = checkNotNull(targetEntity.getColumn(tag.getLinkField()));
-					link.setTargetEntity(targetEntity);
-					link.setTargetColumns(ImmutableList.of(targetColumn));
-					return link;
-				}));
-		loadLink(result, linkTags, model);
+		loadLink(result, model);
+		processLinkTag(result, model);
 		return result;
+	}
+
+	private static void processLinkTag(Map<String, Entity> entityMap, Model model) {
+		if (Utils.isNullOrEmpty(model.getFieldTags()))
+			return;
+		for (TagDef tag : model.getFieldTags()) {
+			if (tag.getType() == TagParamType.TABLE) {
+				entityMap.values().parallelStream().forEach(entity -> {
+					entity.getColumns().stream().forEach(column -> {
+						if (Utils.isNullOrEmpty(column.getTags()))
+							return;
+						String table = column.getTagValue(tag.getName());
+						if (Utils.isNullOrEmpty(table))
+							return;
+						Entity targetEntity = entityMap.get(table);
+						if (targetEntity.getKeyCount() != 1) {
+							logger.warn("'{}[{}]' tag '{}-{}' should have one key field", entity.getName(),
+									column.getName(), tag.getName(), table);
+						}
+						Link link = new Link();
+						link.setName(column.getName());
+						link.setLabel(column.getLabel());
+						link.setColumns(ImmutableList.of(column));
+						link.setTargetEntity(targetEntity);
+						link.setTargetColumns(targetEntity.getKeyColumns());
+						entity.addLink(link);
+					});
+				});
+			}
+		}
 	}
 
 	private static void loadUnit(Map<String, Entity> model, Unit unit) {
@@ -144,43 +162,20 @@ public abstract class DaoUtils {
 			unit.getUnits().forEach(u -> loadUnit(model, u));
 	}
 
-	private static void loadLink(Map<String, Entity> model, final Map<String, Link> linkTags, Unit unit) {
+	private static void loadLink(Map<String, Entity> model, Unit unit) {
 		if (unit.getTables() != null)
 			unit.getTables().forEach(e -> {
 				Entity entity = model.get(e.getName());
 
-				List<Link> links = new ArrayList<Link>();
-				// linkTag
-				if (!linkTags.isEmpty()) {
-					entity.getColumns().stream().forEach(column -> {
-						if (Utils.isNullOrEmpty(column.getTags()))
-							return;
-						for (String tagName : column.getTags().keySet()) {
-							Link taglink = linkTags.get(tagName);
-							if (taglink != null) {
-								Link link = new Link();
-								link.setName(column.getName());
-								link.setLabel(column.getLabel());
-								link.setColumns(ImmutableList.of(column));
-								link.setTargetEntity(taglink.getTargetEntity());
-								link.setTargetColumns(taglink.getTargetColumns());
-								links.add(link);
-							}
-						}
-					});
-				}
 				// linkField
 				if (!Utils.isNullOrEmpty(e.getLinkFields()))
 					e.getLinkFields().forEach(link -> {
-						links.add(new Link(model, entity, link));
+						entity.addLink(new Link(model, entity, link));
 					});
 
-				if (!links.isEmpty()) {
-					entity.setLinks(links);
-				}
 			});
 		if (unit.getUnits() != null)
-			unit.getUnits().forEach(u -> loadLink(model, linkTags, u));
+			unit.getUnits().forEach(u -> loadLink(model, u));
 	}
 
 	/**

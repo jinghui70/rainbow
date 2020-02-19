@@ -9,7 +9,7 @@ public class Table extends BaseObject {
 
 	private List<Index> indexes;
 	
-	private Map<String, Object> tags;
+	private Map<String, String> tags;
 	
 	private List<LinkField> linkFields;
 
@@ -37,11 +37,11 @@ public class Table extends BaseObject {
 		this.linkFields = linkFields;
 	}
 
-	public Map<String, Object> getTags() {
+	public Map<String, String> getTags() {
 		return tags;
 	}
 
-	public void setTags(Map<String, Object> tags) {
+	public void setTags(Map<String, String> tags) {
 		this.tags = tags;
 	}
 

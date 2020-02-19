@@ -11,12 +11,12 @@ import java.util.List;
 public class Model extends Unit {
 
 	private String name;
-	
+
 	private String comment;
-	
-	private List<Tag> tableTags;
-	
-	private List<Tag> fieldTags;
+
+	private List<TagDef> tableTags;
+
+	private List<TagDef> fieldTags;
 
 	public String getName() {
 		return name;
@@ -34,19 +34,19 @@ public class Model extends Unit {
 		this.comment = comment;
 	}
 
-	public List<Tag> getTableTags() {
+	public List<TagDef> getTableTags() {
 		return tableTags;
 	}
 
-	public void setTableTags(List<Tag> tableTags) {
+	public void setTableTags(List<TagDef> tableTags) {
 		this.tableTags = tableTags;
 	}
 
-	public List<Tag> getFieldTags() {
+	public List<TagDef> getFieldTags() {
 		return fieldTags;
 	}
 
-	public void setFieldTags(List<Tag> fieldTags) {
+	public void setFieldTags(List<TagDef> fieldTags) {
 		this.fieldTags = fieldTags;
 	}
 

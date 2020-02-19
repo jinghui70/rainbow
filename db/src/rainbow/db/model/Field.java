@@ -14,7 +14,7 @@ public class Field extends BaseObject {
 
 	private boolean mandatory;
 	
-	private Map<String, Object> tags;
+	private Map<String, String> tags;
 
 	public DataType getType() {
 		return type;
@@ -56,11 +56,11 @@ public class Field extends BaseObject {
 		this.mandatory = mandatory;
 	}
 
-	public Map<String, Object> getTags() {
+	public Map<String, String> getTags() {
 		return tags;
 	}
 
-	public void setTags(Map<String, Object> tags) {
+	public void setTags(Map<String, String> tags) {
 		this.tags = tags;
 	}
 
