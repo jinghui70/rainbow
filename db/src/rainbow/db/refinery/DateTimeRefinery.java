@@ -3,8 +3,6 @@ package rainbow.db.refinery;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 
 import rainbow.core.bundle.Bean;
@@ -16,14 +14,22 @@ import rainbow.db.model.DataType;
 public class DateTimeRefinery implements Refinery {
 
 	@Override
-	public RefineryDef def() {
-		List<String> list = Arrays.asList("yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyy年MM月dd日");
-		return new RefineryDef("datetime", list, false);
+	public String getName() {
+		return "datetime";
 	}
 
 	@Override
-	public boolean accept(Column column) {
-		return column.getType().equals(DataType.TIMESTAMP) || column.getType().equals(DataType.DATE);
+	public RefineryDef accept(Column column) {
+		switch (column.getType()) {
+		case TIMESTAMP:
+			return makeDef(true, "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd");
+		case DATE:
+			return makeDef(true, "yyyy-MM-dd", "yyyy年MM月dd日");
+		case TIME:
+			return makeDef(true, "HH:mm:ss");
+		default:
+			return null;
+		}
 	}
 
 	@Override

@@ -13,35 +13,27 @@ import rainbow.db.dao.model.Column;
  */
 public interface Refinery extends INameObject {
 
-	@Override
-	default String getName() {
-		return def().getName();
-	}
-
 	/**
-	 * 返回加工厂描述对象
-	 * 
-	 * @return
-	 */
-	RefineryDef def();
-
-	/**
-	 * 返回是否能加工指定的Column
+	 * 返回是否能加工指定的Column，如果可以加工，返回加工描述用来确定参数，否则返回空
 	 * 
 	 * @param column
 	 * @return
 	 */
-	boolean accept(Column column);
+	RefineryDef accept(Column column);
 
 	/**
 	 * 加工具体的数据
 	 * 
 	 * @param column
-	 * @param data  加工的数据对象
-	 * @param key   加工属性名
-	 * @param param 加工参数
+	 * @param data   加工的数据对象
+	 * @param key    加工属性名
+	 * @param param  加工参数
 	 * @return
 	 */
 	void refine(Column column, Map<String, Object> data, String key, String param);
+
+	default RefineryDef makeDef(boolean canInput, String... params) {
+		return new RefineryDef(this, canInput, params);
+	}
 
 }

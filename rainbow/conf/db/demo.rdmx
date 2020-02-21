@@ -3,5 +3,113 @@
 	"name": "Unkown",
 	"tableTags": [],
 	"fieldTags": [],
-	"version": "1.0.3"
+	"tables": [
+		{
+			"code": "T_STOCK",
+			"label": "库存",
+			"name": "Stock",
+			"comment": "",
+			"fields": [
+				{
+					"code": "id",
+					"name": "id",
+					"label": "商品ID",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 22,
+					"key": true,
+					"mandatory": true
+				},
+				{
+					"code": "RQ",
+					"name": "date",
+					"label": "日期",
+					"type": "DATE",
+					"comment": "",
+					"key": true,
+					"mandatory": true
+				},
+				{
+					"code": "START",
+					"name": "start",
+					"label": "期初余额",
+					"type": "INT",
+					"comment": ""
+				},
+				{
+					"code": "INCOME",
+					"name": "income",
+					"label": "本期进货",
+					"type": "INT",
+					"comment": ""
+				},
+				{
+					"code": "OUTCOME",
+					"name": "outcome",
+					"label": "本期销售",
+					"type": "INT",
+					"comment": ""
+				}
+			],
+			"linkFields": [
+				{
+					"name": "id",
+					"label": "商品",
+					"many": false,
+					"fields": [
+						"id"
+					],
+					"targetTable": "Goods",
+					"targetFields": [
+						"id"
+					]
+				}
+			]
+		},
+		{
+			"code": "T_GOODS",
+			"label": "商品",
+			"name": "Goods",
+			"comment": "",
+			"fields": [
+				{
+					"code": "ID",
+					"name": "id",
+					"label": "ID",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 22,
+					"key": true,
+					"mandatory": true
+				},
+				{
+					"code": "NAME",
+					"name": "name",
+					"label": "名称",
+					"type": "VARCHAR",
+					"comment": "",
+					"length": 50,
+					"mandatory": true
+				},
+				{
+					"code": "PRICE",
+					"name": "price",
+					"label": "单价",
+					"type": "NUMERIC",
+					"comment": "",
+					"length": 10,
+					"precision": 2
+				},
+				{
+					"code": "CREATETIME",
+					"name": "createTime",
+					"label": "创建时间",
+					"type": "TIMESTAMP",
+					"comment": "",
+					"mandatory": true
+				}
+			]
+		}
+	],
+	"version": "1.0.4"
 }

@@ -2,9 +2,9 @@ package rainbow.db.refinery;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import rainbow.core.extension.ExtensionRegistry;
+import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 
 public class RefineryRegistry {
@@ -13,8 +13,7 @@ public class RefineryRegistry {
 		List<Refinery> list = ExtensionRegistry.getExtensionObjects(Refinery.class);
 		if (list.isEmpty())
 			return Collections.emptyList();
-		return list.stream().filter(refinery -> refinery.accept(column)).map(Refinery::def)
-				.collect(Collectors.toList());
+		return Utils.transform(list, refinery -> refinery.accept(column));
 	}
 
 	public static Refinery getRefinery(String name) {
