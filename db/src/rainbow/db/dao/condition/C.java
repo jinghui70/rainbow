@@ -2,6 +2,7 @@ package rainbow.db.dao.condition;
 
 import java.util.function.Function;
 
+import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.QueryField;
 import rainbow.db.dao.Select;
@@ -75,6 +76,27 @@ public abstract class C {
 	 */
 	public static C make() {
 		return EmptyCondition.INSTANCE;
+	}
+	
+	/**
+	 * 查询某几个字段含有指定的字符串，字符串可以用逗号（全角或半角）分割
+	 * 
+	 * @param text   查询的字符串
+	 * @param fields 查询的字段
+	 * @return 返回查询条件
+	 */
+	public static C like(String text, String... fields) {
+		if (Utils.isNullOrEmpty(text))
+			return C.make();
+		String[] strs = text.split("[,，]");
+		C cnd = C.make();
+		for (String str : strs) {
+			String v = '%' + str.trim() + '%';
+			for (String field : fields) {
+				cnd = cnd.or(field, Op.Like, v);
+			}
+		}
+		return cnd;
 	}
 
 }
