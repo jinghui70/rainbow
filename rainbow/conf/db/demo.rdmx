@@ -1,8 +1,27 @@
 {
 	"label": "未命名",
 	"name": "Unkown",
-	"tableTags": [],
-	"fieldTags": [],
+	"tableTags": [
+		{
+			"name": "对象",
+			"type": "NONE"
+		}
+	],
+	"fieldTags": [
+		{
+			"name": "BOOL",
+			"type": "STRING",
+			"defaultParam": "是|否"
+		},
+		{
+			"name": "代码",
+			"type": "STRING"
+		},
+		{
+			"name": "对象",
+			"type": "TABLE"
+		}
+	],
 	"tables": [
 		{
 			"code": "T_STOCK",
@@ -107,6 +126,17 @@
 					"type": "TIMESTAMP",
 					"comment": "",
 					"mandatory": true
+				},
+				{
+					"code": "TYPE",
+					"name": "type",
+					"label": "商品属性",
+					"type": "SMALLINT",
+					"comment": "",
+					"mandatory": true,
+					"tags": {
+						"BOOL": "经销|代销"
+					}
 				}
 			]
 		}

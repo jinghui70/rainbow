@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
-import com.google.common.collect.ImmutableList;
 
 import rainbow.core.model.object.Tree;
 import rainbow.core.model.object.TreeNode;
@@ -26,8 +25,6 @@ import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
 import rainbow.db.model.DataType;
 import rainbow.db.model.Model;
-import rainbow.db.model.TagDef;
-import rainbow.db.model.TagParamType;
 import rainbow.db.model.Unit;
 
 public abstract class DaoUtils {
@@ -121,44 +118,9 @@ public abstract class DaoUtils {
 		HashMap<String, Entity> result = new HashMap<String, Entity>();
 		loadUnit(result, model);
 		loadLink(result, model);
-		processLinkTag(result, model);
 		return result;
 	}
-
-	private static void processLinkTag(Map<String, Entity> entityMap, Model model) {
-		if (Utils.isNullOrEmpty(model.getFieldTags()))
-			return;
-		for (TagDef tag : model.getFieldTags()) {
-			if (tag.getType() == TagParamType.TABLE) {
-				entityMap.values().parallelStream().forEach(entity -> {
-					entity.getColumns().stream().forEach(column -> {
-						if (Utils.isNullOrEmpty(column.getTags()))
-							return;
-						String table = column.getTagValue(tag.getName());
-						if (Utils.isNullOrEmpty(table))
-							return;
-						Entity targetEntity = entityMap.get(table);
-						if (targetEntity == null) {
-							logger.error("'{}[{}]' tag '{}-{}' not exist", entity.getName(),
-									column.getName(), tag.getName(), table);
-						} else if (targetEntity.getKeyCount() != 1) {
-							logger.error("'{}[{}]' tag '{}-{}' should have one key field", entity.getName(),
-									column.getName(), tag.getName(), table);
-						} else {
-							Link link = new Link();
-							link.setName(column.getName());
-							link.setLabel(column.getLabel());
-							link.setColumns(ImmutableList.of(column));
-							link.setTargetEntity(targetEntity);
-							link.setTargetColumns(targetEntity.getKeyColumns());
-							entity.addLink(link);
-						}
-					});
-				});
-			}
-		}
-	}
-
+	
 	private static void loadUnit(Map<String, Entity> model, Unit unit) {
 		if (unit.getTables() != null)
 			unit.getTables().stream().map(Entity::new).forEach(e -> model.put(e.getName(), e));
@@ -170,13 +132,11 @@ public abstract class DaoUtils {
 		if (unit.getTables() != null)
 			unit.getTables().forEach(e -> {
 				Entity entity = model.get(e.getName());
-
 				// linkField
 				if (!Utils.isNullOrEmpty(e.getLinkFields()))
 					e.getLinkFields().forEach(link -> {
 						entity.addLink(new Link(model, entity, link));
 					});
-
 			});
 		if (unit.getUnits() != null)
 			unit.getUnits().forEach(u -> loadLink(model, u));
