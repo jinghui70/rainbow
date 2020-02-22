@@ -1,7 +1,5 @@
 package rainbow.db.refinery;
 
-import java.util.Map;
-
 import rainbow.core.model.object.INameObject;
 import rainbow.db.dao.model.Column;
 
@@ -30,7 +28,7 @@ public interface Refinery extends INameObject {
 	 * @param param  加工参数
 	 * @return
 	 */
-	void refine(Column column, Map<String, Object> data, String key, String param);
+	Object refine(Column column, Object data, String param);
 
 	default RefineryDef makeDef(boolean canInput, String... params) {
 		return new RefineryDef(this, canInput, params);

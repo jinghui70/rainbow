@@ -97,13 +97,13 @@ public class LinkQueryAnalyzer extends QueryInfo {
 				for (SelectField field : fields) {
 					Object value = JdbcUtils.getResultSetValue(rs, index++, field.getColumn().dataClass());
 					key = field.getName();
-					map.put(key, value);
 					if (field.getRefinery() != null) {
 						Refinery refinery = RefineryRegistry.getRefinery(field.getRefinery());
 						if (refinery != null) {
-							refinery.refine(field.getColumn(), map, key, field.getRefineryParam());
+							value = refinery.refine(field.getColumn(), value, field.getRefineryParam());
 						}
 					}
+					map.put(key, value);
 				}
 				return map;
 			}

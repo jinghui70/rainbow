@@ -211,13 +211,13 @@ public class QueryAnalyzer {
 						vmap = map;
 						key = field.getName();
 					}
-					vmap.put(key, value);
 					if (field.getRefinery() != null) {
 						Refinery refinery = RefineryRegistry.getRefinery(field.getRefinery());
 						if (refinery != null) {
-							refinery.refine(field.getColumn(), vmap, key, field.getRefineryParam());
+							value = refinery.refine(field.getColumn(), value, field.getRefineryParam());
 						}
 					}
+					vmap.put(key, value);
 				}
 				return map;
 			}
