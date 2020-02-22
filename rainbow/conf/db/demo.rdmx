@@ -72,7 +72,7 @@
 			],
 			"linkFields": [
 				{
-					"name": "id",
+					"name": "goods",
 					"label": "商品",
 					"many": false,
 					"fields": [
