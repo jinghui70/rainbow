@@ -23,7 +23,7 @@ public abstract class ServiceBundleActivator extends BundleActivator {
 			if (clazz.isInterface() && clazz.getName().endsWith("Service")) {
 				Service service = new Service(clazz);
 				String name = Utils.lowerFirstChar(clazz.getSimpleName());
-				Object bean = checkNotNull(getBean(name), "service bean not found: {}", name);
+				Object bean = checkNotNull(getBean(name, clazz), "service bean not found: {}", name);
 				service.setServiceImpl(bean);
 				services.add(service);
 				logger.debug("service found: {}", name);
