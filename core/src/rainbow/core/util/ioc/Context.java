@@ -36,7 +36,7 @@ public class Context {
 		this.beans = new HashMap<String, Bean>();
 		this.parents = Collections.emptyList();
 	}
-	
+
 	/**
 	 * 构造函数
 	 * 
@@ -57,11 +57,11 @@ public class Context {
 		beans.put(name, bean);
 		return this;
 	}
-	
+
 	public Context addBean(String name, Class<?> clazz) {
 		return addBean(name, Bean.singleton(clazz));
 	}
-	
+
 	public Context addBean(Class<?> clazz) {
 		String name = clazz.getSimpleName();
 		if (name.endsWith("Impl")) {
@@ -70,7 +70,7 @@ public class Context {
 		name = Utils.lowerFirstChar(name);
 		return addBean(name, clazz);
 	}
-	
+
 	/**
 	 * 加载所有的单例Bean
 	 */
@@ -114,6 +114,46 @@ public class Context {
 	}
 
 	/**
+	 * 只在自己的容器里找，返回指定名字的Bean对象
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Object getLocalBean(String id) {
+		Bean bean = getBeanDef(id);
+		return getBean(id, bean);
+	}
+
+	/**
+	 * 只在自己的容器里找，返回容器定义的指定的Bean
+	 * 
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getLocalBean(String id, Class<T> clazz) {
+		Bean bean = getBeanDef(id, clazz);
+		return (T) getBean(id, bean);
+	}
+
+	/**
+	 * 只在自己的容器里找，返回符合指定定义类型的第一个Bean对象
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T getLocalBean(Class<T> clazz) {
+		for (Entry<String, Bean> entry : beans.entrySet()) {
+			Bean bean = entry.getValue();
+			if (clazz.isAssignableFrom(bean.getClazz()))
+				return (T) getBean(entry.getKey(), bean);
+		}
+		throw new NoSuchBeanDefinitionException(clazz.getName());
+	}
+
+	/**
 	 * 返回指定名字的Bean对象
 	 * 
 	 * @param id
@@ -121,8 +161,7 @@ public class Context {
 	 */
 	public Object getBean(String id) {
 		try {
-			Bean bean = getBeanDef(id);
-			return getBean(id, bean);
+			return getLocalBean(id);
 		} catch (NoSuchBeanDefinitionException e) {
 			for (Context parent : parents)
 				try {
@@ -139,19 +178,37 @@ public class Context {
 	 * @param clazz
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public <T> T getBean(Class<T> clazz) {
-		for (Entry<String, Bean> entry : beans.entrySet()) {
-			Bean bean = entry.getValue();
-			if (clazz.isAssignableFrom(bean.getClazz()))
-				return (T) getBean(entry.getKey(), bean);
+		try {
+			return getLocalBean(clazz);
+		} catch (NoSuchBeanDefinitionException e) {
+			for (Context parent : parents)
+				try {
+					return parent.getBean(clazz);
+				} catch (NoSuchBeanDefinitionException pe) {
+				}
+			throw e;
 		}
-		for (Context parent : parents)
-			try {
-				return parent.getBean(clazz);
-			} catch (NoSuchBeanDefinitionException e) {
-			}
-		throw new NoSuchBeanDefinitionException(clazz.getName());
+	}
+
+	/**
+	 * 返回容器定义的指定的Bean
+	 * 
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T getBean(String id, Class<T> clazz) {
+		try {
+			return (T) getLocalBean(id, clazz);
+		} catch (NoSuchBeanDefinitionException e) {
+			for (Context parent : parents)
+				try {
+					return parent.getBean(id, clazz);
+				} catch (NoSuchBeanDefinitionException pe) {
+				}
+			throw e;
+		}
 	}
 
 	/**
@@ -169,28 +226,6 @@ public class Context {
 				result.add((T) getSingletonBean(entry.getKey(), bean));
 		}
 		return result;
-	}
-
-	/**
-	 * 返回容器定义的指定的Bean
-	 * 
-	 * @param id
-	 * @param clazz
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> T getBean(String id, Class<T> clazz) {
-		try {
-			Bean bean = getBeanDef(id, clazz);
-			return (T) getBean(id, bean);
-		} catch (NoSuchBeanDefinitionException e) {
-			for (Context parent : parents)
-				try {
-					return parent.getBean(id, clazz);
-				} catch (NoSuchBeanDefinitionException pe) {
-				}
-			throw e;
-		}
 	}
 
 	private Object getBean(String id, Bean bean) {

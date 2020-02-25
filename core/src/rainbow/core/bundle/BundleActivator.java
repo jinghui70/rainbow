@@ -323,13 +323,13 @@ public abstract class BundleActivator {
 	public final <T> T getBean(String name, Class<T> clazz) {
 		if (context == null)
 			return null;
-		return context.getBean(name, clazz);
+		return context.getLocalBean(name, clazz);
 	}
 
 	public final Object getBean(String name) {
 		if (context == null)
 			return null;
-		return context.getBean(name);
+		return context.getLocalBean(name);
 	}
 
 }
