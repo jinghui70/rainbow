@@ -95,7 +95,7 @@
 				<property name="root" location="${dist}/@{flag}" />
 				<filelist refid="bundles" />
 			</subant>
-			<echo file="${dist}/@{flag}/version.txt" encoding="UTF-8">${application-name} Version:${version}</echo>
+			<echo file="${dist}/@{flag}/version.txt" append="true" encoding="UTF-8">${application-name} Version:${version}&#x000A;</echo>
 			<delete dir="${build}" />
 		</sequential>
 	</macrodef>
@@ -107,6 +107,9 @@
 
 	<target name="build_deploy" depends="init">
 		<build flag="deploy" />
+		<delete>
+			<fileset dir="${dist.deploy}/bundle" includes="*.dev.jar" />
+		</delete>
 	</target>
 	
 	<target name="build" depends="clean, init, build_dev, build_deploy" />
