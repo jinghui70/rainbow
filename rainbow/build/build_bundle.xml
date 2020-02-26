@@ -91,7 +91,7 @@
 			<mkdir dir="${dist}/@{flag}/lib" />
 			<mkdir dir="${dist}/@{flag}/bundle" />
 			<unzip src="@{flag}.zip" dest="${dist}/@{flag}" encoding="GBK" />
-			<subant target="build_@{flag}" genericantfile="build/common.xml" inheritall="true" failonerror="@{failonerror}">
+			<subant target="build_@{flag}" genericantfile="build/common.xml" inheritall="true" failonerror="true">
 				<property name="root" location="${dist}/@{flag}" />
 				<filelist refid="bundles" />
 			</subant>
