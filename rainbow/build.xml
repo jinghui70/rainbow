@@ -25,6 +25,9 @@
 		<copy todir="${dist}/deploy/bin">
 			<fileset dir="build/bin" />
 		</copy>
+		<copy todir="${dist}/dev/web">
+			<fileset dir="web" />
+		</copy>
 		
 		<zip destfile="${dist}/dev.zip" basedir="${dist}/dev" />
 		<zip destfile="${dist}/deploy.zip" basedir="${dist}/deploy" />
