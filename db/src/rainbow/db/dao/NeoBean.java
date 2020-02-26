@@ -10,8 +10,10 @@ import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,11 +54,9 @@ public class NeoBean {
 		}
 		if (obj instanceof NeoBean) {
 			NeoBean other = (NeoBean) obj;
-			for (Column column : entity.getColumns()) {
+			for (Column column : other.valueColumns()) {
 				Object value = other.getObject(column.getName());
-				if (value != null) {
-					setValue(column, value);
-				}
+				setValue(column, value);
 			}
 		} else if (obj instanceof Map) {
 			Map<?, ?> map = (Map<?, ?>) obj;
@@ -96,7 +96,7 @@ public class NeoBean {
 
 	public Object getObject(String property) {
 		Column column = entity.getColumn(property);
-		return (column==null) ? null : valueMap.get(column);
+		return (column == null) ? null : valueMap.get(column);
 	}
 
 	/**
@@ -176,6 +176,20 @@ public class NeoBean {
 			value = column.convert(value);
 		setObject(column, value);
 		return this;
+	}
+
+	/**
+	 * 过滤已存在的数据，如果不保留，就从map中去掉
+	 * 
+	 * @param keep
+	 */
+	public void filterColumn(Predicate<Column> keep) {
+		Iterator<Column> i = valueColumns().iterator();
+		while (i.hasNext()) {
+			Column column = i.next();
+			if (!keep.test(column))
+				i.remove();
+		}
 	}
 
 	/**
