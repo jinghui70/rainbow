@@ -6,6 +6,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -67,6 +68,8 @@ public class Gate extends AbstractHandler {
 			HttpServletResponse response) throws IOException, ServletException {
 		if (target.startsWith(rootPath))
 			target = target.substring(rootPath.length());
+		else if(Objects.equals(rootPath, target + '/'))
+			target = "";
 		else
 			return;
 
