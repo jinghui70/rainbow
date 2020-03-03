@@ -1,8 +1,33 @@
 package rainbow.db.dao.object;
 
-import rainbow.core.model.object.TreeObject;
+import java.util.List;
 
-public class _Org extends TreeObject {
+import rainbow.core.model.object.ITreeObject;
+import rainbow.core.model.object.IdNameObject;
+
+public class _Org extends IdNameObject implements ITreeObject<_Org> {
+
+	private String pid;
+
+	private List<_Org> children;
+
+	public String getPid() {
+		return pid;
+	}
+
+	public void setPid(String pid) {
+		this.pid = pid;
+	}
+
+	@Override
+	public List<_Org> getChildren() {
+		return children;
+	}
+
+	@Override
+	public void setChildren(List<_Org> children) {
+		this.children = children;
+	}
 
 	public _Org() {
 	}
@@ -10,16 +35,6 @@ public class _Org extends TreeObject {
 	public _Org(String id, String pid, String name) {
 		setId(id);
 		setPid(pid);
-		this.name = name;
-	}
-
-	private String name;
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
 		this.name = name;
 	}
 

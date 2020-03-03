@@ -8,8 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -17,8 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 
-import rainbow.core.model.object.Tree;
-import rainbow.core.model.object.TreeNode;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
@@ -196,35 +192,6 @@ public abstract class DaoUtils {
 			sb.append(")");
 		}
 		sb.append(");");
-	}
-
-	/**
-	 * 把一个NeoBean列表转为树结构
-	 * 
-	 * @param data
-	 * @param strict 严格模式根结点的pid必须为空
-	 * @return
-	 */
-	public static Tree<NeoBean> makeTree(List<NeoBean> data, boolean strict) {
-		Map<String, TreeNode<NeoBean>> map = new HashMap<String, TreeNode<NeoBean>>();
-		List<TreeNode<NeoBean>> roots = new LinkedList<TreeNode<NeoBean>>();
-		data.forEach(v -> map.put(v.getString("id"), new TreeNode<NeoBean>(v)));
-		data.forEach(v -> {
-			String id = v.getString("id");
-			String pid = v.getString("pid");
-			TreeNode<NeoBean> node = map.get(id);
-			if (Utils.isNullOrEmpty(pid))
-				roots.add(node);
-			else {
-				TreeNode<NeoBean> parent = map.get(pid);
-				if (parent == null) {
-					if (!strict)
-						roots.add(node);
-				} else
-					parent.addChild(node);
-			}
-		});
-		return new Tree<NeoBean>(roots, map);
 	}
 
 }

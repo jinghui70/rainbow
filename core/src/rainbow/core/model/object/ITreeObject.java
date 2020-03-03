@@ -1,7 +1,11 @@
 package rainbow.core.model.object;
 
-public interface ITreeObject extends IIdObject {
+import java.util.List;
 
-	String getPid();
-	
+public interface ITreeObject<T> {
+
+	List<T> getChildren();
+
+	void setChildren(List<T> children);
+
 }

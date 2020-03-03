@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,8 +16,6 @@ import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Lists;
 
-import rainbow.core.model.object.Tree;
-import rainbow.core.model.object.TreeNode;
 import rainbow.db.DBTest;
 import rainbow.db.dao.condition.Op;
 import rainbow.db.dao.memory.MemoryDao;
@@ -126,34 +123,27 @@ public class TestDao {
 		dao.insert(new _Org("2-1", "2", "东城区"));
 		dao.insert(new _Org("2-2", "2", "朝阳区"));
 
-		List<_Org> list = dao.select().from("_Org").orderBy("id").queryForList(_Org.class);
-		Tree<_Org> tree = Tree.makeTree(list, true);
-		assertEquals(1, tree.rootCount());
-		TreeNode<_Org> node = tree.getFirstRoot();
-		assertEquals("中国", node.getData().getName());
-		assertEquals(2, node.getChildren().size());
+		List<_Org> list = dao.select().from("_Org").orderBy("id").queryForTree(_Org.class, true);
+		assertEquals(1, list.size());
+		_Org first = list.get(0);
+		assertEquals("中国", first.getName());
+		assertEquals(2, first.getChildren().size());
 
-		Map<String, Object> map = node.toMap(d-> {
-			Map<String, Object> result = new HashMap<String, Object>();
-			_Org org = (_Org) d;
-			result.put("id", org.getId());
-			result.put("name", org.getName());
-			return result;
-		});
-		List<Map<String, Object>> children = (List<Map<String, Object>>) map.get("children");
-		children = (List<Map<String, Object>>) children.get(0).get("children");
-		map = children.get(0);
-		assertEquals("2-1", map.get("id"));
-		assertEquals("东城区", map.get("name"));
-		
-		List<NeoBean> neoList = dao.select().from("_Org").orderBy("id").queryForList();
-		Tree<NeoBean> tree2 = DaoUtils.makeTree(neoList, true);
-		map = tree2.getFirstRoot().toMap(NeoBean::toMap);
-		children = (List<Map<String, Object>>) map.get("children");
-		children = (List<Map<String, Object>>) children.get(0).get("children");
-		map = children.get(1);
+		first = first.getChildren().get(0); // 北京
+		first = first.getChildren().get(0);
+		assertEquals("2-1", first.getId());
+		assertEquals("东城区", first.getName());
+
+		dao.insert(new _Org("4", "XXX", "NOWHERE"));
+		List<Map<String, Object>> data = dao.select().from("_Org").orderBy("id").queryForTree(true);
+		assertEquals(1, data.size());
+		data = (List<Map<String, Object>>) data.get(0).get("children");
+		assertEquals(2, data.size());
+
+		data = (List<Map<String, Object>>) data.get(0).get("children");
+		Map<String, Object> map = data.get(1);
 		assertEquals("2-2", map.get("id"));
 		assertEquals("朝阳区", map.get("name"));
-		
+
 	}
 }

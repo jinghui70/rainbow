@@ -42,7 +42,7 @@ public interface ISelect {
 	 * @return
 	 */
 	public String queryForString();
-	
+
 	/**
 	 * 返回符合条件的记录数
 	 * 
@@ -135,6 +135,13 @@ public interface ISelect {
 	 * @return
 	 */
 	public List<Map<String, Object>> queryForMapList(int limit);
+
+	/**
+	 * 通过id，pid属性查询后构建一个树对象
+	 * 
+	 * @return 返回的map列表，如果有下级，map中对应有key为children
+	 */
+	public List<Map<String, Object>> queryForTree(boolean strict);
 
 	/**
 	 * 查询返回一组Map列表
