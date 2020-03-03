@@ -120,7 +120,7 @@ public abstract class DaoUtils {
 		loadLink(result, model);
 		return result;
 	}
-	
+
 	private static void loadUnit(Map<String, Entity> model, Unit unit) {
 		if (unit.getTables() != null)
 			unit.getTables().stream().map(Entity::new).forEach(e -> model.put(e.getName(), e));
@@ -217,9 +217,11 @@ public abstract class DaoUtils {
 				roots.add(node);
 			else {
 				TreeNode<NeoBean> parent = map.get(pid);
-				if (strict && parent == null)
-					throw new RuntimeException(Utils.format("没找到节点{}的父节点{}", id, pid));
-				parent.addChild(node);
+				if (parent == null) {
+					if (!strict)
+						roots.add(node);
+				} else
+					parent.addChild(node);
 			}
 		});
 		return new Tree<NeoBean>(roots, map);
