@@ -3,35 +3,58 @@ package rainbow.db.dao;
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import rainbow.core.util.converter.Converters;
-import rainbow.db.jdbc.RowMapper;
 
-public class ObjectRowMapper<T> implements RowMapper<T> {
+public class ObjectRowMapper<T> extends AbstractRowMapper<T> {
+
+	private static Logger logger = LoggerFactory.getLogger(ObjectRowMapper.class);
 
 	private Class<T> clazz;
 
-	private BeanInfo beanInfo;
-
-	private MapRowMapper mapRowMapper;
+	private Map<String, PropertyDescriptor> map;
 
 	public ObjectRowMapper(List<SelectField> fields, Class<T> clazz) {
-		this.mapRowMapper = new MapRowMapper(fields);
+		super(fields);
 		this.clazz = clazz;
 		try {
-			this.beanInfo = Introspector.getBeanInfo(clazz, Object.class);
+			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
+			map = Arrays.stream(beanInfo.getPropertyDescriptors()).filter(p -> p.getWriteMethod() != null)
+					.collect(Collectors.toMap(PropertyDescriptor::getName, Function.identity()));
 		} catch (IntrospectionException e) {
 		}
 	}
 
 	@Override
-	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
-		Map<String, Object> map = mapRowMapper.mapRow(rs, rowNum);
-		return Converters.map2Object(map, beanInfo, clazz);
+	protected T makeInstance() {
+		try {
+			return clazz.newInstance();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
+	@Override
+	protected void setValue(T object, String key, Object value) {
+		PropertyDescriptor p = map.get(key);
+		if (p != null) {
+			value = Converters.convert(value, p.getPropertyType());
+			try {
+				p.getWriteMethod().invoke(object, value);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				logger.error("set value {} to {}.{} failed", value, clazz.getSimpleName(), key, e);
+				throw new RuntimeException(e);
+			}
+		}
+	}
 }

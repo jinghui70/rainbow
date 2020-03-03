@@ -4,6 +4,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -216,21 +217,6 @@ public class Converters {
 	public static <T> T map2Object(Map<String, Object> map, Class<T> clazz) {
 		try {
 			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
-			return map2Object(map, beanInfo, clazz);
-		} catch (IntrospectionException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * 转换一个Map为JavaBean
-	 * 
-	 * @param map
-	 * @param clazz
-	 * @return
-	 */
-	public static <T> T map2Object(Map<String, Object> map, BeanInfo beanInfo, Class<T> clazz) {
-		try {
 			T object = clazz.newInstance();
 			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
 			for (PropertyDescriptor pd : pds) {
@@ -245,8 +231,10 @@ public class Converters {
 				}
 			}
 			return object;
-		} catch (Exception e) {
+		} catch (IntrospectionException | InstantiationException | IllegalAccessException | IllegalArgumentException
+				| InvocationTargetException e) {
 			throw new RuntimeException(e);
 		}
 	}
+
 }
