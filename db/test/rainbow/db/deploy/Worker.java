@@ -12,9 +12,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Driver;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -44,7 +47,8 @@ public class Worker {
 	}.getType();
 
 	private static Map<String, Class<? extends Driver>> driverClassMap = ImmutableMap
-			.<String, Class<? extends Driver>>builder().put("mysql", com.mysql.cj.jdbc.Driver.class) //
+			.<String, Class<? extends Driver>>builder() //
+			.put("mysql", com.mysql.cj.jdbc.Driver.class) //
 			.put("h2", org.h2.Driver.class) //
 			.build();
 
@@ -56,7 +60,9 @@ public class Worker {
 
 	private Path output;
 
-	private Path preset;
+	private List<Path> preset = Collections.emptyList();
+
+	private JdbcConfig jdbc;
 
 	public void setOutputDir(String outputDir) {
 		this.output = Paths.get(outputDir);
@@ -64,13 +70,8 @@ public class Worker {
 	}
 
 	public void setPresetDir(String presetDir) {
-		if (Utils.isNullOrEmpty(presetDir))
-			this.preset = null;
-		else {
-			this.preset = Paths.get(presetDir);
-			if (!Files.exists(this.preset) && !Files.isDirectory(this.preset))
-				this.preset = null;
-		}
+		String[] dirs = Utils.split(presetDir, ',');
+		this.preset = Arrays.stream(dirs).map(Paths::get).collect(Collectors.toList());
 	}
 
 	public void setModelFile(String fileName) throws IOException {
@@ -82,6 +83,10 @@ public class Worker {
 			}
 		} else
 			throw new AppException("{} is not a valid model file", fileName);
+	}
+
+	public void setJdbcConfig(String jdbcStr) {
+		this.jdbc = JSON.parseObject(jdbcStr, JdbcConfig.class);
 	}
 
 	public void outputRdm() throws IOException {
@@ -102,29 +107,28 @@ public class Worker {
 		pw.println("</model>");
 	}
 
-	public void doWork(Work work)
-			throws IOException, TransformerException, InstantiationException, IllegalAccessException {
-		String server = Utils.substringBetween(work.getUrl(), "jdbc:", ":").toLowerCase();
-		checkArgument(driverClassMap.containsKey(server), "jdbcUrl ({}) not support", work.getUrl());
+	public void doWork() throws IOException, TransformerException, InstantiationException, IllegalAccessException {
+		String server = Utils.substringBetween(jdbc.getUrl(), "jdbc:", ":").toLowerCase();
+		checkArgument(driverClassMap.containsKey(server), "jdbcUrl ({}) not support", jdbc.getUrl());
 		System.out.append("process database ").println(server);
 		generateDDL(server);
 		Class<? extends Driver> driverClass = driverClassMap.get(server);
 		Driver driver = driverClass.newInstance();
-		SimpleDriverDataSource dataSource = new SimpleDriverDataSource(driver, work.getUrl(), work.getUser(),
-				work.getPassword());
+		SimpleDriverDataSource dataSource = new SimpleDriverDataSource(driver, jdbc.getUrl(), jdbc.getUser(),
+				jdbc.getPassword());
 		DaoImpl dao = new DaoImpl(dataSource, entityMap);
 		generateDatabase(dao, server);
-		if (preset != null) {
-			System.out.println("loading preset data ");
-			Files.list(preset).filter(f -> f.getFileName().toString().endsWith(".json")).sorted().forEach(f -> {
+		for (Path p : preset) {
+			System.out.println("loading preset data " + p.getFileName());
+			Files.list(p).filter(f -> f.getFileName().toString().endsWith(".json")).sorted().forEach(f -> {
 				try {
 					loadPresetData(dao, f);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
 				}
 			});
+			System.out.println("Done!");
 		}
-		System.out.println("Done!");
 	}
 
 	private void loadPresetData(Dao dao, Path file) throws IOException {

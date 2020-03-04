@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import javax.xml.transform.TransformerException;
 
-import com.alibaba.fastjson.JSON;
-
 public class Deploy {
 
 	/**
@@ -13,27 +11,27 @@ public class Deploy {
 	 * 
 	 * @param args
 	 * @throws IOException
-	 * @throws TransformerException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
+	 * @throws TransformerException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 */
-	public static void main(String[] args) throws IOException, InstantiationException, IllegalAccessException, TransformerException {
+	public static void main(String[] args)
+			throws IOException, InstantiationException, IllegalAccessException, TransformerException {
 		if (args.length < 3) {
-			System.out.println("params need: [modelfile] [presetDataDir] [outputDir] [...databaseSet]");
+			System.out.println("params need: [outputDir] [modelfile] [jdbcConfig] [presetDataDir]");
 			return;
 		}
 		Worker worker = new Worker();
-		worker.setModelFile(args[0]);
-		worker.setPresetDir(args[1]);
-		worker.setOutputDir(args[2]);
+		System.out.println("output dir:" + args[0]);
+		worker.setOutputDir(args[0]);
+		System.out.println("model file:" + args[1]);
+		worker.setModelFile(args[1]);
+		System.out.println("jdbc config:" + args[2]);
+		worker.setJdbcConfig(args[2]);
+		if (args.length > 3)
+			worker.setPresetDir(args[3]);
 		worker.outputRdm();
-
-		int index = 3;
-		while (index <= args.length - 1) {
-			String option = args[index++];
-			Work work = JSON.parseObject(option, Work.class);
-			worker.doWork(work);
-		}
+		worker.doWork();
 	}
 
 }

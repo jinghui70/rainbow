@@ -1,6 +1,6 @@
 package rainbow.db.deploy;
 
-public class Work {
+public class JdbcConfig {
 	
 	private String url;
 	
