@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -86,18 +87,19 @@ public class PresetServiceImpl extends ActivatorAwareObject implements PresetSer
 			if (Utils.isNullOrEmpty(data)) {
 				Files.deleteIfExists(file);
 			} else {
-				NeoBean neo = dao.newNeoBean(entityName);
+				Entity entity = dao.getEntity(entityName);
+				Map<String, Object> map = new LinkedHashMap<String, Object>();
 				try (Writer writer = Files.newBufferedWriter(file)) {
 					for (Map<String, Object> item : data) {
-						neo.init(null);
-						for (Column column : neo.getEntity().getColumns()) {
+						map.clear();
+						for (Column column : entity.getColumns()) {
 							Object v = item.get(column.getName());
 							if (column.dataClass() == String.class && Objects.equal("", v) && !column.isMandatory())
 								v = null;
 							if (v != null)
-								neo.setValue(column, v);
+								map.put(column.getName(), v);
 						}
-						writer.write(Utils.toJson(neo.toMap()));
+						writer.write(Utils.toJson(map));
 						writer.write('\r');
 					}
 				}
