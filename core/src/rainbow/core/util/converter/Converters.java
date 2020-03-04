@@ -1,10 +1,8 @@
 package rainbow.core.util.converter;
 
 import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -214,27 +212,24 @@ public class Converters {
 	 * @param clazz
 	 * @return
 	 */
-	public static <T> T map2Object(Map<String, Object> map, Class<T> clazz) {
-		try {
-			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
-			T object = clazz.newInstance();
-			PropertyDescriptor[] pds = beanInfo.getPropertyDescriptors();
-			for (PropertyDescriptor pd : pds) {
-				String key = pd.getName();
-				Method setter = pd.getWriteMethod();
-				if (setter != null) {
-					Object value = map.get(key);
-					if (value != null) {
-						value = Converters.convert(value, pd.getPropertyType());
-						setter.invoke(object, value);
-					}
-				}
-			}
-			return object;
-		} catch (IntrospectionException | InstantiationException | IllegalAccessException | IllegalArgumentException
-				| InvocationTargetException e) {
-			throw new RuntimeException(e);
+	public static <T> T map2Object(Map<String, Object> map, ObjectMaker<T> maker) {
+		T result = maker.makeInstance();
+		for (String key : map.keySet()) {
+			Object value = map.get(key);
+			maker.setValue(result, key, value);
 		}
+		return result;
+	}
+
+	/**
+	 * 转换一个Map为JavaBean
+	 * 
+	 * @param map
+	 * @param clazz
+	 * @return
+	 */
+	public static <T> T map2Object(Map<String, Object> map, Class<T> clazz) {
+		return map2Object(map, new ObjectMaker<T>(clazz));
 	}
 
 }

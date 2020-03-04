@@ -1,4 +1,4 @@
-package rainbow.db.dao;
+package rainbow.core.util.converter;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -6,7 +6,6 @@ import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -14,40 +13,39 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rainbow.core.util.converter.Converters;
+public class ObjectMaker<T> implements DataMaker<T> {
 
-public class ObjectRowMapper<T> extends AbstractRowMapper<T> {
-
-	private static Logger logger = LoggerFactory.getLogger(ObjectRowMapper.class);
+	private static Logger logger = LoggerFactory.getLogger(ObjectMaker.class);
 
 	private Class<T> clazz;
 
 	private Map<String, PropertyDescriptor> map;
 
-	public ObjectRowMapper(List<SelectField> fields, Class<T> clazz) {
-		super(fields);
+	public ObjectMaker(Class<T> clazz) {
 		this.clazz = clazz;
 		try {
 			BeanInfo beanInfo = Introspector.getBeanInfo(clazz, Object.class);
 			map = Arrays.stream(beanInfo.getPropertyDescriptors()).filter(p -> p.getWriteMethod() != null)
 					.collect(Collectors.toMap(PropertyDescriptor::getName, Function.identity()));
 		} catch (IntrospectionException e) {
-		}
-	}
-
-	@Override
-	protected T makeInstance() {
-		try {
-			return clazz.newInstance();
-		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	protected void setValue(T object, String key, Object value) {
+	public T makeInstance() {
+		try {
+			return clazz.newInstance();
+		} catch (Exception e) {
+			logger.error("create instance of {} failed", clazz.getName(), e);
+			throw new RuntimeException(e);
+		}
+	}
+
+	@Override
+	public void setValue(T object, String key, Object value) {
 		PropertyDescriptor p = map.get(key);
-		if (p != null) {
+		if (p != null && p.getWriteMethod() != null) {
 			value = Converters.convert(value, p.getPropertyType());
 			try {
 				p.getWriteMethod().invoke(object, value);
@@ -57,4 +55,5 @@ public class ObjectRowMapper<T> extends AbstractRowMapper<T> {
 			}
 		}
 	}
+
 }

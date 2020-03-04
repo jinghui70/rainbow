@@ -4,21 +4,26 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import rainbow.core.util.converter.DataMaker;
+import rainbow.core.util.converter.ObjectMaker;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.refinery.Refinery;
 import rainbow.db.refinery.RefineryRegistry;
 
-public abstract class AbstractRowMapper<T> implements RowMapper<T> {
+public final class SelectRowMapper<T> implements RowMapper<T> {
 
 	private List<SelectField> fields;
 
-	public AbstractRowMapper(List<SelectField> fields) {
+	private DataMaker<T> maker;
+
+	public SelectRowMapper(List<SelectField> fields, DataMaker<T> maker) {
 		this.fields = fields;
+		this.maker = maker;
 	}
 
 	@Override
 	public T mapRow(ResultSet rs, int rowNum) throws SQLException {
-		T result = makeInstance();
+		T result = maker.makeInstance();
 		int index = 1;
 		for (SelectField field : fields) {
 			Object value = DaoUtils.getResultSetValue(rs, index++, field.getType());
@@ -30,13 +35,13 @@ public abstract class AbstractRowMapper<T> implements RowMapper<T> {
 				}
 			}
 			if (value != null)
-				setValue(result, key, value);
+				maker.setValue(result, key, value);
 		}
 		return result;
 	}
 
-	protected abstract T makeInstance();
-
-	protected abstract void setValue(T object, String key, Object value);
+	public static <T> SelectRowMapper<T> objectMapper(List<SelectField> fields, Class<T> clazz) {
+		return new SelectRowMapper<T>(fields, new ObjectMaker<T>(clazz));
+	}
 
 }

@@ -9,7 +9,6 @@ import java.beans.PropertyDescriptor;
 import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +20,9 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Maps;
 
 import rainbow.core.util.converter.Converters;
+import rainbow.core.util.converter.DataMaker;
+import rainbow.core.util.converter.MapMaker;
+import rainbow.core.util.converter.ObjectMaker;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.model.DataType;
@@ -79,7 +81,7 @@ public class NeoBean {
 					if (column != null) {
 						Method getter = pd.getReadMethod();
 						if (getter != null) {
-							Object value = pd.getReadMethod().invoke(obj);
+							Object value = getter.invoke(obj);
 							setValue(column, value);
 						}
 					}
@@ -219,14 +221,27 @@ public class NeoBean {
 	 * @return
 	 */
 	public <T> T bianShen(Class<T> clazz) {
-		return Converters.map2Object(toMap(), clazz);
+		return bianShen(new ObjectMaker<T>(clazz));
+	}
+
+	/**
+	 * 变身为某一个类实例
+	 * 
+	 * @param clazz
+	 * @param converters
+	 * @return
+	 */
+	public <T> T bianShen(DataMaker<T> maker) {
+		T result = maker.makeInstance();
+		for (Column column : valueMap.keySet()) {
+			Object value = valueMap.get(column);
+			maker.setValue(result, column.getName(), value);
+		}
+		return result;
 	}
 
 	public Map<String, Object> toMap() {
-		Map<String, Object> result = new HashMap<String, Object>(valueMap.size());
-		for (Column column : valueMap.keySet())
-			result.put(column.getName(), valueMap.get(column));
-		return result;
+		return bianShen(MapMaker.instance);
 	}
 
 	@Override

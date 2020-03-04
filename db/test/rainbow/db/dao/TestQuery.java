@@ -91,7 +91,7 @@ public class TestQuery {
 				.groupBy("goods, person").orderBy("goods desc");
 
 		// 用map的方式处理
-		List<Map<String, Object>> l = select.queryForMapList();
+		List<Map<String, Object>> l = select.queryForList();
 		assertEquals(2, l.size());
 		Map<String, Object> m = l.get(0);
 		assertEquals("6", m.get("goods"));
@@ -115,7 +115,7 @@ public class TestQuery {
 		Select select = dao.select("goods,goods.name,sum(qty):qty,sum(money):money").from("_SaleRecord")
 				.groupBy("goods");
 		assertEquals(1, select.count());
-		Map<String, Object> map = select.queryForMap();
+		Map<String, Object> map = select.queryForObject();
 		assertEquals(3.0, map.get("qty"));
 		assertEquals(600.0, map.get("money"));
 	}

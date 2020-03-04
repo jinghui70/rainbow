@@ -57,7 +57,7 @@ public class TestJoin {
 		dao.insert(_Goods.p30());
 
 		List<Map<String, Object>> list = dao.select("name,mobile.name:mobile").from("_Person")
-				.where("gender", _Gender.男).orderBy("mobile.price").queryForMapList();
+				.where("gender", _Gender.男).orderBy("mobile.price").queryForList();
 		assertEquals(2, list.size());
 		Map<String, Object> data = list.get(0);
 		assertEquals("李四", data.get("name"));
@@ -66,7 +66,7 @@ public class TestJoin {
 		assertEquals("张三", data.get("name"));
 		assertEquals("iPhone7", data.get("mobile"));
 
-		data = dao.select("name,mobile.name:mobile").from("_Person").where("id", 6).queryForMap();
+		data = dao.select("name,mobile.name:mobile").from("_Person").where("id", 6).queryForObject();
 		assertEquals("赵六", data.get("name"));
 		assertNull(data.get("mobile"));
 
@@ -125,20 +125,20 @@ public class TestJoin {
 
 		// 因为左链接，查出来两条记录
 		Select select = dao.select("person.name,goods.name:goods").from("_SaleRecord").orderBy("inx");
-		List<Map<String, Object>> list = select.queryForMapList();
+		List<Map<String, Object>> list = select.queryForList();
 		assertEquals(3, list.size());
 		Map<String, Object> v = list.get(2);
 		assertNull(v.get("goods"));
 
 		// 条件加在where，只能查出来两条
 		select.where("person.id", zhang3.getId());
-		list = select.queryForMapList();
+		list = select.queryForList();
 		assertEquals(2, list.size());
 
 		// 条件加在join，能查出来三条
 		select.where(C.make()); // 清空条件
 		select.setLinkCnds("person", C.make("id", zhang3.getId()));
-		list = select.queryForMapList();
+		list = select.queryForList();
 		assertEquals(3, list.size());
 	}
 
@@ -160,9 +160,8 @@ public class TestJoin {
 		dao.insert(neo);
 
 		Select select = dao.select("id,person.name:person").from("_SaleRecordNoLink")
-				.extraLink("person", "person", "_Person", "id")
-				.orderBy("inx");
-		List<Map<String, Object>> list = select.queryForMapList();
+				.extraLink("person", "person", "_Person", "id").orderBy("inx");
+		List<Map<String, Object>> list = select.queryForList();
 		assertEquals(1, list.size());
 		Map<String, Object> map = list.get(0);
 		assertEquals("张三", map.get("person"));

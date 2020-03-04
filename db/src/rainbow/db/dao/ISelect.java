@@ -5,94 +5,141 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public interface ISelect {
+import rainbow.core.model.object.ITreeObject;
+import rainbow.core.util.converter.DataMaker;
+import rainbow.core.util.converter.MapMaker;
+import rainbow.core.util.converter.ObjectMaker;
 
-	/**
-	 * 返回一个NeoBean，如果结果不是一个则返回空
-	 * 
-	 * @return
-	 */
-	public NeoBean queryForObject();
-
-	/**
-	 * 查询返回一个对象
-	 * 
-	 * @param clazz 返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
-	 * @return
-	 */
-	public <T> T queryForObject(Class<T> clazz);
-
-	/**
-	 * 查询返回一个Map
-	 * 
-	 * @return
-	 */
-	public Map<String, Object> queryForMap();
-
-	/**
-	 * 查询返回一个整数
-	 * 
-	 * @return
-	 */
-	public int queryForInt();
-
-	/**
-	 * 查询返回一个字符串
-	 * 
-	 * @return
-	 */
-	public String queryForString();
-
-	/**
-	 * 返回符合条件的记录数
-	 * 
-	 * @return
-	 */
-	public int count();
-
-	/**
-	 * 返回符合条件的第一个NeoBean
-	 * 
-	 * @return
-	 */
-	public NeoBean fetchFirst();
-
-	/**
-	 * 返回符合条件的第一个对象
-	 * 
-	 * @param clazz 返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
-	 * @return
-	 */
-	public <T> T fetchFirst(Class<T> clazz);
-
-	/**
-	 * 返回符合条件的第一个Map
-	 * 
-	 * @return
-	 */
-	public Map<String, Object> fetchMapFirst();
+/**
+ * @author lijinghui
+ *
+ */
+interface ISelect {
 
 	/**
 	 * 查询并把结果逐一调用消费函数
 	 * 
 	 * @param consumer
 	 */
-	public void query(Consumer<ResultSet> consumer);
+	void query(Consumer<ResultSet> consumer);
 
 	/**
-	 * 查询返回NeoBean列表
+	 * 返回符合条件的记录数
 	 * 
 	 * @return
 	 */
-	public List<NeoBean> queryForList();
+	int count();
 
 	/**
-	 * 查询返回前几项NeoBean列表
+	 * 查询一条记录，返回一个对象
 	 * 
-	 * @param limit 返回记录个数
+	 * @param clazz 返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
 	 * @return
 	 */
-	public List<NeoBean> queryForList(int limit);
+	<T> T queryForObject(Class<T> clazz);
+
+	/**
+	 * 查询一条记录，返回一个Map
+	 * 
+	 * @return
+	 */
+	Map<String, Object> queryForObject();
+
+	/**
+	 * 查询一条记录，返回一个NeoBean
+	 * 
+	 * @return
+	 */
+	NeoBean queryForNeoBean();
+
+	/**
+	 * 查询一条记录，一般用上面的函数，本函数可以对查询结果做一些额外处理
+	 * 
+	 * @param <T>
+	 * @param maker
+	 * @return
+	 */
+	<T> T queryForObject(DataMaker<T> maker);
+
+	/**
+	 * 查询返回一个整数
+	 * 
+	 * @return
+	 */
+	int queryForInt();
+
+	/**
+	 * 查询返回一个字符串
+	 * 
+	 * @return
+	 */
+	String queryForString();
+
+	/**
+	 * 获取第一条记录
+	 * 
+	 * @param <T>
+	 * @param maker
+	 * @return
+	 */
+	<T> T fetchFirst(DataMaker<T> maker);
+
+	/**
+	 * 获取第一条记录
+	 * 
+	 * @param <T>
+	 * @param clazz
+	 * @return
+	 */
+	<T> T fetchFirst(Class<T> clazz);
+
+	/**
+	 * 获取第一条记录
+	 * 
+	 * @return
+	 */
+	Map<String, Object> fetchFirst();
+
+	/**
+	 * 获取第一条记录
+	 * 
+	 * @return
+	 */
+	NeoBean fetchFirstNeo();
+
+	/**
+	 * 查询列表
+	 * 
+	 * @param <T>
+	 * @param maker
+	 * @return
+	 */
+	<T> List<T> queryForList(DataMaker<T> maker);
+
+	/**
+	 * 查询列表
+	 * 
+	 * @param <T>
+	 * @param maker
+	 * @param limit 限定行数
+	 * @return
+	 */
+	<T> List<T> queryForList(DataMaker<T> maker, int limit);
+
+	/**
+	 * 查询返回一组列表
+	 * 
+	 * @return
+	 */
+	List<NeoBean> queryForNeoList();
+
+	/**
+	 * 查询返回一组列表
+	 * 
+	 * @param limit 限定个数
+	 * @return
+	 */
+	List<NeoBean> queryForNeoList(int limit);
 
 	/**
 	 * 查询返回一组列表
@@ -100,7 +147,7 @@ public interface ISelect {
 	 * @param clazz 返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
 	 * @return
 	 */
-	public <T> List<T> queryForList(Class<T> clazz);
+	<T> List<T> queryForList(Class<T> clazz);
 
 	/**
 	 * 查询返回前几项对象列表
@@ -109,24 +156,14 @@ public interface ISelect {
 	 * @param limit 返回记录个数
 	 * @return
 	 */
-	public <T> List<T> queryForList(Class<T> clazz, int limit);
-
-	/**
-	 * 查询返回前几项对象列表
-	 * 
-	 * @param clazz    返回对象类，如果只查询一个字段，返回的应该是原生数据类而不是对象
-	 * @param pageSize 每页记录数
-	 * @param pageNo   第几页
-	 * @return
-	 */
-	public <T> PageData<T> pageQuery(Class<T> clazz, int pageSize, int pageNo);
+	<T> List<T> queryForList(Class<T> clazz, int limit);
 
 	/**
 	 * 查询返回一组Map列表
 	 * 
 	 * @return
 	 */
-	public List<Map<String, Object>> queryForMapList();
+	List<Map<String, Object>> queryForList();
 
 	/**
 	 * 查询返回一组Map列表
@@ -134,22 +171,72 @@ public interface ISelect {
 	 * @param limit 返回记录个数
 	 * @return
 	 */
-	public List<Map<String, Object>> queryForMapList(int limit);
+	List<Map<String, Object>> queryForList(int limit);
 
 	/**
-	 * 通过id，pid属性查询后构建一个树对象
+	 * 分页查询
 	 * 
-	 * @return 返回的map列表，如果有下级，map中对应有key为children
+	 * @param <T>
+	 * @param maker
+	 * @param pageSize 每页记录数
+	 * @param page     第几页
+	 * @return
 	 */
-	public List<Map<String, Object>> queryForTree(boolean strict);
+	<T> PageData<T> pageQuery(DataMaker<T> maker, int pageSize, int page);
 
 	/**
-	 * 查询返回一组Map列表
+	 * 分页查询
+	 * 
+	 * @param clazz    返回对象类
+	 * @param pageSize 每页记录数
+	 * @param pageNo   第几页
+	 * @return
+	 */
+	<T> PageData<T> pageQuery(Class<T> clazz, int pageSize, int page);
+
+	/**
+	 * 分页查询
 	 * 
 	 * @param pageSize 每页记录数
 	 * @param pageNo   第几页
 	 * @return
 	 */
-	public PageData<Map<String, Object>> pageQuery(int pageSize, int pageNo);
+	PageData<Map<String, Object>> pageQuery(int pageSize, int page);
+
+	/**
+	 * 查询字段中必须有id，pid属性，查询后构建一个树对象，对象的下级存在children中
+	 * 
+	 * @param <T>
+	 * @param clazz  树对象类，必有children属性
+	 * @param strict 严格模式下，根结点pid必须为空，不为空则丢弃
+	 * @return 树的根结点列表
+	 */
+	<T extends ITreeObject<T>> List<T> queryForTree(Class<T> clazz, boolean strict);
+
+	/**
+	 * 查询字段中必须有id，pid属性，查询后构建一个树对象，这个版本是需要对
+	 * 
+	 * @param <T>
+	 * @param maker  树对象构造类，必有children属性
+	 * @param strict 严格模式下，根结点pid必须为空，不为空则丢弃
+	 * @return 树的根结点列表
+	 */
+	<T extends ITreeObject<T>> List<T> queryForTree(ObjectMaker<T> maker, boolean strict);
+
+	/**
+	 * 查询字段中必须有id，pid属性，查询后构建一个树对象，对象的下级存在children中
+	 * 
+	 * @param strict 严格模式下，根结点pid必须为空，不为空则丢弃
+	 * @return
+	 */
+	List<Map<String, Object>> queryForTree(boolean strict);
+
+	/**
+	 * 查询字段中必须有id，pid属性，查询后构建一个树对象，对象的下级存在children中
+	 * 
+	 * @param strict 严格模式下，根结点pid必须为空，不为空则丢弃
+	 * @return
+	 */
+	List<Map<String, Object>> queryForTree(MapMaker maker, boolean strict);
 
 }
