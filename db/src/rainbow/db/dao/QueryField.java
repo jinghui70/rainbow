@@ -89,9 +89,11 @@ public class QueryField {
 			field.column = entity.getColumn(str);
 			if (field.column == null) {
 				Optional<SelectField> sf = context.alias2selectField(str);
-				checkNotNull(sf.isPresent(), "bad query field {}", str);
-				field.alias = str;
-				field.column = sf.get().getColumn();
+				if (sf.isPresent()) {
+					field.alias = str;
+					field.column = sf.get().getColumn();
+				} else
+					throw new RuntimeException("bad query field:" + str);
 			}
 		}
 		return field;

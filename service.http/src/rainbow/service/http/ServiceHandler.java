@@ -83,9 +83,24 @@ public class ServiceHandler implements RequestHandler {
 		} catch (AppException e) {
 			response.sendError(500, e.getMessage());
 		} catch (Throwable e) {
-			throw new ServletException(e);
+			String error = errorText(e);
+			logger.error(error, e);
+			response.sendError(500, error);
 		}
 		baseRequest.setHandled(true);
+	}
+
+	private String errorText(Throwable e) {
+		StringBuilder sb = new StringBuilder();
+		while (e != null) {
+			String m = e.getMessage();
+			if (m != null) {
+				sb.append(m).append("-");
+			}
+			sb.append(e.getClass().getSimpleName()).append('\n');
+			e = e.getCause();
+		}
+		return sb.toString();
 	}
 
 	private void writeStreamResult(HttpServletResponse response, StreamResult sr) throws IOException {

@@ -30,6 +30,37 @@ public class SimpleCondition extends C {
 		this.param = param;
 	}
 
+	/**
+	 * 改变参数
+	 * 
+	 * @param param
+	 */
+	public void changeParam(Object param) {
+		this.param = param;
+	}
+
+	/**
+	 * 改变操作符
+	 * 
+	 * @param op
+	 */
+	public void changeOp(Op op) {
+		this.op = op;
+	}
+
+	/**
+	 * 彻底变成另一个条件，在某些特殊场合可能有用
+	 * 
+	 * @param property
+	 * @param op
+	 * @param param
+	 */
+	public void change(String property, Op op, Object param) {
+		this.property = property;
+		this.op = op;
+		this.param = param;
+	}
+
 	@Override
 	public C and(C cnd) {
 		if (cnd == null || cnd.isEmpty())
