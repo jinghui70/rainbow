@@ -24,6 +24,12 @@ public class SimpleCondition extends C {
 
 	private QueryField field;
 
+	public SimpleCondition(String property, Object param) {
+		this.property = property;
+		this.op = Op.Equal;
+		this.param = param;
+	}
+
 	public SimpleCondition(String property, Op op, Object param) {
 		this.property = property;
 		this.op = op;
