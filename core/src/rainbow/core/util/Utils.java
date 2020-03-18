@@ -1,6 +1,7 @@
 package rainbow.core.util;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.RandomAccess;
 import java.util.UUID;
 import java.util.function.Function;
@@ -85,8 +87,11 @@ public abstract class Utils {
 	 * @param key
 	 * @return
 	 */
-	public static <K, V> V safeGet(Map<K, V> map, K key) {
-		return (isNullOrEmpty(map)) ? null : map.get(key);
+	public static <K, V> Optional<V> safeGet(Map<K, V> map, K key) {
+		if (map == null)
+			return Optional.empty();
+		V v = map.get(key);
+		return Optional.ofNullable(v);
 	}
 
 	/**

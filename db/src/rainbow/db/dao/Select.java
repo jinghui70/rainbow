@@ -176,7 +176,7 @@ public class Select extends Where<Select> implements ISelect {
 	public Link parseLink(String name) {
 		Link link = entity.getLink(name);
 		if (link == null)
-			link = Utils.safeGet(extraLinks, name);
+			link = Utils.safeGet(extraLinks, name).get();
 		return link;
 	}
 
@@ -264,8 +264,7 @@ public class Select extends Where<Select> implements ISelect {
 					sql.append("A.").append(c.getCode()).append("=").append(alias).append('.').append(cl.getCode());
 					sql.appendTemp(" AND ");
 				}
-				C cnd = Utils.safeGet(linkCnds, link.getName());
-				if (cnd != null) {
+				Utils.safeGet(linkCnds, link.getName()).ifPresent(cnd -> {
 					cnd.initField(field -> {
 						Column column = link.getTargetEntity().getColumn(field);
 						QueryField qf = new QueryField();
@@ -279,7 +278,7 @@ public class Select extends Where<Select> implements ISelect {
 						sql.append(")");
 					} else
 						cnd.toSql(this, sql);
-				}
+				});
 				sql.clearTemp();
 			}
 		}
