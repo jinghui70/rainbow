@@ -15,7 +15,15 @@ public class StreamResult extends NameObject {
 	 */
 	private InputStream inputStream;
 
+	/**
+	 * 下载标记
+	 */
 	private boolean download;
+
+	/**
+	 * 文件类型
+	 */
+	private String contentType;
 
 	public StreamResult() {
 	}
@@ -31,6 +39,14 @@ public class StreamResult extends NameObject {
 
 	public void setDownload(boolean download) {
 		this.download = download;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
 	}
 
 	public InputStream getInputStream() {

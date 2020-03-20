@@ -106,7 +106,9 @@ public class ServiceHandler implements RequestHandler {
 		} else if (sr.isDownload())
 			HttpUtils.writeStreamDownload(response, sr.getInputStream(), sr.getName());
 		else {
-			String mime = rainbow.httpserver.HttpUtils.getMimeType(sr.getName());
+			String mime = sr.getContentType();
+			if (mime == null)
+				mime = HttpUtils.getMimeType(sr.getName());
 			HttpUtils.writeStreamBack(response, sr.getInputStream(), mime);
 		}
 	}
