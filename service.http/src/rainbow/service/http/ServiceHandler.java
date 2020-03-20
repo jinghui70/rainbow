@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import rainbow.core.bundle.Bean;
+import rainbow.core.bundle.Extension;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.SessionException;
 import rainbow.core.util.Utils;
@@ -27,7 +28,8 @@ import rainbow.service.ServiceRegistry;
 import rainbow.service.StreamResult;
 import rainbow.service.exception.InvalidServiceException;
 
-@Bean(extension = RequestHandler.class)
+@Bean
+@Extension(name = "service")
 public class ServiceHandler implements RequestHandler {
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
@@ -37,11 +39,6 @@ public class ServiceHandler implements RequestHandler {
 	@Inject
 	public void setServiceRegistry(ServiceRegistry serviceRegistry) {
 		this.serviceRegistry = serviceRegistry;
-	}
-
-	@Override
-	public String getName() {
-		return "service";
 	}
 
 	@Override
@@ -77,15 +74,15 @@ public class ServiceHandler implements RequestHandler {
 			} else
 				HttpUtils.writeJsonBack(response, value);
 		} catch (SessionException e) {
-			response.sendError(401, e.getKey());
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getKey());
 		} catch (InvalidServiceException e) {
-			response.sendError(400, e.getMessage());
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
 		} catch (AppException e) {
-			response.sendError(500, e.getMessage());
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		} catch (Throwable e) {
 			String error = errorText(e);
 			logger.error(error, e);
-			response.sendError(500, error);
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		}
 		baseRequest.setHandled(true);
 	}

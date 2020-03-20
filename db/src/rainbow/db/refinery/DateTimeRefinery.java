@@ -5,10 +5,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import rainbow.core.bundle.Bean;
+import rainbow.core.bundle.Extension;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.dao.model.Column;
 
-@Bean(extension = Refinery.class)
+@Bean
+@Extension
 public class DateTimeRefinery implements Refinery {
 
 	@Override

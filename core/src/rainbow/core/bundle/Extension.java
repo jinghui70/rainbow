@@ -9,10 +9,10 @@ import rainbow.core.util.Utils;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface Bean {
+public @interface Extension {
 
 	String name() default Utils.NULL_STR;
 
-	boolean singleton() default true;
+	Class<?> point() default Object.class;
 
 }

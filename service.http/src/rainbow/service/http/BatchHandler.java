@@ -9,15 +9,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 
 import rainbow.core.bundle.Bean;
+import rainbow.core.bundle.Extension;
 import rainbow.httpserver.RequestHandler;
 
-@Bean(extension = RequestHandler.class)
+@Bean
+@Extension(name = "batch")
 public class BatchHandler implements RequestHandler {
-
-	@Override
-	public String getName() {
-		return "batch";
-	}
 
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)

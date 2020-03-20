@@ -1,18 +1,11 @@
 package rainbow.core.extension;
 
-import rainbow.core.model.object.INameObject;
-
-public class Factory implements INameObject {
+public class Factory {
 
 	protected Class<?> clazz;
 
 	public Factory(Class<?> clazz) {
 		this.clazz = clazz;
-	}
-
-	@Override
-	public String getName() {
-		return clazz.getSimpleName();
 	}
 
 	public Class<?> getClazz() {

@@ -1,6 +1,7 @@
 package rainbow.core.extension;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -8,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import rainbow.core.model.IAdaptable;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.model.object.INameObject;
+import rainbow.core.util.Utils;
 
 /**
  * 系统扩展点
@@ -55,7 +57,7 @@ public class ExtensionPoint {
 		checkNotNull(eo, "invalid extension object {}, register Extension {} failed", object.getClass().getName(),
 				clazz.getSimpleName());
 
-		if (name == null) {
+		if (Utils.isNullOrEmpty(name)) {
 			if (eo instanceof INameObject) {
 				name = ((INameObject) eo).getName();
 			} else {

@@ -32,6 +32,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import rainbow.core.bundle.Bean;
+import rainbow.core.bundle.Extension;
 import rainbow.core.model.IAdaptable;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.Platform;
@@ -51,7 +52,8 @@ import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.model.Entity;
 
-@Bean(extension = InjectProvider.class)
+@Bean
+@Extension(point = InjectProvider.class)
 public class DaoManagerImpl extends ActivatorAwareObject
 		implements DaoManager, IAdaptable, InitializingBean, DisposableBean {
 
@@ -66,14 +68,14 @@ public class DaoManagerImpl extends ActivatorAwareObject
 	private Dao onlyDao;
 
 	private Context ctx;
-	
+
 	private List<Logic> logics;
 
 	@Override
 	public List<Logic> getLogics() {
 		return logics;
 	}
-	
+
 	@Override
 	public Dao getDao(String name) {
 		return daoMap.get(name);
