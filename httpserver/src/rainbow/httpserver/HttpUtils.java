@@ -93,8 +93,9 @@ public abstract class HttpUtils {
 	 * @param mimeType
 	 * @throws IOException
 	 */
-	public static void writeStreamBack(HttpServletResponse response, InputStream stream, String name) throws IOException {
-		response.setContentType(getMimeType(name));
+	public static void writeStreamBack(HttpServletResponse response, InputStream stream, String mimeType)
+			throws IOException {
+		response.setContentType(mimeType);
 		OutputStream outStream = response.getOutputStream();
 		try (InputStream is = stream) {
 			int len = 0;
@@ -115,7 +116,7 @@ public abstract class HttpUtils {
 	public static void writeFileBack(HttpServletResponse response, Path file) throws IOException {
 		writeStreamBack(response, Files.newInputStream(file), file.getFileName().toString());
 	}
-	
+
 	/**
 	 * 文件流下载
 	 * 
