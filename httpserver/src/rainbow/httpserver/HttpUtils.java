@@ -4,12 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
@@ -93,9 +89,7 @@ public abstract class HttpUtils {
 	 * @param mimeType
 	 * @throws IOException
 	 */
-	public static void writeStreamBack(HttpServletResponse response, InputStream stream, String mimeType)
-			throws IOException {
-		response.setContentType(mimeType);
+	public static void writeStreamBack(HttpServletResponse response, InputStream stream) throws IOException {
 		OutputStream outStream = response.getOutputStream();
 		try (InputStream is = stream) {
 			int len = 0;
@@ -104,52 +98,6 @@ public abstract class HttpUtils {
 				outStream.write(buffer, 0, len);
 			}
 		}
-	}
-
-	/**
-	 * 返回文件内容
-	 * 
-	 * @param response
-	 * @param file
-	 * @throws IOException
-	 */
-	public static void writeFileBack(HttpServletResponse response, Path file) throws IOException {
-		writeStreamBack(response, Files.newInputStream(file), file.getFileName().toString());
-	}
-
-	/**
-	 * 文件流下载
-	 * 
-	 * @param baseRequest
-	 * @param response
-	 * @param stream
-	 * @param name        文件名，如果只有后缀，应该以点'.'开始
-	 * @throws IOException
-	 */
-	public static void writeStreamDownload(HttpServletResponse response, InputStream stream, String name)
-			throws IOException {
-		try {
-			if (name.charAt(0) == '.')
-				response.setHeader("Content-Disposition", "attachment");
-			else
-				response.setHeader("Content-Disposition",
-						String.format("attachment; filename=\"%s\"", URLEncoder.encode(name, "UTF-8")));
-		} catch (UnsupportedEncodingException e) {
-		}
-		writeStreamBack(response, stream, name);
-	}
-
-	/**
-	 * 下载一个文件的响应
-	 * 
-	 * @param response
-	 * @param file
-	 * @throws IOException
-	 */
-	public static void writeFileDownload(HttpServletResponse response, Path file) throws IOException {
-		long size = Files.size(file);
-		response.setHeader("Content-Length", Long.toString(size));
-		writeStreamDownload(response, Files.newInputStream(file), file.getFileName().toString());
 	}
 
 }

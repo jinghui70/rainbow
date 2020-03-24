@@ -1,6 +1,7 @@
 package rainbow.service.http;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -103,13 +104,18 @@ public class ServiceHandler implements RequestHandler {
 	private void writeStreamResult(HttpServletResponse response, StreamResult sr) throws IOException {
 		if (sr.getInputStream() == null) {
 			response.sendError(404, sr.getName());
-		} else if (sr.isDownload())
-			HttpUtils.writeStreamDownload(response, sr.getInputStream(), sr.getName());
-		else {
+		} else {
 			String mime = sr.getContentType();
 			if (mime == null)
 				mime = HttpUtils.getMimeType(sr.getName());
-			HttpUtils.writeStreamBack(response, sr.getInputStream(), mime);
+			response.setContentType(mime);
+			if (sr.isDownload()) {
+				StringBuilder tmpstr = new StringBuilder("attachment");
+				if (Utils.hasContent(sr.getName()) && sr.getName().charAt(0) != '.')
+					tmpstr.append("; filename=\"").append(URLEncoder.encode(sr.getName(), "UTF-8")).append("\"");
+				response.setHeader("Content-Disposition", tmpstr.toString());
+			}
+			HttpUtils.writeStreamBack(response, sr.getInputStream());
 		}
 	}
 

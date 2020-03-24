@@ -68,7 +68,7 @@ public class Gate extends AbstractHandler {
 			HttpServletResponse response) throws IOException, ServletException {
 		if (target.startsWith(rootPath))
 			target = target.substring(rootPath.length());
-		else if(Objects.equals(rootPath, target + '/'))
+		else if (Objects.equals(rootPath, target + '/'))
 			target = "";
 		else
 			return;
@@ -86,7 +86,8 @@ public class Gate extends AbstractHandler {
 			if (webdir != null) {
 				Path file = webdir.resolve(target);
 				if (Files.exists(file) && !Files.isDirectory(file)) {
-					HttpUtils.writeFileBack(response, file);
+					response.setContentType(HttpUtils.getMimeType(file.getFileName().toString()));
+					HttpUtils.writeStreamBack(response, Files.newInputStream(file));
 					baseRequest.setHandled(true);
 					return;
 				}
