@@ -6,9 +6,6 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import rainbow.core.model.object.ITreeObject;
-import rainbow.core.util.converter.DataMaker;
-import rainbow.core.util.converter.MapMaker;
-import rainbow.core.util.converter.ObjectMaker;
 
 /**
  * @author lijinghui
@@ -53,15 +50,6 @@ interface ISelect {
 	NeoBean queryForNeoBean();
 
 	/**
-	 * 查询一条记录，一般用上面的函数，本函数可以对查询结果做一些额外处理
-	 * 
-	 * @param <T>
-	 * @param maker
-	 * @return
-	 */
-	<T> T queryForObject(DataMaker<T> maker);
-
-	/**
 	 * 查询返回一个整数
 	 * 
 	 * @return
@@ -74,15 +62,6 @@ interface ISelect {
 	 * @return
 	 */
 	String queryForString();
-
-	/**
-	 * 获取第一条记录
-	 * 
-	 * @param <T>
-	 * @param maker
-	 * @return
-	 */
-	<T> T fetchFirst(DataMaker<T> maker);
 
 	/**
 	 * 获取第一条记录
@@ -106,25 +85,6 @@ interface ISelect {
 	 * @return
 	 */
 	NeoBean fetchFirstNeo();
-
-	/**
-	 * 查询列表
-	 * 
-	 * @param <T>
-	 * @param maker
-	 * @return
-	 */
-	<T> List<T> queryForList(DataMaker<T> maker);
-
-	/**
-	 * 查询列表
-	 * 
-	 * @param <T>
-	 * @param maker
-	 * @param limit 限定行数
-	 * @return
-	 */
-	<T> List<T> queryForList(DataMaker<T> maker, int limit);
 
 	/**
 	 * 查询返回一组列表
@@ -176,17 +136,6 @@ interface ISelect {
 	/**
 	 * 分页查询
 	 * 
-	 * @param <T>
-	 * @param maker
-	 * @param pageSize 每页记录数
-	 * @param page     第几页
-	 * @return
-	 */
-	<T> PageData<T> pageQuery(DataMaker<T> maker, int pageSize, int page);
-
-	/**
-	 * 分页查询
-	 * 
 	 * @param clazz    返回对象类
 	 * @param pageSize 每页记录数
 	 * @param pageNo   第几页
@@ -214,29 +163,11 @@ interface ISelect {
 	<T extends ITreeObject<T>> List<T> queryForTree(Class<T> clazz, boolean strict);
 
 	/**
-	 * 查询字段中必须有id，pid属性，查询后构建一个树对象，这个版本是需要对
-	 * 
-	 * @param <T>
-	 * @param maker  树对象构造类，必有children属性
-	 * @param strict 严格模式下，根结点pid必须为空，不为空则丢弃
-	 * @return 树的根结点列表
-	 */
-	<T extends ITreeObject<T>> List<T> queryForTree(ObjectMaker<T> maker, boolean strict);
-
-	/**
 	 * 查询字段中必须有id，pid属性，查询后构建一个树对象，对象的下级存在children中
 	 * 
 	 * @param strict 严格模式下，根结点pid必须为空，不为空则丢弃
 	 * @return
 	 */
 	List<Map<String, Object>> queryForTree(boolean strict);
-
-	/**
-	 * 查询字段中必须有id，pid属性，查询后构建一个树对象，对象的下级存在children中
-	 * 
-	 * @param strict 严格模式下，根结点pid必须为空，不为空则丢弃
-	 * @return
-	 */
-	List<Map<String, Object>> queryForTree(MapMaker maker, boolean strict);
 
 }

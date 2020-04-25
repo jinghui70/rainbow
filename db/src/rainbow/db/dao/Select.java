@@ -343,19 +343,14 @@ public class Select extends Where<Select> implements ISelect {
 
 	@Override
 	public Map<String, Object> queryForObject() {
-		return queryForObject(MapMaker.instance);
+		Sql sql = build();
+		return dao.queryForObject(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
 	}
 
 	@Override
 	public NeoBean queryForNeoBean() {
 		Sql sql = build();
 		return dao.queryForObject(sql, new NeoBeanMapper(getEntity(), getFields()));
-	}
-
-	@Override
-	public <T> T queryForObject(DataMaker<T> maker) {
-		Sql sql = build();
-		return dao.queryForObject(sql, new SelectRowMapper<T>(getFields(), maker));
 	}
 
 	@Override
@@ -370,13 +365,6 @@ public class Select extends Where<Select> implements ISelect {
 	}
 
 	@Override
-	public <T> T fetchFirst(DataMaker<T> maker) {
-		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), 1));
-		return dao.queryForObject(sql, new SelectRowMapper<T>(getFields(), maker));
-	}
-
-	@Override
 	public <T> T fetchFirst(Class<T> clazz) {
 		Sql sql = build();
 		if (getFields().size() == 1)
@@ -387,7 +375,9 @@ public class Select extends Where<Select> implements ISelect {
 
 	@Override
 	public Map<String, Object> fetchFirst() {
-		return fetchFirst(MapMaker.instance);
+		Sql sql = build();
+		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), 1));
+		return dao.queryForObject(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
 	}
 
 	@Override
@@ -395,19 +385,6 @@ public class Select extends Where<Select> implements ISelect {
 		Sql sql = build();
 		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), 1));
 		return dao.queryForObject(sql, new NeoBeanMapper(getEntity(), getFields()));
-	}
-
-	@Override
-	public <T> List<T> queryForList(DataMaker<T> maker) {
-		Sql sql = build();
-		return dao.queryForList(sql, new SelectRowMapper<T>(getFields(), maker));
-	}
-
-	@Override
-	public <T> List<T> queryForList(DataMaker<T> maker, int limit) {
-		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
-		return dao.queryForList(sql, new SelectRowMapper<T>(getFields(), maker));
 	}
 
 	@Override
@@ -444,16 +421,18 @@ public class Select extends Where<Select> implements ISelect {
 
 	@Override
 	public List<Map<String, Object>> queryForList() {
-		return queryForList(MapMaker.instance);
+		Sql sql = build();
+		return dao.queryForList(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
 	}
 
 	@Override
 	public List<Map<String, Object>> queryForList(int limit) {
-		return queryForList(MapMaker.instance, limit);
+		Sql sql = build();
+		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
+		return dao.queryForList(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
 	}
 
-	@Override
-	public <T> PageData<T> pageQuery(DataMaker<T> maker, int pageSize, int page) {
+	private <T> PageData<T> pageQuery(DataMaker<T> maker, int pageSize, int page) {
 		Sql sql = build();
 		if (page == 1) {
 			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
@@ -484,16 +463,12 @@ public class Select extends Where<Select> implements ISelect {
 
 	@Override
 	public <T extends ITreeObject<T>> List<T> queryForTree(Class<T> clazz, boolean strict) {
-		return queryForTree(new ObjectMaker<T>(clazz), strict);
-	}
-
-	@Override
-	public <T extends ITreeObject<T>> List<T> queryForTree(ObjectMaker<T> maker, boolean strict) {
 		List<Map<String, Object>> list = queryForList();
 		if (Utils.isNullOrEmpty(list))
 			return Collections.emptyList();
 		List<T> roots = new LinkedList<T>();
 		Map<String, T> map = new HashMap<String, T>();
+		ObjectMaker<T> maker = new ObjectMaker<T>(clazz);
 		list.forEach(v -> map.put(v.get("id").toString(), Converters.map2Object(v, maker)));
 		list.forEach(v -> {
 			String id = v.get("id").toString();
@@ -519,15 +494,10 @@ public class Select extends Where<Select> implements ISelect {
 		return roots;
 	}
 
-	@Override
-	public List<Map<String, Object>> queryForTree(boolean strict) {
-		return queryForTree(MapMaker.instance, strict);
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Map<String, Object>> queryForTree(MapMaker maker, boolean strict) {
-		List<Map<String, Object>> list = queryForList(maker);
+	public List<Map<String, Object>> queryForTree(boolean strict) {
+		List<Map<String, Object>> list = queryForList();
 		if (Utils.isNullOrEmpty(list))
 			return list;
 		List<Map<String, Object>> roots = new LinkedList<Map<String, Object>>();
