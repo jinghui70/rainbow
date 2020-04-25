@@ -1,6 +1,5 @@
 package rainbow.core.util.converter.impl;
 
-import rainbow.core.model.object.ICodeObject;
 import rainbow.core.util.converter.AbstractConverter;
 
 /**
@@ -14,9 +13,6 @@ public class Enum2String extends AbstractConverter<Enum, String> {
 
 	@Override
 	public String convert(Enum from, Class<?> toClass) {
-		if (from instanceof ICodeObject) {
-			return ((ICodeObject) from).getCode();
-		}
 		return from.name();
 	}
 
