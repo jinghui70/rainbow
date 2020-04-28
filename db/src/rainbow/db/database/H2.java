@@ -21,7 +21,7 @@ public class H2 extends AbstractDialect {
 	public String now() {
 		return "CURRENT_TIMESTAMP";
 	}
-	
+
 	@Override
 	public String wrapLimitSql(String sql, int limit) {
 		return String.format("%s LIMIT %d", sql, limit);
@@ -49,7 +49,7 @@ public class H2 extends AbstractDialect {
 		Sql sql = new Sql("SELECT COLUMN_NAME,REMARKS,TYPE_NAME,CHARACTER_MAXIMUM_LENGTH,NUMERIC_SCALE"
 				+ " FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=?").addParam(table);
 		final Map<String, Field> map = Maps.newHashMap();
-		List<Field> columns = dao.queryForList(sql, new RowMapper<Field>() {
+		List<Field> columns = sql.queryForList(dao, new RowMapper<Field>() {
 			@Override
 			public Field mapRow(ResultSet rs, int rowNum) throws SQLException {
 				Field column = new Field();
@@ -60,8 +60,10 @@ public class H2 extends AbstractDialect {
 				return column;
 			}
 		});
-		sql = new Sql("SELECT COLUMN_LIST FROM INFORMATION_SCHEMA.CONSTRAINTS WHERE CONSTRAINT_TYPE='PRIMARY KEY' AND TABLE_NAME=?").addParam(table);
-		String key = dao.queryForObject(sql, String.class);
+		sql = new Sql(
+				"SELECT COLUMN_LIST FROM INFORMATION_SCHEMA.CONSTRAINTS WHERE CONSTRAINT_TYPE='PRIMARY KEY' AND TABLE_NAME=?")
+						.addParam(table);
+		String key = sql.queryForString(dao);
 		if (key != null) {
 			for (String k : Utils.split(key, ',')) {
 				map.get(k).setKey(true);
@@ -75,9 +77,9 @@ public class H2 extends AbstractDialect {
 	 * 
 	 * H2 支持的物理类型为：
 	 * 
-	 * INT BOOLEAN TINYINT SMALLINT BIGINT IDENTITY DECIMAL DOUBLE REAL TIME
-	 * DATE TIMESTAMP BINARY OTHER VARCHAR VARCHAR_IGNORECASE CHAR BLOB CLOB
-	 * UUID ARRAY Type
+	 * INT BOOLEAN TINYINT SMALLINT BIGINT IDENTITY DECIMAL DOUBLE REAL TIME DATE
+	 * TIMESTAMP BINARY OTHER VARCHAR VARCHAR_IGNORECASE CHAR BLOB CLOB UUID ARRAY
+	 * Type
 	 * 
 	 * @param column
 	 * @param physic

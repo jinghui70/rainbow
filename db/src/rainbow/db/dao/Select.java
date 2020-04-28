@@ -313,8 +313,7 @@ public class Select extends Where<Select> implements ISelect {
 
 	@Override
 	public void query(Consumer<ResultSet> consumer) {
-		Sql sql = build();
-		dao.doQuery(sql, consumer);
+		build().query(dao, consumer);
 	}
 
 	@Override
@@ -324,11 +323,9 @@ public class Select extends Where<Select> implements ISelect {
 			this.select = new String[] { Dao.COUNT };
 			Sql sql = build();
 			this.select = oldSelect;
-			return dao.queryForObject(sql, Integer.class);
+			return sql.queryForObject(dao, Integer.class);
 		} else {
-			Sql sql = build();
-			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-			return dao.queryForObject(countSql, Integer.class);
+			return build().count(dao);
 		}
 	}
 
@@ -336,21 +333,21 @@ public class Select extends Where<Select> implements ISelect {
 	public <T> T queryForObject(Class<T> clazz) {
 		Sql sql = build();
 		if (getFields().size() == 1)
-			return dao.queryForObject(sql, clazz);
+			return sql.queryForObject(dao, clazz);
 		DataMaker<T> maker = new ObjectMaker<T>(clazz);
-		return dao.queryForObject(sql, new SelectRowMapper<T>(getFields(), maker));
+		return sql.queryForObject(dao, new SelectRowMapper<T>(getFields(), maker));
 	}
 
 	@Override
 	public Map<String, Object> queryForObject() {
 		Sql sql = build();
-		return dao.queryForObject(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
+		return sql.queryForObject(dao, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
 	}
 
 	@Override
 	public NeoBean queryForNeoBean() {
 		Sql sql = build();
-		return dao.queryForObject(sql, new NeoBeanMapper(getEntity(), getFields()));
+		return sql.queryForObject(dao, new NeoBeanMapper(getEntity(), getFields()));
 	}
 
 	@Override
@@ -368,87 +365,68 @@ public class Select extends Where<Select> implements ISelect {
 	public <T> T fetchFirst(Class<T> clazz) {
 		Sql sql = build();
 		if (getFields().size() == 1)
-			return dao.queryForObject(sql, clazz);
+			return sql.fetchFirst(dao, clazz);
 		DataMaker<T> maker = new ObjectMaker<T>(clazz);
-		return dao.queryForObject(sql, new SelectRowMapper<T>(getFields(), maker));
+		return sql.fetchFirst(dao, new SelectRowMapper<T>(getFields(), maker));
 	}
 
 	@Override
 	public Map<String, Object> fetchFirst() {
 		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), 1));
-		return dao.queryForObject(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
+		return sql.fetchFirst(dao, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
 	}
 
 	@Override
 	public NeoBean fetchFirstNeo() {
 		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), 1));
-		return dao.queryForObject(sql, new NeoBeanMapper(getEntity(), getFields()));
+		return sql.fetchFirst(dao, new NeoBeanMapper(getEntity(), getFields()));
 	}
 
 	@Override
 	public List<NeoBean> queryForNeoList() {
 		Sql sql = build();
-		return dao.queryForList(sql, new NeoBeanMapper(getEntity(), getFields()));
+		return sql.queryForList(dao, new NeoBeanMapper(getEntity(), getFields()));
 	}
 
 	@Override
 	public List<NeoBean> queryForNeoList(int limit) {
 		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
-		return dao.queryForList(sql, new NeoBeanMapper(getEntity(), getFields()));
+		return sql.queryForList(dao, new NeoBeanMapper(getEntity(), getFields()), limit);
 	}
 
 	@Override
 	public <T> List<T> queryForList(Class<T> clazz) {
 		Sql sql = build();
 		if (getFields().size() == 1)
-			return dao.queryForList(sql, clazz);
+			return sql.queryForList(dao, clazz);
 		DataMaker<T> maker = new ObjectMaker<T>(clazz);
-		return dao.queryForList(sql, new SelectRowMapper<T>(getFields(), maker));
+		return sql.queryForList(dao, new SelectRowMapper<T>(getFields(), maker));
 	}
 
 	@Override
 	public <T> List<T> queryForList(Class<T> clazz, int limit) {
 		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
 		if (getFields().size() == 1)
-			return dao.queryForList(sql, clazz);
+			return sql.queryForList(dao, clazz, limit);
 		DataMaker<T> maker = new ObjectMaker<T>(clazz);
-		return dao.queryForList(sql, new SelectRowMapper<T>(getFields(), maker));
+		return sql.queryForList(dao, new SelectRowMapper<T>(getFields(), maker), limit);
 	}
 
 	@Override
 	public List<Map<String, Object>> queryForList() {
 		Sql sql = build();
-		return dao.queryForList(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
+		return sql.queryForList(dao, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
 	}
 
 	@Override
 	public List<Map<String, Object>> queryForList(int limit) {
 		Sql sql = build();
-		sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), limit));
-		return dao.queryForList(sql, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance));
+		return sql.queryForList(dao, new SelectRowMapper<Map<String, Object>>(getFields(), MapMaker.instance), limit);
 	}
 
 	private <T> PageData<T> pageQuery(DataMaker<T> maker, int pageSize, int page) {
 		Sql sql = build();
-		if (page == 1) {
-			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-			int count = dao.queryForObject(countSql, Integer.class);
-			if (count == 0) {
-				return new PageData<T>();
-			} else {
-				sql.setSql(dao.getDialect().wrapLimitSql(sql.getSql(), pageSize));
-				List<T> list = dao.queryForList(sql, new SelectRowMapper<T>(getFields(), maker));
-				return new PageData<T>(count, list);
-			}
-		} else {
-			sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), pageSize, page));
-			List<T> list = dao.queryForList(sql, new SelectRowMapper<T>(getFields(), maker));
-			return new PageData<T>(list);
-		}
+		return sql.pageQuery(dao, new SelectRowMapper<T>(getFields(), maker), pageSize, page);
 	}
 
 	@Override

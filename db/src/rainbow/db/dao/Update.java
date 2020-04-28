@@ -67,7 +67,7 @@ public class Update extends Where<Update> {
 		}
 		sql.clearTemp();
 		sql.whereCnd(dao, entity, cnd);
-		return dao.execSql(sql);
+		return sql.execute(dao);
 	}
 
 }

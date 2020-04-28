@@ -38,7 +38,7 @@ public class MemoryDao extends DaoImpl implements DisposableBean {
 		execSql(ddl);
 		entityMap.put(entity.getName(), entity);
 	}
-	
+
 	@Override
 	public void setDataSource(DataSource dataSource) {
 		// do nothing

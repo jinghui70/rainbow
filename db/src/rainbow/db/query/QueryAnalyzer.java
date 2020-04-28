@@ -29,9 +29,9 @@ import rainbow.db.refinery.Refinery;
 import rainbow.db.refinery.RefineryRegistry;
 
 public class QueryAnalyzer {
-	
+
 	private static Logger logger = LoggerFactory.getLogger(QueryAnalyzer.class);
-	
+
 	private Dao dao;
 
 	private Entity entity;
@@ -57,7 +57,8 @@ public class QueryAnalyzer {
 		fields = info.getFields().stream().map(this::createSelectField).collect(Collectors.toList());
 
 		if (info.isTree()) {
-			checkArgument(entity.hasColumn("id") && entity.hasColumn("pid"), "entity is not a tree: {}", info.getEntity());
+			checkArgument(entity.hasColumn("id") && entity.hasColumn("pid"), "entity is not a tree: {}",
+					info.getEntity());
 			fields.add(SelectField.parse("id:__i", entity));
 			fields.add(SelectField.parse("pid:__p", entity));
 		}
@@ -185,15 +186,15 @@ public class QueryAnalyzer {
 	public QueryResult doQuery() {
 		QueryResult result = new QueryResult();
 		Sql sql = build();
-		if (info.getPageNo()!=0 && info.getPageSize()!=0) {
-			Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(sql).append(") C");
-			int count = dao.queryForObject(countSql, Integer.class);
+		if (info.getPageNo() != 0 && info.getPageSize() != 0) {
+			int count = sql.count(dao);
 			result.setCount(count);
-			if (count==0) return result;
+			if (count == 0)
+				return result;
 			sql.setSql(dao.getDialect().wrapPagedSql(sql.getSql(), info.getPageSize(), info.getPageNo()));
 		}
 		// 查询结果
-		List<Map<String, Object>> data = dao.queryForList(sql, new RowMapper<Map<String, Object>>() {
+		List<Map<String, Object>> data = sql.queryForList(dao, new RowMapper<Map<String, Object>>() {
 			@SuppressWarnings("unchecked")
 			@Override
 			public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {

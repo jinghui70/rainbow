@@ -1,8 +1,6 @@
 package rainbow.db.dao;
 
-import java.sql.ResultSet;
 import java.util.List;
-import java.util.function.Consumer;
 
 import com.google.common.base.Supplier;
 
@@ -10,8 +8,6 @@ import rainbow.core.model.object.INameObject;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.database.Dialect;
 import rainbow.db.jdbc.JdbcTemplate;
-import rainbow.db.jdbc.ResultSetExtractor;
-import rainbow.db.jdbc.RowMapper;
 
 /**
  * 类说明 ：DB访问器接口，封装了对一个DataSource的所有访问。一个DataSource只能有一个Dao实例。
@@ -196,36 +192,13 @@ public interface Dao extends INameObject {
 	 */
 	<T> T fetch(Class<T> clazz, Object... keyValues);
 
-	/** 以下查询返回一个值 *********************************************************/
-
-	/** 查询一个值 */
-	<T> T queryForObject(Sql sql, Class<T> requiredType);
-
-	/** 查询一个对象 */
-	<T> T queryForObject(Sql sql, RowMapper<T> mapper);
-
-	/** 以下查询返回一组值 *********************************************************/
-
-	/** 根据条件求一个字段的值的列表 */
-	<T> List<T> queryForList(Sql sql, Class<T> requiredType);
-
-	/** 根据条件求一个对象列表 */
-	<T> List<T> queryForList(Sql sql, RowMapper<T> mapper);
-
-	/** 做一个查询，具体每行的查询结果的处理由consumer来做 */
-	void doQuery(Sql sql, Consumer<ResultSet> consumer);
-
-	/** 做一个查询，具体结果集的处理由ResultSetExtractor来做 */
-	<T> T doQuery(Sql sql, ResultSetExtractor<T> rse);
-
 	/**
-	 * 直接调用执行SQL的语句
+	 * 直接执行一个Sql
 	 * 
 	 * @param sql
+	 * @param params
 	 * @return
 	 */
-	int execSql(Sql sql);
-
 	int execSql(String sql, Object... params);
 
 }

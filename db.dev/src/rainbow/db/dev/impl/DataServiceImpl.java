@@ -103,9 +103,9 @@ public class DataServiceImpl implements DataService, InitializingBean {
 		}
 		Sql sql = new Sql(text);
 		if (select) {
-			return dao.queryForList(sql, new ColumnMapRowMapper());
+			return sql.queryForList(dao, ColumnMapRowMapper.instance);
 		} else {
-			int count = dao.execSql(sql);
+			int count = sql.execute(dao);
 			return Utils.format("影响了{}条数据", count);
 		}
 	}

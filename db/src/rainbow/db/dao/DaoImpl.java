@@ -4,11 +4,9 @@ import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -24,11 +22,9 @@ import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.database.Dialect;
 import rainbow.db.database.DialectManager;
+import rainbow.db.jdbc.ColumnMapRowMapper;
 import rainbow.db.jdbc.DataAccessException;
-import rainbow.db.jdbc.IncorrectResultSizeDataAccessException;
 import rainbow.db.jdbc.JdbcTemplate;
-import rainbow.db.jdbc.ResultSetExtractor;
-import rainbow.db.jdbc.RowMapper;
 
 public class DaoImpl extends NameObject implements Dao {
 
@@ -133,7 +129,7 @@ public class DaoImpl extends NameObject implements Dao {
 	public boolean existsOfTable(String tableName) {
 		String sql = String.format("SELECT COUNT(1) FROM %s where 1>1", tableName);
 		try {
-			jdbcTemplate.queryForInt(sql);
+			jdbcTemplate.queryForObject(sql, ColumnMapRowMapper.instance);
 		} catch (DataAccessException e) {
 			return false;
 		}
@@ -173,7 +169,7 @@ public class DaoImpl extends NameObject implements Dao {
 			}
 		});
 		sql.clearTemp().append(") values (").append(sb.substring(0, sb.length() - 1)).append(")");
-		return execSql(sql);
+		return sql.execute(this);
 	}
 
 	@Override
@@ -219,7 +215,7 @@ public class DaoImpl extends NameObject implements Dao {
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
 		Sql sql = new Sql(entity.getKeyCount()).append("delete from ").append(entity.getCode()).whereKey(neo);
-		return execSql(sql);
+		return sql.execute(this);
 	}
 
 	@Override
@@ -248,15 +244,15 @@ public class DaoImpl extends NameObject implements Dao {
 		});
 		sql.clearTemp();
 		sql.whereKey(neo);
-		return execSql(sql);
+		return sql.execute(this);
 	}
 
 	@Override
 	public void replace(Object obj) {
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
-		Sql sql = new Sql().append("select count(1) from ").append(entity.getCode()).whereKey(neo);
-		int count = queryForObject(sql, int.class);
+		Sql sql = new Sql("select count(1) from ").append(entity.getCode()).whereKey(neo);
+		int count = sql.queryForObject(this, int.class);
 		if (count == 0)
 			insert(neo);
 		else
@@ -271,7 +267,7 @@ public class DaoImpl extends NameObject implements Dao {
 			sql.append(c.getCode()).appendTempComma();
 		});
 		sql.clearTemp().append(" from ").append(entity.getCode()).whereKey(entity, keyValues);
-		return queryForObject(sql, new NeoBeanMapper(entity));
+		return sql.queryForObject(this, new NeoBeanMapper(entity));
 	}
 
 	@Override
@@ -303,70 +299,6 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public Delete delete(String entityName) {
 		return new Delete(this, entityName);
-	}
-
-	@Override
-	public <T> T queryForObject(Sql sql, Class<T> requiredType) {
-		try {
-			if (sql.noParams())
-				return jdbcTemplate.queryForObject(sql.getSql(), requiredType);
-			else
-				return jdbcTemplate.queryForObject(sql.getSql(), sql.getParamArray(), requiredType);
-		} catch (IncorrectResultSizeDataAccessException e) {
-			return null;
-		}
-	}
-
-	@Override
-	public <T> T queryForObject(Sql sql, RowMapper<T> mapper) {
-		try {
-			if (sql.noParams())
-				return jdbcTemplate.queryForObject(sql.getSql(), mapper);
-			else
-				return jdbcTemplate.queryForObject(sql.getSql(), sql.getParamArray(), mapper);
-		} catch (IncorrectResultSizeDataAccessException e) {
-			return null;
-		}
-	}
-
-	@Override
-	public <T> List<T> queryForList(Sql sql, Class<T> requiredType) {
-		if (sql.noParams())
-			return jdbcTemplate.queryForList(sql.getSql(), requiredType);
-		else
-			return jdbcTemplate.queryForList(sql.getSql(), sql.getParamArray(), requiredType);
-	}
-
-	@Override
-	public <T> List<T> queryForList(Sql sql, RowMapper<T> mapper) {
-		if (sql.noParams())
-			return jdbcTemplate.query(sql.getSql(), mapper);
-		else
-			return jdbcTemplate.query(sql.getSql(), sql.getParamArray(), mapper);
-	}
-
-	@Override
-	public void doQuery(Sql sql, Consumer<ResultSet> consumer) {
-		if (sql.noParams())
-			jdbcTemplate.query(sql.getSql(), consumer);
-		else
-			jdbcTemplate.query(sql.getSql(), sql.getParamArray(), consumer);
-	}
-
-	@Override
-	public <T> T doQuery(Sql sql, ResultSetExtractor<T> rse) {
-		if (sql.noParams())
-			return jdbcTemplate.query(sql.getSql(), rse);
-		else
-			return jdbcTemplate.query(sql.getSql(), sql.getParamArray(), rse);
-	}
-
-	@Override
-	public int execSql(Sql sql) {
-		if (sql.noParams())
-			return jdbcTemplate.update(sql.getSql());
-		else
-			return jdbcTemplate.update(sql.getSql(), sql.getParamArray());
 	}
 
 	@Override

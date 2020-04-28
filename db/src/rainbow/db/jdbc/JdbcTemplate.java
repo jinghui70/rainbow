@@ -182,14 +182,17 @@ public class JdbcTemplate implements JdbcOperations {
 		}
 	}
 
+	@Override
 	public void execute(final String sql) throws DataAccessException {
 		logger.debug("Executing SQL statement :{}", sql);
 		class ExecuteStatementCallback implements StatementCallback<Object>, SqlProvider {
+			@Override
 			public Object doInStatement(Statement stmt) throws SQLException {
 				stmt.execute(sql);
 				return null;
 			}
 
+			@Override
 			public String getSql() {
 				return sql;
 			}
@@ -226,6 +229,7 @@ public class JdbcTemplate implements JdbcOperations {
 			logger.debug("Executing SQL query: {}", sql);
 		}
 		class QueryStatementCallback implements StatementCallback<T>, SqlProvider {
+			@Override
 			public T doInStatement(Statement stmt) throws SQLException {
 				ResultSet rs = null;
 				try {
@@ -236,6 +240,7 @@ public class JdbcTemplate implements JdbcOperations {
 				}
 			}
 
+			@Override
 			public String getSql() {
 				return sql;
 			}
@@ -247,41 +252,15 @@ public class JdbcTemplate implements JdbcOperations {
 		query(sql, new RowConsumerResultSetExtractor(consumer));
 	}
 
-	public <T> List<T> query(String sql, RowMapper<T> rowMapper) throws DataAccessException {
+	@Override
+	public <T> List<T> queryForList(String sql, RowMapper<T> rowMapper) throws DataAccessException {
 		return query(sql, new RowMapperResultSetExtractor<T>(rowMapper));
 	}
 
+	@Override
 	public <T> T queryForObject(String sql, RowMapper<T> rowMapper) throws DataAccessException {
-		List<T> results = query(sql, rowMapper);
+		List<T> results = queryForList(sql, rowMapper);
 		return requiredSingleResult(results);
-	}
-
-	public <T> T queryForObject(String sql, Class<T> requiredType) throws DataAccessException {
-		return queryForObject(sql, new SingleColumnRowMapper<T>(requiredType));
-	}
-
-	public long queryForLong(String sql) throws DataAccessException {
-		Number number = queryForObject(sql, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	public int queryForInt(String sql) throws DataAccessException {
-		Number number = queryForObject(sql, int.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	public <T> List<T> queryForList(String sql, Class<T> elementType) throws DataAccessException {
-		return query(sql, new SingleColumnRowMapper<T>(elementType));
-	}
-
-	@Override
-	public List<Map<String, Object>> queryForList(String sql) throws DataAccessException {
-		return query(sql, ColumnMapRowMapper.instance);
-	}
-
-	@Override
-	public List<Map<String, Object>> queryForList(String sql, Object... args) throws DataAccessException {
-		return query(sql, args, ColumnMapRowMapper.instance);
 	}
 
 	@Override
@@ -319,12 +298,14 @@ public class JdbcTemplate implements JdbcOperations {
 			execute(sql, new BatchStatementCallback());
 	}
 
+	@Override
 	public int update(final String sql) throws DataAccessException {
 		checkNotNull(sql, "SQL must not be null");
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing SQL update: {}", sql);
 		}
 		class UpdateStatementCallback implements StatementCallback<Integer>, SqlProvider {
+			@Override
 			public Integer doInStatement(Statement stmt) throws SQLException {
 				int rows = stmt.executeUpdate(sql);
 				if (logger.isDebugEnabled()) {
@@ -333,6 +314,7 @@ public class JdbcTemplate implements JdbcOperations {
 				return rows;
 			}
 
+			@Override
 			public String getSql() {
 				return sql;
 			}
@@ -370,6 +352,7 @@ public class JdbcTemplate implements JdbcOperations {
 			throws DataAccessException {
 		checkNotNull(rse, "ResultSetExtractor must not be null");
 		return execute(sql, new PreparedStatementCallback<T>() {
+			@Override
 			public T doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				ResultSet rs = null;
 				try {
@@ -394,42 +377,29 @@ public class JdbcTemplate implements JdbcOperations {
 		query(sql, pss, new RowConsumerResultSetExtractor(consumer));
 	}
 
+	@Override
 	public void query(String sql, Object[] args, Consumer<ResultSet> consumer) throws DataAccessException {
 		query(sql, newArgPreparedStatementSetter(args), consumer);
 	}
 
-	public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
+	@Override
+	public <T> List<T> queryForList(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
 		return query(sql, args, new RowMapperResultSetExtractor<T>(rowMapper));
 	}
 
+	@Override
 	public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) throws DataAccessException {
 		List<T> results = query(sql, args, new RowMapperResultSetExtractor<T>(rowMapper, 1));
 		return requiredSingleResult(results);
 	}
 
-	public <T> T queryForObject(String sql, Object[] args, Class<T> requiredType) throws DataAccessException {
-		return queryForObject(sql, args, new SingleColumnRowMapper<T>(requiredType));
-	}
-
-	public long queryForLong(String sql, Object... args) throws DataAccessException {
-		Number number = queryForObject(sql, args, Long.class);
-		return (number != null ? number.longValue() : 0);
-	}
-
-	public int queryForInt(String sql, Object... args) throws DataAccessException {
-		Number number = queryForObject(sql, args, Integer.class);
-		return (number != null ? number.intValue() : 0);
-	}
-
-	public <T> List<T> queryForList(String sql, Object[] args, Class<T> elementType) throws DataAccessException {
-		return query(sql, args, new SingleColumnRowMapper<T>(elementType));
-	}
-
+	@Override
 	public int update(final String sql, final PreparedStatementSetter pss) throws DataAccessException {
 		if (logger.isDebugEnabled()) {
 			logger.debug("Executing prepared SQL update: {}", sql);
 		}
 		return execute(sql, new PreparedStatementCallback<Integer>() {
+			@Override
 			public Integer doInPreparedStatement(PreparedStatement ps) throws SQLException {
 				if (pss != null) {
 					pss.setValues(ps);
@@ -511,6 +481,7 @@ public class JdbcTemplate implements JdbcOperations {
 			this.consumer = consumer;
 		}
 
+		@Override
 		public Object extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
 				this.consumer.accept(rs);
@@ -580,6 +551,7 @@ public class JdbcTemplate implements JdbcOperations {
 			}
 		}
 		return execute(csc, new CallableStatementCallback<Map<String, Object>>() {
+			@Override
 			public Map<String, Object> doInCallableStatement(CallableStatement cs) throws SQLException {
 				boolean retVal = cs.execute();
 				int updateCount = cs.getUpdateCount();

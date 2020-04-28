@@ -3,13 +3,22 @@ package rainbow.db.dao;
 import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.jdbc.ColumnMapRowMapper;
+import rainbow.db.jdbc.DataAccessException;
+import rainbow.db.jdbc.EmptyResultDataAccessException;
+import rainbow.db.jdbc.IncorrectResultSizeDataAccessException;
+import rainbow.db.jdbc.RowMapper;
+import rainbow.db.jdbc.SingleColumnRowMapper;
 
 /**
  * 封装了一个Sql的内容对象
@@ -17,7 +26,7 @@ import rainbow.db.dao.model.Entity;
  * @author lijinghui
  * 
  */
-public class Sql implements Appendable {
+public class Sql implements Appendable, ISql {
 
 	private StringBuilder sb = new StringBuilder();
 
@@ -203,6 +212,141 @@ public class Sql implements Appendable {
 		append(" where ");
 		cnd.toSql(dao, entity, this);
 		return this;
+	}
+
+	@Override
+	public void query(Dao dao, Consumer<ResultSet> consumer) {
+		if (noParams())
+			dao.getJdbcTemplate().query(getSql(), consumer);
+		else
+			dao.getJdbcTemplate().query(getSql(), getParamArray(), consumer);
+	}
+
+	@Override
+	public <T> T queryForObject(Dao dao, RowMapper<T> mapper) {
+		try {
+			if (noParams())
+				return dao.getJdbcTemplate().queryForObject(getSql(), mapper);
+			else
+				return dao.getJdbcTemplate().queryForObject(getSql(), getParamArray(), mapper);
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public <T> T queryForObject(Dao dao, Class<T> requiredType) throws DataAccessException {
+		return queryForObject(dao, new SingleColumnRowMapper<T>(requiredType));
+	}
+
+	@Override
+	public Map<String, Object> queryForObject(Dao dao) {
+		return queryForObject(dao, ColumnMapRowMapper.instance);
+	}
+
+	@Override
+	public String queryForString(Dao dao) {
+		return queryForObject(dao, String.class);
+	}
+
+	@Override
+	public int queryForInt(Dao dao) {
+		Integer result = queryForObject(dao, Integer.class);
+		return result == null ? 0 : result.intValue();
+	}
+
+	@Override
+	public int count(Dao dao) {
+		Sql countSql = new Sql().append("SELECT COUNT(1) FROM (").append(this).append(") C");
+		return countSql.queryForInt(dao);
+	}
+
+	@Override
+	public <T> T fetchFirst(Dao dao, RowMapper<T> mapper) {
+		String sql = getSql();
+		sql = dao.getDialect().wrapLimitSql(getSql(), 1);
+		try {
+			if (noParams())
+				return dao.getJdbcTemplate().queryForObject(sql, mapper);
+			else
+				return dao.getJdbcTemplate().queryForObject(sql, getParamArray(), mapper);
+		} catch (IncorrectResultSizeDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public <T> T fetchFirst(Dao dao, Class<T> requiredType) {
+		return fetchFirst(dao, new SingleColumnRowMapper<T>(requiredType));
+	}
+
+	@Override
+	public Map<String, Object> fetchFirst(Dao dao) {
+		return fetchFirst(dao, ColumnMapRowMapper.instance);
+	}
+
+	@Override
+	public <T> List<T> queryForList(Dao dao, RowMapper<T> mapper) {
+		if (noParams())
+			return dao.getJdbcTemplate().queryForList(getSql(), mapper);
+		else
+			return dao.getJdbcTemplate().queryForList(getSql(), getParamArray(), mapper);
+	}
+
+	@Override
+	public <T> List<T> queryForList(Dao dao, Class<T> requiredType) {
+		return queryForList(dao, new SingleColumnRowMapper<T>(requiredType));
+	}
+
+	@Override
+	public List<Map<String, Object>> queryForList(Dao dao) {
+		return queryForList(dao, ColumnMapRowMapper.instance);
+	}
+
+	@Override
+	public <T> List<T> queryForList(Dao dao, RowMapper<T> mapper, int limit) {
+		String sql = getSql();
+		sql = dao.getDialect().wrapLimitSql(getSql(), limit);
+		if (noParams())
+			return dao.getJdbcTemplate().queryForList(sql, mapper);
+		else
+			return dao.getJdbcTemplate().queryForList(sql, getParamArray(), mapper);
+	}
+
+	@Override
+	public <T> List<T> queryForList(Dao dao, Class<T> requiredType, int limit) {
+		return queryForList(dao, new SingleColumnRowMapper<T>(requiredType), limit);
+	}
+
+	@Override
+	public List<Map<String, Object>> queryForList(Dao dao, int limit) {
+		return queryForList(dao, ColumnMapRowMapper.instance);
+	}
+
+	@Override
+	public <T> PageData<T> pageQuery(Dao dao, RowMapper<T> mapper, int pageSize, int page) {
+		int count = count(dao);
+		if (count == 0 || count <= (page - 1) * pageSize)
+			return new PageData<T>();
+		String sql = page == 1 ? dao.getDialect().wrapLimitSql(getSql(), pageSize)
+				: dao.getDialect().wrapPagedSql(getSql(), pageSize, page);
+		List<T> list = noParams() ? dao.getJdbcTemplate().queryForList(sql, mapper)
+				: dao.getJdbcTemplate().queryForList(sql, getParamArray(), mapper);
+		return new PageData<T>(count, list);
+
+	}
+
+	@Override
+	public PageData<Map<String, Object>> pageQuery(Dao dao, int pageSize, int page) {
+		return pageQuery(dao, ColumnMapRowMapper.instance, pageSize, page);
+	}
+
+	@Override
+	public int execute(Dao dao) {
+		if (noParams())
+			return dao.getJdbcTemplate().update(getSql());
+		else
+			return dao.getJdbcTemplate().update(getSql(), getParamArray());
 	}
 
 }

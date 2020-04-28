@@ -88,7 +88,7 @@ public class LinkQueryAnalyzer extends QueryInfo {
 			Object value = mainObject.get(column.getName());
 			param.set(index++, value);
 		}
-		List<Map<String, Object>> list = dao.queryForList(sql, new RowMapper<Map<String, Object>>() {
+		List<Map<String, Object>> list = sql.queryForList(dao, new RowMapper<Map<String, Object>>() {
 			@Override
 			public Map<String, Object> mapRow(ResultSet rs, int rowNum) throws SQLException {
 				Map<String, Object> map = Maps.newHashMapWithExpectedSize(fields.size());
