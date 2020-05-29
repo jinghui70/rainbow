@@ -1,8 +1,6 @@
 package rainbow.httpserver;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
@@ -78,25 +76,6 @@ public abstract class HttpUtils {
 					SerializerFeature.WriteEnumUsingName, SerializerFeature.WriteDateUseDateFormat);
 			// content = AES.encode(request, content);
 			writer.write(content);
-		}
-	}
-
-	/**
-	 * 返回流内容
-	 * 
-	 * @param response
-	 * @param stream
-	 * @param mimeType
-	 * @throws IOException
-	 */
-	public static void writeStreamBack(HttpServletResponse response, InputStream stream) throws IOException {
-		OutputStream outStream = response.getOutputStream();
-		try (InputStream is = stream) {
-			int len = 0;
-			byte[] buffer = new byte[8192];
-			while ((len = is.read(buffer)) > 0) {
-				outStream.write(buffer, 0, len);
-			}
 		}
 	}
 

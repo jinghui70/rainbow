@@ -1,6 +1,8 @@
 package rainbow.service.http;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
 
 import javax.servlet.ServletException;
@@ -56,18 +58,7 @@ public class ServiceHandler implements RequestHandler {
 			if (method.paramCount() == 0) {
 				value = method.invoke();
 			} else {
-				Object[] args = new Object[method.paramCount()];
-				if (method.paramCount() == 1 && parts.length == 3) {
-					args[0] = parts[2];
-				} else {
-					String param = Utils.streamToString(request.getInputStream());
-					JSONObject jo = JSON.parseObject(param);
-					args = new Object[method.paramCount()];
-					int i = 0;
-					for (ServiceParam p : method.getParams()) {
-						args[i++] = jo.getObject(p.getName(), p.getType());
-					}
-				}
+				Object[] args = parseParam(method, parts, request);
 				value = method.invoke(args);
 			}
 			if (value != null && value instanceof StreamResult) {
@@ -78,6 +69,8 @@ public class ServiceHandler implements RequestHandler {
 			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getKey());
 		} catch (InvalidServiceException e) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+		} catch (InvalidServiceParamException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, errorText(e));
 		} catch (AppException e) {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
 		} catch (Throwable e) {
@@ -86,6 +79,36 @@ public class ServiceHandler implements RequestHandler {
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, error);
 		}
 		baseRequest.setHandled(true);
+	}
+
+	/**
+	 * 分析调用参数
+	 * 
+	 * @param method
+	 * @param parts
+	 * @return
+	 */
+	private Object[] parseParam(ServiceMethod method, String[] parts, HttpServletRequest request) {
+		try {
+			if (method.paramCount() == 1 && parts.length == 3) {
+				Type type = method.getParams()[0].getType();
+				if (type == String.class)
+					return new String[] { parts[2] };
+				return new Object[] { Integer.parseInt(parts[2]) };
+			}
+			String param = Utils.streamToString(request.getInputStream());
+			if (param.startsWith("json="))
+				param = param.substring(5);
+			JSONObject jo = JSON.parseObject(param);
+			Object[] args = new Object[method.paramCount()];
+			int i = 0;
+			for (ServiceParam p : method.getParams()) {
+				args[i++] = jo.getObject(p.getName(), p.getType());
+			}
+			return args;
+		} catch (Throwable e) {
+			throw new InvalidServiceParamException(e);
+		}
 	}
 
 	private String errorText(Throwable e) {
@@ -102,7 +125,7 @@ public class ServiceHandler implements RequestHandler {
 	}
 
 	private void writeStreamResult(HttpServletResponse response, StreamResult sr) throws IOException {
-		if (sr.getInputStream() == null) {
+		if (sr.getInputStream() == null && sr.getStreamWriter() == null) {
 			response.sendError(404, sr.getName());
 		} else {
 			String mime = sr.getContentType();
@@ -115,7 +138,13 @@ public class ServiceHandler implements RequestHandler {
 					tmpstr.append("; filename=\"").append(URLEncoder.encode(sr.getName(), "UTF-8")).append("\"");
 				response.setHeader("Content-Disposition", tmpstr.toString());
 			}
-			HttpUtils.writeStreamBack(response, sr.getInputStream());
+			if (sr.getInputStream() != null) {
+				Utils.copy(sr.getInputStream(), response.getOutputStream());
+			} else {
+				try (BufferedOutputStream bos = new BufferedOutputStream(response.getOutputStream())) {
+					sr.getStreamWriter().write(bos);
+				}
+			}
 		}
 	}
 

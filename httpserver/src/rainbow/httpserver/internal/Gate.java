@@ -87,7 +87,7 @@ public class Gate extends AbstractHandler {
 				Path file = webdir.resolve(target);
 				if (Files.exists(file) && !Files.isDirectory(file)) {
 					response.setContentType(HttpUtils.getMimeType(file.getFileName().toString()));
-					HttpUtils.writeStreamBack(response, Files.newInputStream(file));
+					Utils.copy(Files.newInputStream(file), response.getOutputStream());
 					baseRequest.setHandled(true);
 					return;
 				}
