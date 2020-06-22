@@ -1,14 +1,11 @@
 package rainbow.db.dao.memory;
 
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.logging.Logger;
 
-import javax.sql.DataSource;
+import rainbow.db.dataSource.AbstractDataSource;
 
-public class MemoryDataSource implements DataSource {
+public class MemoryDataSource extends AbstractDataSource {
 
 	private MemoryConnection con;
 
@@ -33,38 +30,6 @@ public class MemoryDataSource implements DataSource {
 			} catch (SQLException e) {
 			}
 		}
-	}
-
-	@Override
-	public PrintWriter getLogWriter() throws SQLException {
-		return null;
-	}
-
-	@Override
-	public void setLogWriter(PrintWriter out) throws SQLException {
-	}
-
-	@Override
-	public void setLoginTimeout(int seconds) throws SQLException {
-	}
-
-	@Override
-	public int getLoginTimeout() throws SQLException {
-		return 0;
-	}
-
-	public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-		return null;
-	}
-
-	@Override
-	public <T> T unwrap(Class<T> iface) throws SQLException {
-		return null;
-	}
-
-	@Override
-	public boolean isWrapperFor(Class<?> iface) throws SQLException {
-		return false;
 	}
 
 }

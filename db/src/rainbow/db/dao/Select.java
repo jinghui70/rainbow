@@ -2,7 +2,6 @@ package rainbow.db.dao;
 
 import static rainbow.core.util.Preconditions.checkState;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,7 +10,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Objects;
@@ -27,6 +25,7 @@ import rainbow.db.dao.condition.ComboCondition;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
+import rainbow.db.jdbc.RowCallbackHandler;
 
 /**
  * 对一个对象查询的封装，只支持直接的属性链接
@@ -312,8 +311,8 @@ public class Select extends Where<Select> implements ISelect {
 	}
 
 	@Override
-	public void query(Consumer<ResultSet> consumer) {
-		build().query(dao, consumer);
+	public void query(RowCallbackHandler rch) {
+		build().query(dao, rch);
 	}
 
 	@Override

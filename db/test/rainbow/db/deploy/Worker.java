@@ -36,7 +36,7 @@ import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.jdbc.SimpleDriverDataSource;
+import rainbow.db.dataSource.SimpleDriverDataSource;
 import rainbow.db.model.Field;
 import rainbow.db.model.Model;
 import rainbow.db.model.Unit;

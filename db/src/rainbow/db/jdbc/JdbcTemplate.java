@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import javax.sql.DataSource;
 
@@ -248,8 +247,8 @@ public class JdbcTemplate implements JdbcOperations {
 		return execute(new QueryStatementCallback());
 	}
 
-	public void query(String sql, Consumer<ResultSet> consumer) throws DataAccessException {
-		query(sql, new RowConsumerResultSetExtractor(consumer));
+	public void query(String sql, RowCallbackHandler rch) throws DataAccessException {
+		query(sql, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
 	@Override
@@ -372,14 +371,13 @@ public class JdbcTemplate implements JdbcOperations {
 		return query(sql, newArgPreparedStatementSetter(args), rse);
 	}
 
-	public void query(String sql, PreparedStatementSetter pss, Consumer<ResultSet> consumer)
-			throws DataAccessException {
-		query(sql, pss, new RowConsumerResultSetExtractor(consumer));
+	public void query(String sql, PreparedStatementSetter pss, RowCallbackHandler rch) throws DataAccessException {
+		query(sql, pss, new RowCallbackHandlerResultSetExtractor(rch));
 	}
 
 	@Override
-	public void query(String sql, Object[] args, Consumer<ResultSet> consumer) throws DataAccessException {
-		query(sql, newArgPreparedStatementSetter(args), consumer);
+	public void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException {
+		query(sql, newArgPreparedStatementSetter(args), rch);
 	}
 
 	@Override
@@ -473,18 +471,18 @@ public class JdbcTemplate implements JdbcOperations {
 	 * Uses a regular ResultSet, so we have to be careful when using it: We don't
 	 * use it for navigating since this could lead to unpredictable consequences.
 	 */
-	private static class RowConsumerResultSetExtractor implements ResultSetExtractor<Object> {
+	private static class RowCallbackHandlerResultSetExtractor implements ResultSetExtractor<Object> {
 
-		private final Consumer<ResultSet> consumer;
+		private final RowCallbackHandler rch;
 
-		public RowConsumerResultSetExtractor(Consumer<ResultSet> consumer) {
-			this.consumer = consumer;
+		public RowCallbackHandlerResultSetExtractor(RowCallbackHandler rch) {
+			this.rch = rch;
 		}
 
 		@Override
 		public Object extractData(ResultSet rs) throws SQLException {
 			while (rs.next()) {
-				this.consumer.accept(rs);
+				this.rch.processRow(rs);
 			}
 			return null;
 		}
@@ -673,9 +671,9 @@ public class JdbcTemplate implements JdbcOperations {
 				RowMapper<?> rowMapper = param.getRowMapper();
 				Object result = (new RowMapperResultSetExtractor(rowMapper)).extractData(rsToUse);
 				returnedResults.put(param.getName(), result);
-			} else if (param.getRowConsumer() != null) {
-				Consumer<ResultSet> rch = param.getRowConsumer();
-				(new RowConsumerResultSetExtractor(rch)).extractData(rsToUse);
+			} else if (param.getRowCallbackHandler() != null) {
+				RowCallbackHandler rch = param.getRowCallbackHandler();
+				(new RowCallbackHandlerResultSetExtractor(rch)).extractData(rsToUse);
 				returnedResults.put(param.getName(), "ResultSet returned from stored procedure was processed");
 			} else if (param.getResultSetExtractor() != null) {
 				Object result = param.getResultSetExtractor().extractData(rsToUse);

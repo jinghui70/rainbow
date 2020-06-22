@@ -1,4 +1,4 @@
-package rainbow.db.jdbc;
+package rainbow.db.dataSource;
 
 import static rainbow.core.util.Preconditions.checkArgument;
 

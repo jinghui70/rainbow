@@ -1,12 +1,11 @@
 package rainbow.db.dao;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import rainbow.db.jdbc.DataAccessException;
 import rainbow.db.jdbc.IncorrectResultSizeDataAccessException;
+import rainbow.db.jdbc.RowCallbackHandler;
 import rainbow.db.jdbc.RowMapper;
 
 /**
@@ -26,12 +25,12 @@ public interface ISql {
 	int count(Dao dao);
 
 	/**
-	 * 查询并把结果逐一调用消费函数
+	 * 查询并把结果逐条调用处理函数
 	 * 
 	 * @param dao
-	 * @param consumer
+	 * @param rch
 	 */
-	void query(Dao dao, Consumer<ResultSet> consumer);
+	void query(Dao dao, RowCallbackHandler rch);
 
 	/**
 	 * 查询一条记录

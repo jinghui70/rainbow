@@ -3,11 +3,9 @@ package rainbow.db.dao;
 import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
@@ -17,6 +15,7 @@ import rainbow.db.jdbc.ColumnMapRowMapper;
 import rainbow.db.jdbc.DataAccessException;
 import rainbow.db.jdbc.EmptyResultDataAccessException;
 import rainbow.db.jdbc.IncorrectResultSizeDataAccessException;
+import rainbow.db.jdbc.RowCallbackHandler;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.jdbc.SingleColumnRowMapper;
 
@@ -215,11 +214,11 @@ public class Sql implements Appendable, ISql {
 	}
 
 	@Override
-	public void query(Dao dao, Consumer<ResultSet> consumer) {
+	public void query(Dao dao, RowCallbackHandler rch) {
 		if (noParams())
-			dao.getJdbcTemplate().query(getSql(), consumer);
+			dao.getJdbcTemplate().query(getSql(), rch);
 		else
-			dao.getJdbcTemplate().query(getSql(), getParamArray(), consumer);
+			dao.getJdbcTemplate().query(getSql(), getParamArray(), rch);
 	}
 
 	@Override

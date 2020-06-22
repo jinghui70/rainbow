@@ -1,8 +1,6 @@
 package rainbow.db.jdbc;
 
-import java.sql.ResultSet;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * Interface specifying a basic set of JDBC operations. Implemented by
@@ -111,7 +109,7 @@ public interface JdbcOperations {
 	 * @param rch  object that will extract results, one row at a time
 	 * @throws DataAccessException if the query fails
 	 */
-	void query(String sql, Object[] args, Consumer<ResultSet> consumer) throws DataAccessException;
+	void query(String sql, Object[] args, RowCallbackHandler rch) throws DataAccessException;
 
 	/**
 	 * Query given SQL to create a prepared statement from SQL and a list of

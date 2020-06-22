@@ -1,11 +1,10 @@
 package rainbow.db.dao;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import rainbow.core.model.object.ITreeObject;
+import rainbow.db.jdbc.RowCallbackHandler;
 
 /**
  * @author lijinghui
@@ -14,11 +13,11 @@ import rainbow.core.model.object.ITreeObject;
 interface ISelect {
 
 	/**
-	 * 查询并把结果逐一调用消费函数
+	 * 查询并把结果逐条调用处理函数
 	 * 
-	 * @param consumer
+	 * @param rch
 	 */
-	void query(Consumer<ResultSet> consumer);
+	void query(RowCallbackHandler rch);
 
 	/**
 	 * 返回符合条件的记录数

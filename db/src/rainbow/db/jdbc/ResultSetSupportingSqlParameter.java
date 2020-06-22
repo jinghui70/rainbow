@@ -1,8 +1,5 @@
 package rainbow.db.jdbc;
 
-import java.sql.ResultSet;
-import java.util.function.Consumer;
-
 /**
  * Common base class for ResultSet-supporting SqlParameters like
  * {@link SqlOutParameter} and {@link SqlReturnResultSet}.
@@ -14,7 +11,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 
 	private ResultSetExtractor<?> resultSetExtractor;
 
-	private Consumer<ResultSet> rowConsumer;
+	private RowCallbackHandler rowCallbackHandler;
 
 	private RowMapper<?> rowMapper;
 
@@ -66,9 +63,9 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * @param sqlType SQL type of the parameter according to java.sql.Types
 	 * @param rch RowCallbackHandler to use for parsing the ResultSet
 	 */
-	public ResultSetSupportingSqlParameter(String name, int sqlType, Consumer<ResultSet> consumer) {
+	public ResultSetSupportingSqlParameter(String name, int sqlType, RowCallbackHandler rch) {
 		super(name, sqlType);
-		this.rowConsumer = consumer;
+		this.rowCallbackHandler = rch;
 	}
 
 	/**
@@ -88,7 +85,7 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	 * ResultSetExtractor, RowCallbackHandler or RowMapper?
 	 */
 	public boolean isResultSetSupported() {
-		return (this.resultSetExtractor != null || this.rowConsumer != null || this.rowMapper != null);
+		return (this.resultSetExtractor != null || this.rowCallbackHandler != null || this.rowMapper != null);
 	}
 
 	/**
@@ -101,8 +98,8 @@ public class ResultSetSupportingSqlParameter extends SqlParameter {
 	/**
 	 * Return the RowCallbackHandler held by this parameter, if any.
 	 */
-	public Consumer<ResultSet> getRowConsumer() {
-		return this.rowConsumer;
+	public RowCallbackHandler getRowCallbackHandler() {
+		return this.rowCallbackHandler;
 	}
 
 	/**
