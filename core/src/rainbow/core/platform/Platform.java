@@ -17,11 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
-import rainbow.core.bundle.BundleListener;
 import rainbow.core.bundle.BundleManager;
 import rainbow.core.bundle.BundleManagerImpl;
-import rainbow.core.console.CommandProvider;
-import rainbow.core.console.Console;
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.util.encrypt.Encryption;
 import rainbow.core.util.ioc.Bean;
@@ -63,8 +60,7 @@ public final class Platform {
 	private Context context = new Context(ImmutableMap.of( //
 			"mBeanServer", Bean.singleton(ManagementFactory.getPlatformMBeanServer(), MBeanServer.class), //
 			"bundleLoader", Bean.singleton(BundleLoader.class), //
-			"bundleManager", Bean.singleton(BundleManagerImpl.class), //
-			"bundleCommandProvider", Bean.singleton(BundleCommandProvider.class) //
+			"bundleManager", Bean.singleton(BundleManagerImpl.class) //
 	));
 
 	/**
@@ -89,7 +85,6 @@ public final class Platform {
 		}
 
 		// 注册扩展点
-		ExtensionRegistry.registerExtensionPoint(null, BundleListener.class);
 		ExtensionRegistry.registerExtensionPoint(null, Encryption.class);
 
 		// 加密
@@ -100,16 +95,6 @@ public final class Platform {
 			} catch (ClassNotFoundException e) {
 				logger.warn("Encryption class not found: {}", encryptionClass);
 			}
-		}
-		// 控制台
-		if (configData.getBool("console")) {
-			ExtensionRegistry.registerExtensionPoint(null, CommandProvider.class);
-			ExtensionRegistry.registerExtension(null, CommandProvider.class,
-					context.getBean(BundleCommandProvider.class));
-			Console console = new Console();
-			Thread t = new Thread(console, "Rainbow Console");
-			t.setDaemon(true);
-			t.start();
 		}
 
 		BundleManager bundleManager = context.getBean(BundleManager.class);
@@ -143,7 +128,7 @@ public final class Platform {
 	private void startLocalJmxServer(int jmxPort) {
 		logger.info("starting jmx server on port {}", jmxPort);
 		// MBeanServer
-		
+
 		MBeanServer mBeanServer = context.getBean("mBeanServer", MBeanServer.class);
 		try {
 			mBeanServer.registerMBean(new PlatformManager(), PlatformManager.getName());
@@ -155,7 +140,7 @@ public final class Platform {
 		try {
 			LocateRegistry.createRegistry(jmxPort);
 			String url = String.format("service:jmx:rmi:///jndi/rmi://localhost:%d/rainbow", jmxPort);
-			JMXServiceURL jmxurl = new JMXServiceURL(url); 
+			JMXServiceURL jmxurl = new JMXServiceURL(url);
 			cs = JMXConnectorServerFactory.newJMXConnectorServer(jmxurl, null, mBeanServer);
 			cs.start();
 			logger.info("jmx server started");
