@@ -3,11 +3,14 @@ package rainbow.core.extension;
 import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import com.google.common.base.Objects;
+
 import rainbow.core.model.IAdaptable;
-import rainbow.core.model.exception.AppException;
 import rainbow.core.model.object.INameObject;
 import rainbow.core.util.Utils;
 
@@ -18,6 +21,17 @@ import rainbow.core.util.Utils;
  * 
  */
 public class ExtensionPoint {
+
+	private static Comparator<Extension> c = new Comparator<Extension>() {
+		@Override
+		public int compare(Extension e1, Extension e2) {
+			if (e1.getOrder() == 0) {
+				return e2.getOrder() == 0 ? 0 : 1;
+			} else if (e2.getOrder() == 0)
+				return -1;
+			return Integer.compare(e1.getOrder(), e2.getOrder());
+		}
+	};
 
 	/**
 	 * 扩展点的bundle
@@ -43,17 +57,12 @@ public class ExtensionPoint {
 		return bundle;
 	}
 
-	Extension addExtension(String bundle, String name, Object object) {
+	Extension addExtension(String bundle, String name, int order, Object object) {
 		Object eo = null;
 		if (clazz.isInstance(object))
 			eo = object;
 		else if (object instanceof IAdaptable)
 			eo = ((IAdaptable) object).getAdapter(clazz);
-		else if (object instanceof Factory) {
-			if (clazz.isAssignableFrom(((Factory) object).getClazz())) {
-				eo = object;
-			}
-		}
 		checkNotNull(eo, "invalid extension object {}, register Extension {} failed", object.getClass().getName(),
 				clazz.getSimpleName());
 
@@ -68,9 +77,10 @@ public class ExtensionPoint {
 			checkArgument(!name.equals(e.getName()), "duplicated extension name '{}' of {}", name,
 					clazz.getSimpleName());
 		}
-		Extension extension = new Extension(bundle, this, eo);
+		Extension extension = new Extension(bundle, this, order, eo);
 		extension.setName(name);
 		extensions.add(extension);
+		extensions.sort(c);
 		return extension;
 	}
 
@@ -88,12 +98,8 @@ public class ExtensionPoint {
 	 * @param name
 	 * @return
 	 */
-	public Extension getExtension(String name) {
-		for (Extension extension : extensions) {
-			if (extension.getName().equals(name))
-				return extension;
-		}
-		return null;
+	public Optional<Extension> getExtension(String name) {
+		return extensions.parallelStream().filter(e -> Objects.equal(e.getName(), name)).findFirst();
 	}
 
 	/**
@@ -102,10 +108,8 @@ public class ExtensionPoint {
 	 * @param name
 	 * @return
 	 */
-	public Object getExtensionObject(String name) throws AppException {
-		Extension extension = getExtension(name);
-		if (extension == null)
-			return null;
-		return extension.getObject();
+	public Object getExtensionObject(String name) {
+		return getExtension(name).map(Extension::getObject).orElse(null);
 	}
+
 }

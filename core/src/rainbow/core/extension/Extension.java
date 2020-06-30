@@ -14,11 +14,14 @@ public class Extension extends NameObject {
 
 	private ExtensionPoint point;
 
+	private int order;
+
 	private Object object;
 
-	public Extension(String bundle, ExtensionPoint point, Object object) {
+	public Extension(String bundle, ExtensionPoint point, int order, Object object) {
 		this.bundle = bundle;
 		this.point = point;
+		this.order = order;
 		this.object = object;
 	}
 
@@ -31,9 +34,11 @@ public class Extension extends NameObject {
 	}
 
 	public Object getObject() {
-		if (object instanceof Factory)
-			return ((Factory) object).createInstance();
 		return object;
+	}
+
+	public int getOrder() {
+		return order;
 	}
 
 }

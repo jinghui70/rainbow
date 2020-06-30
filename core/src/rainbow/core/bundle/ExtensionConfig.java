@@ -8,32 +8,26 @@ package rainbow.core.bundle;
  */
 public class ExtensionConfig {
 
-	/**
-	 * 扩展名
-	 */
-	private String name;
-
-	/**
-	 * 如果该扩展是一个Bean的BeanName
-	 */
-	private String beanName;
+	private rainbow.core.bundle.Extension annotation;
 
 	/**
 	 * 扩展对象类
 	 */
-	private Class<?> extClass;
+	private Class<?> clazz;
 
-	/**
-	 * 扩展点
-	 */
-	private Class<?> point;
+	private String beanName;
 
-	public String getName() {
-		return name;
+	public ExtensionConfig(Extension annotation, Class<?> clazz) {
+		this.annotation = annotation;
+		this.clazz = clazz;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public rainbow.core.bundle.Extension getAnnotation() {
+		return annotation;
+	}
+
+	public Class<?> getClazz() {
+		return clazz;
 	}
 
 	public String getBeanName() {
@@ -42,22 +36,6 @@ public class ExtensionConfig {
 
 	public void setBeanName(String beanName) {
 		this.beanName = beanName;
-	}
-
-	public Class<?> getExtClass() {
-		return extClass;
-	}
-
-	public void setExtClass(Class<?> extClass) {
-		this.extClass = extClass;
-	}
-
-	public Class<?> getPoint() {
-		return point;
-	}
-
-	public void setPoint(Class<?> point) {
-		this.point = point;
 	}
 
 }

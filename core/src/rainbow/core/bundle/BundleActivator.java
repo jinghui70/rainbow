@@ -1,7 +1,5 @@
 package rainbow.core.bundle;
 
-import static rainbow.core.util.Preconditions.checkState;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -88,21 +86,7 @@ public abstract class BundleActivator {
 			context = createContext(contextConfig, parentContexts);
 			context.loadAll();
 		}
-
-		// 注册配置的扩展
-		extConfigs.stream().forEach(extConfig -> {
-			if (Utils.isNullOrEmpty(extConfig.getBeanName())) {
-				try {
-					Object eo = extConfig.getExtClass().newInstance();
-					registerExtension(extConfig.getPoint(), extConfig.getName(), eo);
-				} catch (InstantiationException | IllegalAccessException e) {
-					logger.error("register extension {}[{}] failed", extConfig.getName(), extConfig.getExtClass(), e);
-				}
-			} else {
-				registerExtension(extConfig.getPoint(), extConfig.getName(), getBean(extConfig.getBeanName()));
-			}
-		});
-		registerExtension();
+		registerExtension(extConfigs);
 		doStart();
 	}
 
@@ -113,9 +97,36 @@ public abstract class BundleActivator {
 	}
 
 	/**
-	 * 注册未配置的扩展，一般用不到
+	 * 注册配置的扩展
 	 */
-	protected void registerExtension() throws BundleException {
+	private void registerExtension(List<ExtensionConfig> extConfigs) throws BundleException {
+		for (ExtensionConfig extConfig : extConfigs) {
+			rainbow.core.bundle.Extension extDef = extConfig.getAnnotation();
+			Class<?> point = extDef.point();
+			if (point == Object.class) {
+				Class<?>[] interfaces = extConfig.getClazz().getInterfaces();
+				if (interfaces.length == 0) {
+					throw new BundleException("{} should implements an extension point",
+							extConfig.getClazz().getName());
+				}
+				point = interfaces[0];
+			}
+			Object object = null;
+			if (Utils.isNullOrEmpty(extConfig.getBeanName())) {
+				try {
+					object = extConfig.getClazz().newInstance();
+				} catch (InstantiationException | IllegalAccessException e) {
+					throw new BundleException("create extension object of[{}] failed", extConfig.getClazz(), e);
+				}
+			} else {
+				object = getBean(extConfig.getBeanName());
+			}
+			Extension extension = ExtensionRegistry.registerExtension(bundleId, point, extDef.name(), extDef.order(),
+					object);
+			if (extensions == null)
+				extensions = new LinkedList<Extension>();
+			extensions.add(extension);
+		}
 	}
 
 	/**
@@ -142,23 +153,14 @@ public abstract class BundleActivator {
 	 * @param contextConfig
 	 * @param extBeans
 	 */
-	final protected void readClassConfig(Map<String, Bean> contextConfig, List<ExtensionConfig> extBeans) {
+	final protected void readClassConfig(Map<String, Bean> contextConfig, List<ExtensionConfig> extConfigs) {
 		getClassLoader().procClass(clazz -> {
 			// 读扩展配置
 			rainbow.core.bundle.Extension extDef = clazz.getAnnotation(rainbow.core.bundle.Extension.class);
 			ExtensionConfig extConfig = null;
 			if (extDef != null) {
-				extConfig = new ExtensionConfig();
-				extConfig.setName(extDef.name());
-				extConfig.setExtClass(clazz);
-				Class<?> point = extDef.point();
-				if (point == Object.class) {
-					Class<?>[] interfaces = clazz.getInterfaces();
-					checkState(interfaces.length > 0, "{} should implements an extension point", clazz.getName());
-					point = interfaces[0];
-				}
-				extConfig.setPoint(point);
-				extBeans.add(extConfig);
+				extConfig = new ExtensionConfig(extDef, clazz);
+				extConfigs.add(extConfig);
 			}
 
 			// 读Bean配置
@@ -295,20 +297,6 @@ public abstract class BundleActivator {
 		if (points == null)
 			points = new LinkedList<Class<?>>();
 		points.add(clazz);
-	}
-
-	/**
-	 * 注册一个扩展
-	 * 
-	 * @param clazz  扩展点
-	 * @param name   扩展名
-	 * @param object 扩展对象
-	 */
-	protected final void registerExtension(Class<?> clazz, String name, Object object) {
-		Extension extension = ExtensionRegistry.registerExtension(bundleId, clazz, name, object);
-		if (extensions == null)
-			extensions = new LinkedList<Extension>();
-		extensions.add(extension);
 	}
 
 	protected final void registerMBean(Object mbean, String name) {

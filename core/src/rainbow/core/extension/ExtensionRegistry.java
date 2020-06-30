@@ -3,10 +3,8 @@ package rainbow.core.extension;
 import static rainbow.core.util.Preconditions.checkNotNull;
 import static rainbow.core.util.Preconditions.checkState;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,9 +60,9 @@ public abstract class ExtensionRegistry {
 	 * @param object 扩展对象
 	 * @return
 	 */
-	public static Extension registerExtension(String bundle, Class<?> clazz, String name, Object object) {
+	public static Extension registerExtension(String bundle, Class<?> clazz, String name, int order, Object object) {
 		ExtensionPoint point = getExtensionPoint(clazz);
-		Extension extension = point.addExtension(bundle, name, object);
+		Extension extension = point.addExtension(bundle, name, order, object);
 		logger.info("register extension {}:{}", clazz.getSimpleName(), extension.getName());
 		return extension;
 	}
@@ -78,7 +76,7 @@ public abstract class ExtensionRegistry {
 	 * @return
 	 */
 	public static Extension registerExtension(String bundle, Class<?> clazz, Object object) {
-		return registerExtension(bundle, clazz, null, object);
+		return registerExtension(bundle, clazz, null, 0, object);
 	}
 
 	/**
@@ -121,7 +119,7 @@ public abstract class ExtensionRegistry {
 	 * @param clazz
 	 * @return
 	 */
-	public static Collection<Extension> getExtensions(Class<?> clazz) {
+	public static List<Extension> getExtensions(Class<?> clazz) {
 		ExtensionPoint point = getExtensionPoint(clazz);
 		return point.getExtensions();
 	}
@@ -133,8 +131,7 @@ public abstract class ExtensionRegistry {
 	 * @return
 	 */
 	public static List<String> getExtensionNames(Class<?> clazz) {
-		ExtensionPoint point = getExtensionPoint(clazz);
-		return Utils.transform(point.getExtensions(), e -> e.getName());
+		return Utils.transform(getExtensions(clazz), Extension::getName);
 	}
 
 	/**
@@ -145,9 +142,7 @@ public abstract class ExtensionRegistry {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> List<T> getExtensionObjects(Class<T> clazz) {
-		ExtensionPoint point = getExtensionPoint(clazz);
-		Collection<Extension> extensions = point.getExtensions();
-		return extensions.stream().map(e->(T) e.getObject()).collect(Collectors.toList());
+		return Utils.transform(getExtensions(clazz), e -> (T) e.getObject());
 	}
 
 	/**
