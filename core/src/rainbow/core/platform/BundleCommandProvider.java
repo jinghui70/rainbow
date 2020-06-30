@@ -33,6 +33,7 @@ public class BundleCommandProvider implements CommandProvider {
 		this.bundleManager = bundleManager;
 	}
 
+	@Override
 	public String getName() {
 		return "bundle";
 	}
@@ -62,10 +63,9 @@ public class BundleCommandProvider implements CommandProvider {
 		if (nextArg == null) {
 			ci.println("No bundle specified");
 		} else {
-			Bundle bundle = bundleManager.get(nextArg);
-			if (bundle == null)
-				ci.println("bundle %s not found", nextArg);
-			ci.println(bundle.getId());
+			String msg = bundleManager.get(nextArg).map(Bundle::getId)
+					.orElse(Utils.format("bundle {} not found", nextArg));
+			ci.println(msg);
 		}
 	}
 
@@ -152,9 +152,9 @@ public class BundleCommandProvider implements CommandProvider {
 		ci.println("State       Bundle                        Desc");
 		bundles.forEach(b -> ci.println(String.format("%-12s%-30s%s", b.getState().name(), b.getId(), b.getDesc())));
 	}
-	
+
 	private Stream<Bundle> doFilter(BundleState stateFilter, String filteredName) {
-		Stream<Bundle> bundles = bundleManager.getBundles();
+		Stream<Bundle> bundles = bundleManager.getBundles().stream();
 		if (stateFilter != null) {
 			bundles = bundles.filter(b -> b.getState() == stateFilter);
 		}

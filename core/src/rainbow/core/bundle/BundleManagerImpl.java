@@ -1,6 +1,5 @@
 package rainbow.core.bundle;
 
-import static rainbow.core.util.Preconditions.checkNotNull;
 import static rainbow.core.util.Preconditions.checkState;
 
 import java.io.IOException;
@@ -8,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.management.MBeanServer;
 
@@ -19,8 +17,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 
-import rainbow.core.extension.Extension;
-import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.BundleAncestor;
 import rainbow.core.platform.BundleLoader;
 import rainbow.core.util.Utils;
@@ -73,14 +69,13 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 */
 	@Override
 	public synchronized void uninstallBundle(String id) {
-		Bundle bundle = get(id);
-		if (bundle == null)
-			return;
-		if (bundle.getState() == BundleState.FOUND || bundle.getState() == BundleState.READY) {
-			bundles.remove(bundle);
-			bundle.destroy();
-		}
-		refreshUnactiveBundles();
+		get(id).ifPresent(bundle -> {
+			if (bundle.getState() == BundleState.FOUND || bundle.getState() == BundleState.READY) {
+				bundles.remove(bundle);
+				bundle.destroy();
+			}
+			refreshUnactiveBundles();
+		});
 	}
 
 	@Override
@@ -97,9 +92,13 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 * @param id
 	 * @return
 	 */
-	public Bundle get(String id) {
-		Optional<Bundle> o = bundles.stream().filter(b -> b.getId().equals(id)).findFirst();
-		return o.isPresent() ? o.get() : null;
+	@Override
+	public Optional<Bundle> get(String id) {
+		return bundles.parallelStream().filter(b -> b.getId().equals(id)).findAny();
+	}
+
+	private Bundle getBundle(String id) throws BundleException {
+		return get(id).orElseThrow(() -> new BundleException("bundle not found: {}", id));
 	}
 
 	/**
@@ -107,8 +106,9 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 * 
 	 * @return
 	 */
-	public Stream<Bundle> getBundles() {
-		return bundles.stream();
+	@Override
+	public List<Bundle> getBundles() {
+		return bundles;
 	}
 
 	/**
@@ -139,8 +139,9 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 				return true;
 			}
 			BundleAncestor ancestor = new BundleAncestor();
+
 			for (String id : bundle.getParentId()) {
-				Bundle parent = get(id);
+				Bundle parent = get(id).orElse(null);
 				if (parent == null)
 					return false;
 				if (ancestor.unaware(parent)) {
@@ -163,8 +164,9 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		}
 	}
 
+	@Override
 	public boolean startBundle(String id) throws BundleException {
-		Bundle bundle = checkNotNull(get(id), "bundle not found: {}", id);
+		Bundle bundle = getBundle(id);
 		synchronized (this) {
 			return startBundle(bundle);
 		}
@@ -202,8 +204,8 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	private void doStartBundle(Bundle bundle) throws BundleException {
 		BundleActivator activator = createActivator(bundle);
 		List<Context> parentContexts = null;
-		if (bundle.getParents() != null) 
-			parentContexts = Utils.transform(bundle.getParents(), p->p.getActivator().getContext());
+		if (bundle.getParents() != null)
+			parentContexts = Utils.transform(bundle.getParents(), p -> p.getActivator().getContext());
 		bundle.setActivator(activator);
 		activator.start(mBeanServer, parentContexts);
 		for (Bundle parent : bundle.getParents()) {
@@ -231,9 +233,9 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		}
 	}
 
+	@Override
 	public void stopBundle(String id) throws BundleException {
-		Bundle bundle = get(id);
-		checkNotNull(bundle, "bundle {} not found", id);
+		Bundle bundle = getBundle(id);
 		synchronized (this) {
 			stopBundle(bundle);
 		}
@@ -269,6 +271,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 * @param onList  初始化要启动的bundle列表
 	 * @param offList 初始化不要启动的bundle列表
 	 */
+	@Override
 	public void initStart() {
 		logger.info("starting bundles: {}", bundles.stream().map(Bundle::toString).collect(Collectors.joining(",")));
 		for (Bundle bundle : bundles)
@@ -278,6 +281,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	/**
 	 * 停止所有的bundle
 	 */
+	@Override
 	public synchronized void stopAll() {
 		for (Bundle bundle : bundles)
 			stopBundle(bundle);
@@ -290,24 +294,6 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 * @param active
 	 */
 	private void fireBundleEvent(Bundle bundle, boolean active) {
-		for (Extension extension : ExtensionRegistry.getExtensions(BundleListener.class)) {
-			Bundle extensionBundle = null;
-			if (extension.getBundle() != null)
-				extensionBundle = get(extension.getBundle());
-			if (extensionBundle == null
-					|| extensionBundle.getState() == BundleState.ACTIVE && extensionBundle != bundle) {
-				BundleListener listener = (BundleListener) extension.getObject();
-				try {
-					if (active)
-						listener.bundleStarted(bundle.getId());
-					else
-						listener.bundleStop(bundle.getId());
-				} catch (Throwable e) {
-					logger.error("when bundle {} {}, listener [{}:{}] encounter an error", bundle.getId(),
-							active ? "start" : "stop", extensionBundle.getId(), listener.getClass(), e);
-				}
-			}
-		}
 	}
 
 }

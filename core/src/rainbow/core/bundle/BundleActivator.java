@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
@@ -93,7 +94,7 @@ public abstract class BundleActivator {
 	/**
 	 * 注册所有的扩展点
 	 */
-	protected void registerExtensionPoint() throws BundleException {
+	protected void registerExtensionPoint() {
 	}
 
 	/**
@@ -186,16 +187,11 @@ public abstract class BundleActivator {
 	 * Bundle停止
 	 */
 	public void stop() {
-		if (points != null)
-			for (Class<?> point : points)
-				ExtensionRegistry.unregisterExtensionPoint(point);
-		if (extensions != null)
-			for (Extension extension : extensions)
-				ExtensionRegistry.unregisterExtension(extension);
+		Optional.ofNullable(points).ifPresent(p -> p.forEach(ExtensionRegistry::unregisterExtensionPoint));
+		Optional.ofNullable(extensions).ifPresent(e -> e.forEach(ExtensionRegistry::unregisterExtension));
 		if (mBeanNames != null)
 			unregisterMBean();
-		if (context != null)
-			context.close();
+		Optional.ofNullable(context).ifPresent(Context::close);
 	}
 
 	/**
