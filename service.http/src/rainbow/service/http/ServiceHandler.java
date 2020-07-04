@@ -4,6 +4,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import rainbow.core.bundle.Bean;
 import rainbow.core.bundle.Extension;
+import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.SessionException;
 import rainbow.core.util.Utils;
@@ -47,12 +49,24 @@ public class ServiceHandler implements RequestHandler {
 	@Override
 	public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 			throws IOException, ServletException {
+		RequestContext context = new RequestContext(target, request, response);
 		try {
 			String[] parts = Utils.split(target, '/');
 			if (parts.length < 2)
 				throw new InvalidServiceException(target);
+			// 读取服务对应的服务函数
 			Service service = serviceRegistry.getService(parts[0]);
 			ServiceMethod method = service.getMethod(parts[1]);
+			context.setService(service);
+			context.setMethod(method);
+
+			// 服务调用前拦截处理
+			List<HttpServiceInterceptor> interceptors = ExtensionRegistry
+					.getExtensionObjects(HttpServiceInterceptor.class);
+			if (!interceptors.isEmpty()) {
+				for (HttpServiceInterceptor interceptor : interceptors)
+					interceptor.beforeService(context);
+			}
 
 			Object value = null;
 			if (method.paramCount() == 0) {
@@ -60,6 +74,13 @@ public class ServiceHandler implements RequestHandler {
 			} else {
 				Object[] args = parseParam(method, parts, request);
 				value = method.invoke(args);
+			}
+			// 服务调用后拦截处理
+			if (!interceptors.isEmpty()) {
+				context.setResult(value);
+				for (HttpServiceInterceptor interceptor : interceptors)
+					interceptor.afterService(context);
+				value = context.getResult(); // 拦截器是可以改变结果的
 			}
 			if (value != null && value instanceof StreamResult) {
 				writeStreamResult(response, (StreamResult) value);

@@ -10,15 +10,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import rainbow.core.model.object.IIdObject;
-import rainbow.core.util.Utils;
-import rainbow.service.annotation.Comment;
 import rainbow.service.exception.InvalidServiceException;
 
 public class Service implements IIdObject {
 
 	private String id;
-
-	private String comment;
 
 	/**
 	 * 服务定义接口类
@@ -38,10 +34,6 @@ public class Service implements IIdObject {
 	@Override
 	public String getId() {
 		return this.id;
-	}
-
-	public String getComment() {
-		return comment;
 	}
 
 	public Class<?> getServiceClass() {
@@ -64,18 +56,9 @@ public class Service implements IIdObject {
 		}
 	}
 
-	public Service(Class<?> serviceClass) {
+	public Service(String id, Class<?> serviceClass) {
 		this.serviceClass = serviceClass;
-		rainbow.service.annotation.Service annotation = serviceClass
-				.getAnnotation(rainbow.service.annotation.Service.class);
-		if (annotation != null) {
-			this.id = annotation.id();
-		} else {
-			this.id = Utils.lowerFirstChar(Utils.substringBefore(serviceClass.getSimpleName(), "Service"));
-		}
-		Comment comment = serviceClass.getAnnotation(Comment.class);
-		if (comment != null)
-			this.comment = comment.value();
+		this.id = id;
 		cacheMethods(serviceClass);
 	}
 

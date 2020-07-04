@@ -16,12 +16,23 @@ public abstract class ServiceBundleActivator extends BundleActivator {
 
 	private static final Logger logger = LoggerFactory.getLogger(ServiceBundleActivator.class);
 
+	/**
+	 * 返回服务前缀名用以区分不同插件中的服务
+	 * 
+	 * @return
+	 */
+	protected String getPrefix() {
+		return Utils.NULL_STR;
+	}
+
 	@Override
 	protected void doStart() throws BundleException {
 		List<Service> services = new LinkedList<Service>();
 		getClassLoader().procClass(clazz -> {
 			if (clazz.isInterface() && clazz.getName().endsWith("Service")) {
-				Service service = new Service(clazz);
+				String id = Utils.lowerFirstChar(Utils.substringBefore(clazz.getSimpleName(), "Service"));
+
+				Service service = new Service(id, clazz);
 				String name = Utils.lowerFirstChar(clazz.getSimpleName());
 				Object bean = checkNotNull(getBean(name, clazz), "service bean not found: {}", name);
 				service.setServiceImpl(bean);

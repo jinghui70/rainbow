@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.SessionException;
-import rainbow.service.annotation.Comment;
 
 public class ServiceMethod {
 
@@ -47,9 +46,6 @@ public class ServiceMethod {
 	public ServiceMethod(Service service, Method method) {
 		this.service = service;
 		this.method = method;
-		Comment entry = method.getAnnotation(Comment.class);
-		if (entry != null)
-			this.comment = entry.value();
 		Parameter[] ps = method.getParameters();
 		params = new ServiceParam[ps.length];
 		if (ps.length > 0) {
