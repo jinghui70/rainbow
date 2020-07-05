@@ -19,8 +19,6 @@ public class ServiceMethod {
 
 	private Method method;
 
-	private String comment;
-
 	private ServiceParam[] params;
 
 	public Service getService() {
@@ -31,8 +29,8 @@ public class ServiceMethod {
 		return method;
 	}
 
-	public String getComment() {
-		return comment;
+	public String getName() {
+		return method.getName();
 	}
 
 	public ServiceParam[] getParams() {
