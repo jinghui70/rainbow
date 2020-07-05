@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -17,8 +18,6 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.platform.Platform;
@@ -101,15 +100,15 @@ public class Gate extends AbstractHandler {
 	}
 
 	private void prepareSession(HttpSession session) {
-		ImmutableMap.Builder<String, Object> sessionValueBuilder = ImmutableMap.builder();
+		Map<String, Object> sessionValue = new HashMap<String, Object>();
 		Enumeration<String> enumeration = session.getAttributeNames();
 		while (enumeration.hasMoreElements()) {
 			String key = enumeration.nextElement();
 			Object value = session.getAttribute(key);
-			sessionValueBuilder.put(key, value);
+			sessionValue.put(key, value);
 		}
-		Map<String, Object> sessionValue = sessionValueBuilder.build();
-		Session.set(sessionValue);
+		if (!sessionValue.isEmpty())
+			Session.set(sessionValue);
 	}
 
 }
