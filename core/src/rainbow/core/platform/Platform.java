@@ -74,21 +74,21 @@ public final class Platform {
 		logger.info("RAINBOW_HOME = {}", home.toString());
 		logger.info("loading config param from core.json...");
 
-		ConfigData configData = new ConfigData("core", true);
-		id = configData.getInt("id");
+		BundleConfig bundleConfig = new BundleConfig("core", true);
+		id = bundleConfig.getInt("id");
 		logger.info("Rainbow ID = {}", id);
 
 		setBundleLoader();
 
 		if (startLocalJmxServer) {
-			startLocalJmxServer(configData.getInt("jmxPort", 1109));
+			startLocalJmxServer(bundleConfig.getInt("jmxPort", 1109));
 		}
 
 		// 注册扩展点
 		ExtensionRegistry.registerExtensionPoint(null, Encryption.class);
 
 		// 加密
-		String encryptionClass = configData.getString("encryption");
+		String encryptionClass = bundleConfig.getString("encryption");
 		if (encryptionClass != null) {
 			try {
 				Class.forName(encryptionClass);

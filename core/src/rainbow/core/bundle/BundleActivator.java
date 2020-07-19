@@ -2,15 +2,11 @@ package rainbow.core.bundle;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -18,13 +14,8 @@ import javax.management.ObjectName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-
 import rainbow.core.extension.Extension;
 import rainbow.core.extension.ExtensionRegistry;
-import rainbow.core.platform.ConfigData;
-import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Bean;
 import rainbow.core.util.ioc.BundleContext;
@@ -204,83 +195,6 @@ public abstract class BundleActivator {
 	protected InputStream getResource(String resource) throws IOException {
 		Resource r = getClassLoader().getLocalResource(resource);
 		return r.getInputStream();
-	}
-
-	/**
-	 * 返回Bundle的配置目录
-	 * 
-	 * @return
-	 */
-	private Path getConfigurePath() {
-		return Platform.getHome().resolve("conf").resolve(bundleId);
-	}
-
-	/**
-	 * 返回Bundle的配置目录下文件
-	 * 
-	 * @return
-	 */
-	public Path getConfigureFile(String fileName) {
-		return getConfigurePath().resolve(fileName);
-	}
-
-	/**
-	 * 返回Bundle的配置目录下指定后缀的所有文件
-	 * 
-	 * @param suffix
-	 * @return
-	 */
-	public final List<Path> getConfigureFiles(final String suffix) {
-		try {
-			return Files.list(getConfigurePath()).filter(f -> f.getFileName().toString().endsWith(suffix))
-					.collect(Collectors.toList());
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	/**
-	 * 返回配置
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public final ConfigData getConfig() {
-		return new ConfigData(bundleId);
-	}
-
-	/**
-	 * 如果配置文件是一个json文件，直接解析为一个对象
-	 * 
-	 * @param fileName
-	 * @param clazz
-	 * @return
-	 * @throws IOException
-	 */
-	public final <T> T parseConfigFile(final String fileName, Class<T> clazz) {
-		Path file = getConfigureFile(fileName);
-		try (InputStream is = Files.newInputStream(file)) {
-			return JSON.parseObject(is, StandardCharsets.UTF_8, clazz);
-		} catch (IOException e) {
-			throw new RuntimeException(String.format("parse file %s error", fileName), e);
-		}
-	}
-
-	/**
-	 * 如果配置文件是一个json文件，直接解析为一个对象
-	 * 
-	 * @param fileName
-	 * @param tr
-	 * @return
-	 * @throws IOException
-	 */
-	public <T> T parseConfigFile(final String fileName, TypeReference<T> tr) {
-		Path file = getConfigureFile(fileName);
-		try (InputStream is = Files.newInputStream(file)) {
-			return JSON.parseObject(is, StandardCharsets.UTF_8, tr.getType());
-		} catch (IOException e) {
-			throw new RuntimeException(String.format("parse file %s error", fileName), e);
-		}
 	}
 
 	/**

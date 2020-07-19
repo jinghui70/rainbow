@@ -2,14 +2,17 @@ package rainbow.core.platform;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-
-import rainbow.core.util.Utils;
 
 /**
  * 
@@ -24,35 +27,30 @@ import rainbow.core.util.Utils;
  * @author lijinghui
  *
  */
-public class ConfigData {
+public class BundleConfig {
 
 	private JSONObject root;
 
 	private Path path;
 
-	private boolean standalone = true;
+	private Path bundleConfigPath;
 
-	/**
-	 * 给测试用的构造函数
-	 * 
-	 * @param root
-	 */
-	public ConfigData(JSONObject root) {
-		this.root = root;
-	}
+	private boolean standalone = true;
 
 	/**
 	 * 给测试用的构造函数。测试通常用
 	 * Paths.get(xx.class.getResource("config.json").toURI())的方式获得配置文件
 	 * 
-	 * @param path
+	 * @param bundleConfig 配置数据文件
+	 * @param configPath 配置文件目录
 	 */
-	public ConfigData(Path path) {
-		this.path = path;
-		root = Utils.loadConfigFile(path);
+	public BundleConfig(Path bundleConfig, Path configPath) {
+		this.path = bundleConfig;
+		root = loadConfigFile(path);
+		this.bundleConfigPath = configPath;
 	}
 
-	public ConfigData(String bundleId, boolean checkExist) {
+	public BundleConfig(String bundleId, boolean checkExist) {
 		init(bundleId);
 		if (checkExist)
 			checkNotNull(root, "config file not found: {}", path.getFileName());
@@ -61,20 +59,17 @@ public class ConfigData {
 			init("core");
 			root = root.getJSONObject(bundleId);
 		}
-	}
-
-	public ConfigData(String bundleId) {
-		this(bundleId, false);
+		bundleConfigPath = Platform.getHome().resolve("conf").resolve(bundleId);
 	}
 
 	private void init(String bundleId) {
 		if (Platform.isDev()) {
 			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json.dev");
-			root = Utils.loadConfigFile(path);
+			root = loadConfigFile(path);
 		}
 		if (root == null) {
 			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json");
-			root = Utils.loadConfigFile(path);
+			root = loadConfigFile(path);
 		}
 	}
 
@@ -179,6 +174,91 @@ public class ConfigData {
 		if (root == null)
 			return null;
 		return root.getObject(key, type.getType());
+	}
+
+	/**
+	 * 读取json配置文件（支持//注释）
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public static JSONObject loadConfigFile(Path path) {
+		if (!Files.exists(path))
+			return null;
+		try {
+			String text = Files.lines(path).map(String::trim).filter(s -> !s.startsWith("//"))
+					.collect(Collectors.joining());
+			return JSON.parseObject(text);
+		} catch (JSONException je) {
+			throw new RuntimeException("fail to parse json file:" + path.toString(), je);
+		} catch (IOException e) {
+			throw new RuntimeException("fail to read json file:" + path.toString(), e);
+		}
+	}
+
+	/**
+	 * 返回Bundle的配置目录
+	 * 
+	 * @return
+	 */
+	public Path getConfigPath() {
+		return bundleConfigPath;
+	}
+
+	/**
+	 * 返回Bundle的配置目录下的指定文件
+	 * 
+	 * @param fileName 文件名
+	 * @return
+	 */
+	public Path getConfigFile(String fileName) {
+		return getConfigPath().resolve(fileName);
+	}
+
+	/**
+	 * 如果配置文件是一个json文件，直接解析为一个对象
+	 * 
+	 * @param fileName
+	 * @param clazz
+	 * @return
+	 * @throws IOException
+	 */
+	public final <T> T getConfigFile(final String fileName, Class<T> clazz) {
+		Path file = getConfigFile(fileName);
+		if (!Files.exists(file))
+			return null;
+		try {
+			String text = Files.lines(file).map(String::trim).filter(s -> !s.startsWith("//"))
+					.collect(Collectors.joining());
+			return JSON.parseObject(text, clazz);
+		} catch (JSONException je) {
+			throw new RuntimeException("fail to parse json file:" + file.toString(), je);
+		} catch (IOException e) {
+			throw new RuntimeException("fail to read json file:" + file.toString(), e);
+		}
+	}
+
+	/**
+	 * 如果配置文件是一个json文件，直接解析为一个对象
+	 * 
+	 * @param fileName
+	 * @param tr
+	 * @return
+	 * @throws IOException
+	 */
+	public <T> T getConfigFile(final String fileName, TypeReference<T> tr) {
+		Path file = getConfigFile(fileName);
+		if (!Files.exists(file))
+			return null;
+		try {
+			String text = Files.lines(file).map(String::trim).filter(s -> !s.startsWith("//"))
+					.collect(Collectors.joining());
+			return JSON.parseObject(text, tr);
+		} catch (JSONException je) {
+			throw new RuntimeException("fail to parse json file:" + file.toString(), je);
+		} catch (IOException e) {
+			throw new RuntimeException("fail to read json file:" + file.toString(), e);
+		}
 	}
 
 }

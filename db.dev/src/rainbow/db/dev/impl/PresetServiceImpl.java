@@ -22,7 +22,7 @@ import com.google.common.base.Objects;
 import rainbow.core.bundle.Bean;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
-import rainbow.core.util.ioc.ActivatorAwareObject;
+import rainbow.core.util.ioc.ConfigAwareObject;
 import rainbow.core.util.ioc.Inject;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.NeoBean;
@@ -32,7 +32,7 @@ import rainbow.db.dao.model.Entity;
 import rainbow.db.dev.PresetService;
 
 @Bean
-public class PresetServiceImpl extends ActivatorAwareObject implements PresetService {
+public class PresetServiceImpl extends ConfigAwareObject implements PresetService {
 
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -53,7 +53,7 @@ public class PresetServiceImpl extends ActivatorAwareObject implements PresetSer
 	 */
 	@Override
 	public List<String> types() {
-		List<String> dataSets = activator.getConfig().getList("dataSets");
+		List<String> dataSets = bundleConfig.getList("dataSets");
 		if (Utils.isNullOrEmpty(dataSets)) {
 			dataSets = Arrays.asList("测试数据", "预置数据");
 		}
@@ -111,7 +111,7 @@ public class PresetServiceImpl extends ActivatorAwareObject implements PresetSer
 	}
 
 	private Path getFile(String presetType, String entityName) {
-		Path path = activator.getConfigureFile(presetType);
+		Path path = bundleConfig.getConfigFile(presetType);
 		if (!Files.exists(path))
 			try {
 				Files.createDirectories(path);
@@ -197,7 +197,7 @@ public class PresetServiceImpl extends ActivatorAwareObject implements PresetSer
 
 	@Override
 	public List<String> hasPreset(String dataSet) throws IOException {
-		Path root = activator.getConfigureFile(dataSet);
+		Path root = bundleConfig.getConfigFile(dataSet);
 		if (!Files.exists(root)) {
 			return Collections.emptyList();
 		}

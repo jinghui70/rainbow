@@ -38,7 +38,7 @@ import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
 import rainbow.core.util.encrypt.EncryptUtils;
-import rainbow.core.util.ioc.ActivatorAwareObject;
+import rainbow.core.util.ioc.ConfigAwareObject;
 import rainbow.core.util.ioc.DisposableBean;
 import rainbow.core.util.ioc.InitializingBean;
 import rainbow.core.util.ioc.InjectProvider;
@@ -54,7 +54,7 @@ import rainbow.db.dao.model.Entity;
 
 @Bean
 @Extension(point = InjectProvider.class)
-public class DaoManagerImpl extends ActivatorAwareObject
+public class DaoManagerImpl extends ConfigAwareObject
 		implements DaoManager, IAdaptable, InitializingBean, DisposableBean {
 
 	private static Logger logger = LoggerFactory.getLogger(DaoManagerImpl.class);
@@ -82,7 +82,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 	}
 
 	private Config loadConfig(String filename) throws FileNotFoundException, JAXBException, IOException {
-		Path file = activator.getConfigureFile(filename);
+		Path file = bundleConfig.getConfigFile(filename);
 		if (!Files.exists(file))
 			return null;
 		return Config.getXmlBinder().unmarshal(file);
@@ -180,7 +180,7 @@ public class DaoManagerImpl extends ActivatorAwareObject
 		Map<String, Entity> entityMap = modelMap.get(name);
 		if (entityMap != null)
 			return entityMap;
-		Path modelFile = activator.getConfigureFile(name + ".rdmx");
+		Path modelFile = bundleConfig.getConfigFile(name + ".rdmx");
 		checkState(Files.exists(modelFile), "database model file not exist:{}", modelFile.toString());
 		entityMap = DaoUtils.resolveModel(modelFile);
 		modelMap.put(name, entityMap);

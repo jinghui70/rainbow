@@ -7,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
@@ -23,11 +21,8 @@ import java.util.Optional;
 import java.util.RandomAccess;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
@@ -528,26 +523,6 @@ public abstract class Utils {
 		if (fromList == null || fromList.length == 0)
 			return Collections.emptyList();
 		return transform(Arrays.asList(fromList), function);
-	}
-
-	/**
-	 * 读取json配置文件（支持//注释）
-	 * 
-	 * @param path
-	 * @return
-	 */
-	public static JSONObject loadConfigFile(Path path) {
-		if (!Files.exists(path))
-			return null;
-		try {
-			String text = Files.lines(path).map(String::trim).filter(s -> !s.startsWith("//"))
-					.collect(Collectors.joining());
-			return JSON.parseObject(text);
-		} catch (JSONException je) {
-			throw new RuntimeException("fail to parse config file:" + path.toString(), je);
-		} catch (IOException e) {
-			throw new RuntimeException("fail to read config file:" + path.toString(), e);
-		}
 	}
 
 	/**

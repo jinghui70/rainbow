@@ -5,7 +5,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.BundleException;
-import rainbow.core.platform.ConfigData;
+import rainbow.core.platform.BundleConfig;
 import rainbow.httpserver.internal.Gate;
 import rainbow.httpserver.internal.RequestErrorHandler;
 
@@ -22,12 +22,12 @@ import rainbow.httpserver.internal.RequestErrorHandler;
 public class Activator extends BundleActivator {
 
 	private Server server;
-	
+
 	@Override
 	protected void doStart() throws BundleException {
 		super.doStart();
 		registerExtensionPoint(RequestHandler.class);
-		ConfigData config = getConfig();
+		BundleConfig config = new BundleConfig(getBundleId(), false);
 		int port = config.getInt("port");
 		if (port == 0)
 			return;
