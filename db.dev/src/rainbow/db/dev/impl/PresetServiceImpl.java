@@ -20,9 +20,9 @@ import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Objects;
 
 import rainbow.core.bundle.Bean;
+import rainbow.core.bundle.ConfigAwareObject;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
-import rainbow.core.util.ioc.ConfigAwareObject;
 import rainbow.core.util.ioc.Inject;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.NeoBean;

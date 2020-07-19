@@ -1,6 +1,7 @@
 package rainbow.core.util.ioc;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkArgument;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -200,7 +201,7 @@ public class Context {
 	 */
 	public <T> T getBean(String id, Class<T> clazz) {
 		try {
-			return (T) getLocalBean(id, clazz);
+			return getLocalBean(id, clazz);
 		} catch (NoSuchBeanDefinitionException e) {
 			for (Context parent : parents)
 				try {
@@ -247,7 +248,7 @@ public class Context {
 		Object object = null;
 		try {
 			object = bean.getClazz().newInstance();
-			dependInject(object, bean);
+			dependInject(object);
 			if (object instanceof InitializingBean) {
 				((InitializingBean) object).afterPropertiesSet();
 			}
@@ -265,7 +266,7 @@ public class Context {
 	 * @throws IllegalAccessException
 	 * @throws InvocationTargetException
 	 */
-	public void dependInject(Object object, Bean bean) throws IllegalArgumentException, NoSuchBeanDefinitionException,
+	public void dependInject(Object object) throws IllegalArgumentException, NoSuchBeanDefinitionException,
 			IllegalAccessException, InvocationTargetException {
 		Class<?> clazz = object.getClass();
 		String injectName = null;

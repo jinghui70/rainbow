@@ -1,4 +1,4 @@
-package rainbow.core.util.ioc;
+package rainbow.core.bundle;
 
 import rainbow.core.platform.BundleConfig;
 
@@ -8,11 +8,11 @@ import rainbow.core.platform.BundleConfig;
  * @author lijinghui
  * 
  */
-public class ConfigAwareObject {
+public class ConfigAwareObject implements ConfigAware {
 
 	protected BundleConfig bundleConfig;
 
-	@Inject
+	@Override
 	public void setbundleConfig(BundleConfig bundleConfig) {
 		this.bundleConfig = bundleConfig;
 	}

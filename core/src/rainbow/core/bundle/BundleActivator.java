@@ -18,7 +18,6 @@ import rainbow.core.extension.Extension;
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Bean;
-import rainbow.core.util.ioc.BundleContext;
 import rainbow.core.util.ioc.Context;
 
 /**

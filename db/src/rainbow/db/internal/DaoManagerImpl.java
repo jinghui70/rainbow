@@ -32,13 +32,13 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import rainbow.core.bundle.Bean;
+import rainbow.core.bundle.ConfigAwareObject;
 import rainbow.core.bundle.Extension;
 import rainbow.core.model.IAdaptable;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
 import rainbow.core.util.encrypt.EncryptUtils;
-import rainbow.core.util.ioc.ConfigAwareObject;
 import rainbow.core.util.ioc.DisposableBean;
 import rainbow.core.util.ioc.InitializingBean;
 import rainbow.core.util.ioc.InjectProvider;
