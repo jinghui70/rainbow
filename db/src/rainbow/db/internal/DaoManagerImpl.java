@@ -254,9 +254,8 @@ public class DaoManagerImpl extends ConfigAwareObject
 	public Object getAdapter(Class<?> adapter) {
 		if (adapter != InjectProvider.class)
 			return null;
-
+		final boolean single = daoMap.size() == 1;
 		return new InjectProvider() {
-
 			@Override
 			public Class<?> getInjectClass() {
 				return Dao.class;
@@ -264,7 +263,7 @@ public class DaoManagerImpl extends ConfigAwareObject
 
 			@Override
 			public Object getInjectObject(String name, String destClassName) {
-				if (Utils.isNullOrEmpty(name))
+				if (single || "dao".equals(name))
 					return defaultDao;
 				return daoMap.get(name);
 			}
