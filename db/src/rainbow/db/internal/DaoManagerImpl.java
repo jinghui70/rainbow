@@ -65,7 +65,7 @@ public class DaoManagerImpl extends ConfigAwareObject
 
 	private Map<String, Dao> daoMap;
 
-	private Dao onlyDao;
+	private Dao defaultDao;
 
 	private Context ctx;
 
@@ -208,12 +208,13 @@ public class DaoManagerImpl extends ConfigAwareObject
 			DaoImpl dao = new DaoImpl(dataSource, entityMap);
 			dao.setName(logic.getId());
 			logicBuilder.put(logic.getId(), dao);
-			onlyDao = dao;
 			logger.info("register logic datasource [{}] with model [{}]", logic.toString(), model);
+			if (defaultDao == null) {
+				defaultDao = dao;
+				logger.info("set [{}] as default Dao", logic.toString());
+			}
 		}
 		Map<String, Dao> result = logicBuilder.build();
-		if (result.size() != 1)
-			onlyDao = null;
 		return result;
 	}
 
@@ -263,9 +264,8 @@ public class DaoManagerImpl extends ConfigAwareObject
 
 			@Override
 			public Object getInjectObject(String name, String destClassName) {
-				if (onlyDao != null)
-					return onlyDao;
-				// 未来考虑在配置中根据类名注入对应的Dao
+				if (Utils.isNullOrEmpty(name))
+					return defaultDao;
 				return daoMap.get(name);
 			}
 		};
