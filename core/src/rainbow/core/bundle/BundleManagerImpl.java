@@ -268,8 +268,6 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	/**
 	 * 初始化启动的bundle
 	 * 
-	 * @param onList  初始化要启动的bundle列表
-	 * @param offList 初始化不要启动的bundle列表
 	 */
 	@Override
 	public void initStart() {

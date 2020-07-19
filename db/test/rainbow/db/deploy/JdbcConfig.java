@@ -1,22 +1,12 @@
 package rainbow.db.deploy;
 
 public class JdbcConfig {
-	
-	private String url;
-	
-	private String user;
-	
-	private String password;
-	
-	private String presetDataDir;
-	
-	public String getPresetDataDir() {
-		return presetDataDir;
-	}
 
-	public void setPresetDataDir(String presetDataDir) {
-		this.presetDataDir = presetDataDir;
-	}
+	private String url;
+
+	private String user;
+
+	private String password;
 
 	public String getUrl() {
 		return url;
@@ -41,6 +31,5 @@ public class JdbcConfig {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
 
 }
