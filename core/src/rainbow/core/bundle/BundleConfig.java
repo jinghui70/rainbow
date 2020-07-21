@@ -1,4 +1,4 @@
-package rainbow.core.platform;
+package rainbow.core.bundle;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
@@ -13,6 +13,9 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+
+import rainbow.core.platform.Platform;
+import rainbow.core.util.Utils;
 
 /**
  * 
@@ -42,7 +45,7 @@ public class BundleConfig {
 	 * Paths.get(xx.class.getResource("config.json").toURI())的方式获得配置文件
 	 * 
 	 * @param bundleConfig 配置数据文件
-	 * @param configPath 配置文件目录
+	 * @param configPath   配置文件目录
 	 */
 	public BundleConfig(Path bundleConfig, Path configPath) {
 		this.path = bundleConfig;
@@ -213,6 +216,18 @@ public class BundleConfig {
 	 */
 	public Path getConfigFile(String fileName) {
 		return getConfigPath().resolve(fileName);
+	}
+
+	/**
+	 * 返回Bundle的配置目录下的指定文件，并读为一个字符串
+	 * 
+	 * @param fileName
+	 * @return 文件内容
+	 * @throws IOException
+	 */
+	public String getConfigFileAsString(String fileName) throws IOException {
+		Path file = getConfigFile(fileName);
+		return Utils.streamToString(Files.newInputStream(file));
 	}
 
 	/**

@@ -4,8 +4,8 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 
 import rainbow.core.bundle.BundleActivator;
+import rainbow.core.bundle.BundleConfig;
 import rainbow.core.bundle.BundleException;
-import rainbow.core.platform.BundleConfig;
 import rainbow.httpserver.internal.Gate;
 import rainbow.httpserver.internal.RequestErrorHandler;
 

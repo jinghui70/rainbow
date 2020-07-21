@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.ImmutableMap;
 
+import rainbow.core.bundle.BundleConfig;
 import rainbow.core.bundle.BundleManager;
 import rainbow.core.bundle.BundleManagerImpl;
 import rainbow.core.extension.ExtensionRegistry;

@@ -4,7 +4,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
-import rainbow.core.platform.BundleConfig;
 import rainbow.core.util.ioc.ApplicationContext;
 import rainbow.core.util.ioc.Bean;
 import rainbow.core.util.ioc.Context;
