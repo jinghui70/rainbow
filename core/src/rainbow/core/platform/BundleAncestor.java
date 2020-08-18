@@ -4,6 +4,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import rainbow.core.bundle.Bundle;
@@ -40,7 +41,7 @@ public class BundleAncestor {
 	 * @return
 	 */
 	public List<Bundle> getParents() {
-		return map.entrySet().stream().filter(e -> e.getValue() == 0).map(e -> e.getKey()).collect(Collectors.toList());
+		return map.entrySet().stream().filter(e -> e.getValue() == 0).map(Entry::getKey).collect(Collectors.toList());
 	}
 
 	/**

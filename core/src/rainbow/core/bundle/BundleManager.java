@@ -1,7 +1,6 @@
 package rainbow.core.bundle;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.Collection;
 
 /**
  * bundle管理接口
@@ -14,10 +13,9 @@ public interface BundleManager {
 	/**
 	 * 返回Bundle列表
 	 * 
-	 * @param filter 过滤条件
 	 * @return
 	 */
-	List<Bundle> getBundles();
+	Collection<Bundle> getBundles();
 
 	/**
 	 * 返回指定Bundle
@@ -25,7 +23,7 @@ public interface BundleManager {
 	 * @param id
 	 * @return
 	 */
-	Optional<Bundle> get(String id);
+	Bundle getBundle(String id);
 
 	/**
 	 * 刷新Bundle及状态列表

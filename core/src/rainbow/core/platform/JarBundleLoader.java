@@ -25,13 +25,12 @@ public class JarBundleLoader implements BundleLoader {
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
 	@Override
-	public List<Bundle> loadBundle(List<Bundle> bundles) throws IOException {
+	public List<Bundle> loadBundle(Set<String> bundles) throws IOException {
 		Path bundleDir = getBundleDir();
 		if (!Files.exists(bundleDir) || !Files.isDirectory(bundleDir)) {
 			logger.error("bundle directory not exists: {}", bundleDir.toAbsolutePath().toString());
 			return new ArrayList<Bundle>();
 		}
-		Set<String> idSet = bundles.stream().map(b -> b.getId()).collect(Collectors.toSet());
 		List<Path> bundleFiles = Files.list(bundleDir).filter(f -> f.getFileName().toString().endsWith(".jar"))
 				.collect(Collectors.toList());
 		if (bundleFiles.isEmpty())
@@ -60,11 +59,11 @@ public class JarBundleLoader implements BundleLoader {
 						logger.error("read bundle.xml of {} faild", input, e);
 						throw new RuntimeException();
 					}
-					if (idSet.contains(data.getId())) {
+					if (bundles.contains(data.getId())) {
 						logger.error("duplicated bundle {} found: {}", data.getId(), input);
 						throw new RuntimeException();
 					}
-					idSet.add(data.getId());
+					bundles.add(data.getId());
 					return new Bundle(data, classLoader);
 				} catch (Throwable e) {
 					classLoader.destroy();

@@ -15,52 +15,51 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class BundleData {
 
-    /**
-     * bundle编号
-     */
-    protected String id;
+	/**
+	 * bundle编号
+	 */
+	protected String id;
 
-    /**
-     * bundle 描述
-     */
-    protected String desc;
+	/**
+	 * bundle 描述
+	 */
+	protected String desc;
 
-    @XmlElement(name = "parent")
-    protected String[] parents;
-    
-    @XmlElement(name = "lib")
-    protected String[] libs;
+	@XmlElement(name = "parent")
+	protected String[] parents;
 
-    public String getId() {
-        return id;
-    }
+	protected String father;
 
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
-    public String[] getParents() {
-        return parents;
-    }
-
-    public void setParents(String[] parents) {
-        this.parents = parents;
-    }
-
-	public String[] getLibs() {
-		return libs;
+	public String getId() {
+		return id;
 	}
 
-	public void setLibs(String[] libs) {
-		this.libs = libs;
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public String getDesc() {
+		return desc;
+	}
+
+	public void setDesc(String desc) {
+		this.desc = desc;
+	}
+
+	public String[] getParents() {
+		return parents;
+	}
+
+	public void setParents(String[] parents) {
+		this.parents = parents;
+	}
+
+	public String getFather() {
+		return father;
+	}
+
+	public void setFather(String father) {
+		this.father = father;
 	}
 
 }

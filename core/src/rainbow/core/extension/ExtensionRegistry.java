@@ -33,7 +33,7 @@ public abstract class ExtensionRegistry {
 	 */
 	public static void registerExtensionPoint(String bundle, Class<?> clazz) {
 		checkState(!pointMap.containsKey(clazz), "duplicated extension point {} ", clazz.getName());
-		logger.info("register extension point {}", clazz.getSimpleName());
+		logger.info("[{}]-register extension point {}", bundle, clazz.getSimpleName());
 		ExtensionPoint point = new ExtensionPoint(bundle, clazz);
 		pointMap.put(clazz, point);
 	}
@@ -64,7 +64,7 @@ public abstract class ExtensionRegistry {
 	public static Extension registerExtension(String bundle, Class<?> clazz, String name, int order, Object object) {
 		ExtensionPoint point = getExtensionPoint(clazz);
 		Extension extension = point.addExtension(bundle, name, order, object);
-		logger.info("register extension {}:{}", clazz.getSimpleName(), extension.getName());
+		logger.info("[{}]-register extension {}:{}", bundle, clazz.getSimpleName(), extension.getName());
 		return extension;
 	}
 

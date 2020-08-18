@@ -40,7 +40,6 @@ import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
 import rainbow.core.util.encrypt.EncryptUtils;
 import rainbow.core.util.ioc.DisposableBean;
-import rainbow.core.util.ioc.InitializingBean;
 import rainbow.core.util.ioc.InjectProvider;
 import rainbow.db.DaoManager;
 import rainbow.db.config.Config;
@@ -54,8 +53,7 @@ import rainbow.db.dao.model.Entity;
 
 @Bean
 @Extension(point = InjectProvider.class)
-public class DaoManagerImpl extends ConfigAwareObject
-		implements DaoManager, IAdaptable, InitializingBean, DisposableBean {
+public class DaoManagerImpl extends ConfigAwareObject implements DaoManager, IAdaptable, DisposableBean {
 
 	private static Logger logger = LoggerFactory.getLogger(DaoManagerImpl.class);
 
@@ -88,8 +86,7 @@ public class DaoManagerImpl extends ConfigAwareObject
 		return Config.getXmlBinder().unmarshal(file);
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
+	public void init() throws Exception {
 		Config config = null;
 		if (Platform.isDev()) {
 			config = loadConfig("database.xml.dev");
@@ -254,7 +251,6 @@ public class DaoManagerImpl extends ConfigAwareObject
 	public Object getAdapter(Class<?> adapter) {
 		if (adapter != InjectProvider.class)
 			return null;
-		final boolean single = daoMap.size() == 1;
 		return new InjectProvider() {
 			@Override
 			public Class<?> getInjectClass() {
@@ -263,7 +259,7 @@ public class DaoManagerImpl extends ConfigAwareObject
 
 			@Override
 			public Object getInjectObject(String name, String destClassName) {
-				if (single || "dao".equals(name))
+				if (daoMap.size() == 1 || "dao".equals(name))
 					return defaultDao;
 				return daoMap.get(name);
 			}
