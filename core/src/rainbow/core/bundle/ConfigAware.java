@@ -8,6 +8,6 @@ package rainbow.core.bundle;
  */
 public interface ConfigAware {
 
-	void setbundleConfig(BundleConfig bundleConfig);
+	void setBundleConfig(BundleConfig bundleConfig);
 
 }

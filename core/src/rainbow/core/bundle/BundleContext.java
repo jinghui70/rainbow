@@ -27,7 +27,7 @@ public class BundleContext extends ApplicationContext {
 		if (object instanceof ConfigAware) {
 			if (bundleConfig == null)
 				bundleConfig = new BundleConfig(activator.getBundleId(), false);
-			((ConfigAware) object).setbundleConfig(bundleConfig);
+			((ConfigAware) object).setBundleConfig(bundleConfig);
 		}
 	}
 

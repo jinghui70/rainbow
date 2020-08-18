@@ -1,5 +1,8 @@
 package rainbow.httpserver;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.session.SessionHandler;
 
@@ -24,9 +27,13 @@ public class Activator extends BundleActivator {
 	private Server server;
 
 	@Override
+	protected List<Class<?>> extensionPoints() {
+		return Arrays.asList(RequestHandler.class);
+	}
+
+	@Override
 	protected void doStart() throws BundleException {
 		super.doStart();
-		registerExtensionPoint(RequestHandler.class);
 		BundleConfig config = new BundleConfig(getBundleId(), false);
 		int port = config.getInt("port");
 		if (port == 0)

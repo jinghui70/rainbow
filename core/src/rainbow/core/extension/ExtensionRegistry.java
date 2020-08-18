@@ -54,9 +54,10 @@ public abstract class ExtensionRegistry {
 	/**
 	 * 注册一个扩展
 	 * 
-	 * @param bundle
+	 * @param bundle 扩展所在插件ID
 	 * @param clazz  扩展点类
 	 * @param name   扩展名，可以为空，自动取名
+	 * @param order  扩展顺序
 	 * @param object 扩展对象
 	 * @return
 	 */

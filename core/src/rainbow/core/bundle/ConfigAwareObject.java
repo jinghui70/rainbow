@@ -11,7 +11,7 @@ public class ConfigAwareObject implements ConfigAware {
 	protected BundleConfig bundleConfig;
 
 	@Override
-	public void setbundleConfig(BundleConfig bundleConfig) {
+	public void setBundleConfig(BundleConfig bundleConfig) {
 		this.bundleConfig = bundleConfig;
 	}
 }

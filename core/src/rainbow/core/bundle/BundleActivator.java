@@ -2,6 +2,7 @@ package rainbow.core.bundle;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +37,6 @@ public abstract class BundleActivator {
 
 	protected Context context;
 
-	private List<Class<?>> points;
 	private List<Extension> extensions;
 	private List<ObjectName> mBeanNames;
 
@@ -65,7 +65,8 @@ public abstract class BundleActivator {
 	 */
 	public final void start(MBeanServer mBeanServer, List<Context> parentContexts) throws BundleException {
 		this.mBeanServer = mBeanServer;
-		registerExtensionPoint();
+		// 注册扩展点
+		extensionPoints().forEach(p -> ExtensionRegistry.registerExtensionPoint(bundleId, p));
 
 		Map<String, Bean> contextConfig = new HashMap<String, Bean>();
 		List<ExtensionConfig> extConfigs = new LinkedList<ExtensionConfig>();
@@ -82,9 +83,12 @@ public abstract class BundleActivator {
 	}
 
 	/**
-	 * 注册所有的扩展点
+	 * 定义需要注册的扩展点接口类列表
+	 * 
+	 * @return 需要注册的扩展点接口类列表
 	 */
-	protected void registerExtensionPoint() {
+	protected List<Class<?>> extensionPoints() {
+		return Collections.emptyList();
 	}
 
 	/**
@@ -177,7 +181,7 @@ public abstract class BundleActivator {
 	 * Bundle停止
 	 */
 	public void stop() {
-		Optional.ofNullable(points).ifPresent(p -> p.forEach(ExtensionRegistry::unregisterExtensionPoint));
+		extensionPoints().forEach(ExtensionRegistry::unregisterExtensionPoint);
 		Optional.ofNullable(extensions).ifPresent(e -> e.forEach(ExtensionRegistry::unregisterExtension));
 		if (mBeanNames != null)
 			unregisterMBean();
@@ -194,18 +198,6 @@ public abstract class BundleActivator {
 	protected InputStream getResource(String resource) throws IOException {
 		Resource r = getClassLoader().getLocalResource(resource);
 		return r.getInputStream();
-	}
-
-	/**
-	 * 注册扩展点
-	 * 
-	 * @param clazz
-	 */
-	protected final void registerExtensionPoint(Class<?> clazz) {
-		ExtensionRegistry.registerExtensionPoint(bundleId, clazz);
-		if (points == null)
-			points = new LinkedList<Class<?>>();
-		points.add(clazz);
 	}
 
 	protected final void registerMBean(Object mbean, String name) {
