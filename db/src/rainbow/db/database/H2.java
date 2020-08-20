@@ -7,14 +7,19 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import rainbow.core.bundle.Extension;
 import rainbow.core.model.exception.AppException;
+import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Sql;
+import rainbow.db.dao.model.Column;
+import rainbow.db.dao.model.Entity;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.model.DataType;
 import rainbow.db.model.Field;
 
+@Extension(point = Dialect.class)
 public class H2 extends AbstractDialect {
 
 	@Override
@@ -129,6 +134,39 @@ public class H2 extends AbstractDialect {
 			column.setLength(length);
 		} else
 			throw new AppException("H2 DataType [%s] not support", physic);
+	}
+
+	@Override
+	protected void toDDL(StringBuilderX ddl, Entity entity) {
+		ddl.append("CREATE TABLE ").append(entity.getCode()).append("(");
+		entity.getColumns().forEach(field -> {
+			ddl.append(field.getCode()).append("\t").append(field.getType());
+			switch (field.getType()) {
+			case CHAR:
+			case VARCHAR:
+				ddl.append("(").append(field.getLength()).append(")");
+				break;
+			case NUMERIC:
+				ddl.append("(").append(field.getLength()).append(",").append(field.getPrecision()).append(")");
+				break;
+			default:
+				break;
+			}
+			if (field.isMandatory())
+				ddl.append(" NOT NULL");
+			ddl.appendTempComma();
+		});
+		if (entity.getKeyCount() == 0) {
+			ddl.clearTemp();
+		} else {
+			ddl.append("	CONSTRAINT PK_").append(entity.getCode()).append(" PRIMARY KEY(");
+			for (Column c : entity.getKeyColumns()) {
+				ddl.append(c.getCode()).appendTempComma();
+			}
+			ddl.clearTemp();
+			ddl.append(")");
+		}
+		ddl.append(");");
 	}
 
 }

@@ -1,0 +1,21 @@
+name: demo
+model: demo.rdmx
+type: H2
+jdbcUrl: jdbc:h2:~/db/DEMO;AUTO_SERVER=TRUE;IFEXISTS=FALSE
+username: Io9vgV+91ODACa4Q24AC9A==
+property:
+  ttt: zzz
+cipher: default
+encrypted: true
+password: null
+---
+name: demo1
+type: H2
+jdbcUrl: jdbc:h2:~/db/DEMO;AUTO_SERVER=TRUE;IFEXISTS=FALSE
+username: Io9vgV+91ODACa4Q24AC9A==
+password: null
+cipher: default
+encrypted: true
+---
+name: demo2
+physicSource: demo

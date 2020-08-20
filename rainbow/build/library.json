@@ -7,6 +7,10 @@
   ],
   "base": [
     { "group":"com.alibaba","name":"fastjson","version":"1.2.56", "source": true },
+    { "group":"com.fasterxml.jackson.core","name":"jackson-core","version":"2.11.2", "source": true },
+    { "group":"com.fasterxml.jackson.core","name":"jackson-annotations","version":"2.11.2", "source": true },
+    { "group":"com.fasterxml.jackson.core","name":"jackson-databind","version":"2.11.2", "source": true },
+    { "group":"org.yaml","name":"snakeyaml","version":"1.26", "source": true },
     { "group":"com.google.guava","name":"guava","version":"28.2-jre", "source": true },
     { "group":"org.slf4j","name":"slf4j-api","version":"1.7.26" },
     { "group":"ch.qos.logback","name":"logback-core","version":"1.2.3" },
@@ -25,7 +29,7 @@
     { "group":"org.eclipse.jetty","name":"jetty-xml","version":"9.4.15.v20190215" }
   ],
   "db": [
-    { "group":"com.alibaba","name":"druid","version":"1.1.14" },
+    { "group":"com.zaxxer","name":"HikariCP","version":"3.4.5","source": true },
     { "group":"com.h2database","name":"h2","version":"1.4.200" },
     { "group": "mysql", "name": "mysql-connector-java", "version": "8.0.15" }
   ]

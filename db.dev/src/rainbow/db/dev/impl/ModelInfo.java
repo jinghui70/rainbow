@@ -10,10 +10,10 @@ import java.util.Map;
 import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
+import rainbow.db.database.DatabaseUtils;
 import rainbow.db.dev.api.ColumnNode;
 import rainbow.db.dev.api.EntityNode;
 import rainbow.db.dev.api.EntityNodeX;
@@ -27,7 +27,7 @@ import rainbow.db.model.Unit;
 public class ModelInfo {
 
 	private Map<String, EntityNodeX> entityMap = new HashMap<String, EntityNodeX>();
-	
+
 	private Dao dao;
 
 	private Node tree;
@@ -35,15 +35,15 @@ public class ModelInfo {
 	public Node getTree() {
 		return tree;
 	}
-	
+
 	public EntityNodeX getEntity(String entity) {
 		return entityMap.get(entity);
 	}
 
-	public ModelInfo(Dao dao, String modelName) {
+	public ModelInfo(Dao dao, String modelFileName) {
 		this.dao = dao;
-		Path modelFile = Platform.getHome().resolve("conf/db").resolve(modelName + ".rdmx");
-		Model model = DaoUtils.loadModel(modelFile);
+		Path modelFile = Platform.getHome().resolve("conf/db").resolve(modelFileName);
+		Model model = DatabaseUtils.loadModel(modelFile);
 		tree = convertUnit(model);
 	}
 

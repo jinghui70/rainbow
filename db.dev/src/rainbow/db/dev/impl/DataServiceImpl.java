@@ -2,13 +2,21 @@ package rainbow.db.dev.impl;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
+
 import rainbow.core.bundle.Bean;
+import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.InitializingBean;
 import rainbow.core.util.ioc.Inject;
@@ -18,6 +26,7 @@ import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
+import rainbow.db.database.DaoConfig;
 import rainbow.db.dev.api.DataService;
 import rainbow.db.dev.api.EntityNodeX;
 import rainbow.db.dev.api.Node;
@@ -35,21 +44,31 @@ public class DataServiceImpl implements DataService, InitializingBean {
 	@Inject
 	private DaoManager daoManager;
 
+	private Path loadConfig(String filename) throws FileNotFoundException {
+		Path file = Platform.getHome().resolve("conf/db").resolve(filename);
+		return Files.exists(file) ? file : null;
+	}
+
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		Map<String, ModelInfo> map = new HashMap<String, ModelInfo>();
-		daoManager.getLogics().forEach(logic -> {
-			Dao dao = daoManager.getDao(logic.getId());
-			String modelName = logic.getModel();
-			if (Utils.isNullOrEmpty(modelName))
-				modelName = logic.getId();
-			ModelInfo modelInfo = map.get(modelName);
-			if (modelInfo == null) {
-				modelInfo = new ModelInfo(dao, modelName);
-				map.put(modelName, modelInfo);
+		Path file = null;
+		if (Platform.isDev())
+			file = loadConfig("database.yaml.dev");
+		if (file == null)
+			file = loadConfig("database.yaml");
+
+		CustomClassLoaderConstructor constructor = new CustomClassLoaderConstructor(DaoConfig.class,
+				getClass().getClassLoader());
+		Yaml yaml = new Yaml(constructor);
+		try (InputStream is = Files.newInputStream(file)) {
+			for (Object o : yaml.loadAll(is)) {
+				DaoConfig config = (DaoConfig) o;
+				if (Utils.isNullOrEmpty(config.getPhysicSource()) && config.getModel() != null) {
+					ModelInfo modelInfo = new ModelInfo(daoManager.getDao(config.getName()), config.getModel());
+					modelMap.put(config.getName(), modelInfo);
+				}
 			}
-			modelMap.put(logic.getId(), modelInfo);
-		});
+		}
 	}
 
 	@Override

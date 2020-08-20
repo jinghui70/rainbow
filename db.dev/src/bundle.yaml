@@ -1,0 +1,5 @@
+id: db.dev
+desc: 数据库开发工具
+requires:
+  - db
+  - service

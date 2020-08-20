@@ -4,7 +4,6 @@ import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,11 +16,11 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.model.object.NameObject;
+import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.database.Dialect;
-import rainbow.db.database.DialectManager;
 import rainbow.db.jdbc.ColumnMapRowMapper;
 import rainbow.db.jdbc.DataAccessException;
 import rainbow.db.jdbc.JdbcTemplate;
@@ -32,44 +31,26 @@ public class DaoImpl extends NameObject implements Dao {
 
 	protected Map<String, Entity> entityMap = ImmutableMap.<String, Entity>of();
 
-	private Dialect dialect;
+	protected Dialect dialect;
 
 	private JdbcTemplate jdbcTemplate;
 
-	public DaoImpl() {
-		this(null, null);
+	public DaoImpl(DataSource dataSource, Dialect dialect) {
+		this(dataSource, dialect, null);
 	}
 
-	public DaoImpl(DataSource dataSource) {
-		this(dataSource, null);
-	}
-
-	public DaoImpl(DataSource dataSource, Map<String, Entity> entityMap) {
+	public DaoImpl(DataSource dataSource, Dialect dialect, Map<String, Entity> entityMap) {
 		setDataSource(dataSource);
+		this.dialect = dialect;
 		setEntityMap(entityMap);
 	}
 
 	public void setDataSource(DataSource dataSource) {
-		if (dataSource == null) {
-			this.jdbcTemplate = null;
-			this.dialect = null;
-		} else {
-			this.jdbcTemplate = new JdbcTemplate(dataSource);
-			this.dialect = initDatabaseDialect(dataSource);
-		}
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
 	public void setEntityMap(Map<String, Entity> entityMap) {
 		this.entityMap = (entityMap == null) ? ImmutableMap.<String, Entity>of() : entityMap;
-	}
-
-	private Dialect initDatabaseDialect(DataSource dataSource) {
-		try (Connection conn = dataSource.getConnection()) {
-			return DialectManager.getDialect(conn.getMetaData());
-		} catch (SQLException e) {
-			logger.error("failed to init database dialect", e);
-			throw new RuntimeException(e);
-		}
 	}
 
 	@Override
@@ -151,8 +132,8 @@ public class DaoImpl extends NameObject implements Dao {
 	private int insertNeoBean(NeoBean neo) {
 		Entity entity = neo.getEntity();
 		Sql sql = new Sql(entity.getColumns().size()).append("insert into ").append(entity.getCode()).append("(");
-
-		StringBuilder sb = new StringBuilder();
+		logger.debug("inserting entity:{}", entity.getName());
+		StringBuilderX sb = new StringBuilderX();
 		entity.getColumns().stream().forEach(column -> {
 			Object v = neo.getObject(column);
 			if (v == null) {
@@ -160,15 +141,16 @@ public class DaoImpl extends NameObject implements Dao {
 			} else {
 				sql.append(column.getCode());
 				if (NOW.equals(v)) {
-					sb.append(dialect.now()).append(',');
+					sb.append(dialect.now());
 				} else {
 					sql.addParam(v);
-					sb.append("?,");
+					sb.append("?");
 				}
+				sb.appendTempComma();
 				sql.appendTempComma();
 			}
 		});
-		sql.clearTemp().append(") values (").append(sb.substring(0, sb.length() - 1)).append(")");
+		sql.clearTemp().append(") values (").append(sb.clearTemp()).append(")");
 		return sql.execute(this);
 	}
 

@@ -76,8 +76,10 @@ public abstract class Utils {
 	}
 
 	/**
-	 * 从一个map中获得key对应的value, map为空时返回null
+	 * 从一个map中获得key对应的value
 	 * 
+	 * @param <K>
+	 * @param <V>
 	 * @param map
 	 * @param key
 	 * @return
@@ -136,26 +138,6 @@ public abstract class Utils {
 	 */
 	public static boolean hasContent(String string) {
 		return string != null && !string.trim().isEmpty();
-	}
-
-	/**
-	 * 重复一个字符串n次，并用指定分隔符分开
-	 * 
-	 * @param sb
-	 * @param str
-	 * @param delimiter
-	 * @param count
-	 */
-	public static void repeat(StringBuilder sb, String str, char delimiter, int count) {
-		if (count < 1)
-			return;
-		if (count > 1) {
-			for (int i = 1; i < count; i++) {
-				sb.append(str);
-				sb.append(delimiter);
-			}
-		}
-		sb.append(str);
 	}
 
 	/**

@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<bundle>
-	<id>httpserver</id>
-	<desc>内嵌jetty实现的HTTP服务器</desc>
-</bundle>

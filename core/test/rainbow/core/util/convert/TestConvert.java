@@ -1,6 +1,7 @@
 package rainbow.core.util.convert;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 
@@ -37,7 +38,19 @@ public class TestConvert {
 
 	@Test
 	public void testBoolean() {
-		short i = Converters.convert(Boolean.TRUE, short.class);
-		assertEquals(1, i);
+		Boolean from = true;
+		boolean to = Converters.convert(from, boolean.class);
+		assertTrue(to);
+
+		boolean from1 = true;
+		Boolean to1 = Converters.convert(from1, Boolean.class);
+		assertTrue(to1);
+
+		short s = Converters.convert(Boolean.TRUE, short.class);
+		assertEquals(1, s);
+
+		int i = 1;
+		assertTrue(Converters.convert(i, boolean.class));
 	}
+
 }

@@ -1,9 +1,12 @@
 package rainbow.db.database;
 
+import java.util.Collection;
 import java.util.List;
 
 import rainbow.core.model.exception.AppException;
+import rainbow.core.util.StringBuilderX;
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.model.Entity;
 import rainbow.db.model.Field;
 
 /**
@@ -29,4 +32,19 @@ public abstract class AbstractDialect implements Dialect {
 		return "TRUNCATE TABLE " + tableName;
 	}
 
+	@Override
+	public String toDDL(Collection<Entity> entities) {
+		StringBuilderX ddl = new StringBuilderX();
+		entities.forEach(entity -> toDDL(ddl, entity));
+		return ddl.toString();
+	}
+
+	@Override
+	public String toDDL(Entity entity) {
+		StringBuilderX ddl = new StringBuilderX();
+		toDDL(ddl, entity);
+		return ddl.toString();
+	}
+
+	protected abstract void toDDL(StringBuilderX ddl, Entity entity);
 }

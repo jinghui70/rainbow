@@ -1,20 +1,23 @@
 package rainbow.db.dao.memory;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 
 import rainbow.db.dataSource.AbstractDataSource;
 
-public class MemoryDataSource extends AbstractDataSource {
+public class MemoryDataSource extends AbstractDataSource implements Closeable {
 
 	private MemoryConnection con;
 
-	public MemoryDataSource() throws SQLException {
-		con = new MemoryConnection();
+	public MemoryDataSource() {
 	}
 
 	@Override
 	public Connection getConnection() throws SQLException {
+		if (con == null)
+			con = new MemoryConnection();
 		return con;
 	}
 
@@ -24,6 +27,10 @@ public class MemoryDataSource extends AbstractDataSource {
 	}
 
 	public void dispose() {
+	}
+
+	@Override
+	public void close() throws IOException {
 		if (con != null) {
 			try {
 				con.destroy();

@@ -11,7 +11,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.Driver;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -19,6 +18,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import javax.sql.DataSource;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
@@ -27,16 +27,16 @@ import javax.xml.transform.stream.StreamSource;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
-import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.dataSource.SimpleDriverDataSource;
+import rainbow.db.database.DataSourceConfig;
+import rainbow.db.database.DatabaseUtils;
+import rainbow.db.database.H2;
 import rainbow.db.model.Field;
 import rainbow.db.model.Model;
 import rainbow.db.model.Unit;
@@ -45,12 +45,6 @@ public class Worker {
 
 	private static Type MAP_TYPE = new TypeReference<Map<String, Object>>() {
 	}.getType();
-
-	private static Map<String, Class<? extends Driver>> driverClassMap = ImmutableMap
-			.<String, Class<? extends Driver>>builder() //
-			.put("mysql", com.mysql.cj.jdbc.Driver.class) //
-			.put("h2", org.h2.Driver.class) //
-			.build();
 
 	private TransformerFactory tf = TransformerFactory.newInstance();
 
@@ -62,7 +56,7 @@ public class Worker {
 
 	private List<Path> preset = Collections.emptyList();
 
-	private JdbcConfig jdbc;
+	private DataSourceConfig jdbc;
 
 	public void setOutputDir(String outputDir) {
 		this.output = Paths.get(outputDir);
@@ -79,14 +73,14 @@ public class Worker {
 		if (Files.exists(modelFile) && Files.isRegularFile(modelFile)) {
 			try (InputStream is = Files.newInputStream(modelFile)) {
 				model = JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
-				entityMap = DaoUtils.resolveModel(model);
+				entityMap = DatabaseUtils.resolveModel(model);
 			}
 		} else
 			throw new AppException("{} is not a valid model file", fileName);
 	}
 
 	public void setJdbcConfig(String jdbcStr) {
-		this.jdbc = JSON.parseObject(jdbcStr, JdbcConfig.class);
+		this.jdbc = JSON.parseObject(jdbcStr, DataSourceConfig.class);
 	}
 
 	public void outputRdm() throws IOException {
@@ -108,15 +102,11 @@ public class Worker {
 	}
 
 	public void doWork() throws IOException, TransformerException, InstantiationException, IllegalAccessException {
-		String server = Utils.substringBetween(jdbc.getUrl(), "jdbc:", ":").toLowerCase();
-		checkArgument(driverClassMap.containsKey(server), "jdbcUrl ({}) not support", jdbc.getUrl());
+		String server = Utils.substringBetween(jdbc.getJdbcUrl(), "jdbc:", ":").toLowerCase();
 		System.out.append("process database ").println(server);
 		generateDDL(server);
-		Class<? extends Driver> driverClass = driverClassMap.get(server);
-		Driver driver = driverClass.newInstance();
-		SimpleDriverDataSource dataSource = new SimpleDriverDataSource(driver, jdbc.getUrl(), jdbc.getUser(),
-				jdbc.getPassword());
-		DaoImpl dao = new DaoImpl(dataSource, entityMap);
+		DataSource dataSource = DatabaseUtils.createDataSource(jdbc);
+		DaoImpl dao = new DaoImpl(dataSource, new H2(), entityMap);
 		generateDatabase(dao, server);
 		for (Path p : preset) {
 			System.out.println("loading preset data " + p.getFileName());

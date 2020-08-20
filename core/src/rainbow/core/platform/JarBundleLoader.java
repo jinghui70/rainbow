@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 
 import rainbow.core.bundle.Bundle;
 import rainbow.core.bundle.BundleData;
@@ -36,6 +36,7 @@ public class JarBundleLoader implements BundleLoader {
 		if (bundleFiles.isEmpty())
 			return new ArrayList<Bundle>();
 
+		Yaml yaml = new Yaml(new Constructor(BundleData.class));
 		return Utils.transform(bundleFiles, new Function<Path, Bundle>() {
 			@Override
 			public Bundle apply(Path input) {
@@ -47,17 +48,14 @@ public class JarBundleLoader implements BundleLoader {
 						logger.warn("load file failed: {}", input, e);
 						return null;
 					}
-					Resource r = classLoader.getLocalResource("bundle.xml");
+					Resource r = classLoader.getLocalResource("bundle.yaml");
 					if (r == null) {
 						logger.info("{} is not a bundle", input);
 						throw new RuntimeException();
 					}
 					BundleData data = null;
 					try (InputStream is = r.getInputStream()) {
-						data = binder.unmarshal(is);
-					} catch (JAXBException | IOException e) {
-						logger.error("read bundle.xml of {} faild", input, e);
-						throw new RuntimeException();
+						data = yaml.load(is);
 					}
 					if (bundles.contains(data.getId())) {
 						logger.error("duplicated bundle {} found: {}", data.getId(), input);

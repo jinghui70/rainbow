@@ -21,7 +21,8 @@ import rainbow.core.bundle.BundleConfig;
 import rainbow.core.bundle.BundleManager;
 import rainbow.core.bundle.BundleManagerImpl;
 import rainbow.core.extension.ExtensionRegistry;
-import rainbow.core.util.encrypt.Encryption;
+import rainbow.core.util.encrypt.Cipher;
+import rainbow.core.util.encrypt.DefaultCipher;
 import rainbow.core.util.ioc.Bean;
 import rainbow.core.util.ioc.Context;
 
@@ -86,18 +87,8 @@ public final class Platform {
 		}
 
 		// 注册扩展点
-		ExtensionRegistry.registerExtensionPoint(null, Encryption.class);
-
-		// 加密
-		String encryptionClass = bundleConfig.getString("encryption");
-		if (encryptionClass != null) {
-			try {
-				Class.forName(encryptionClass);
-			} catch (ClassNotFoundException e) {
-				logger.warn("Encryption class not found: {}", encryptionClass);
-			}
-		}
-
+		ExtensionRegistry.registerExtensionPoint(null, Cipher.class);
+		ExtensionRegistry.registerExtension(null, Cipher.class, new DefaultCipher());
 		BundleManager bundleManager = context.getBean(BundleManager.class);
 		bundleManager.refresh();
 		bundleManager.initStart();

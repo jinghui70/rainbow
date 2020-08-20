@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.condition.C;
 import rainbow.db.dao.model.Column;
@@ -25,13 +26,9 @@ import rainbow.db.jdbc.SingleColumnRowMapper;
  * @author lijinghui
  * 
  */
-public class Sql implements Appendable, ISql {
-
-	private StringBuilder sb = new StringBuilder();
+public class Sql extends StringBuilderX implements ISql {
 
 	private List<Object> params;
-
-	private String tempStr = null;
 
 	public Sql() {
 		params = new ArrayList<Object>();
@@ -50,51 +47,50 @@ public class Sql implements Appendable, ISql {
 		return sb.toString();
 	}
 
+	@Override
 	public void setSql(String sql) {
 		sb.setLength(0);
 		sb.append(sql);
 	}
 
-	public StringBuilder getStringBuilder() {
-		return sb;
-	}
-
+	@Override
 	public Sql append(Object obj) {
-		return this.append(obj.toString());
+		return append(obj.toString());
 	}
 
 	public Sql append(Sql sql) {
-		checkTemp();
-		sb.append(sql.getStringBuilder().toString());
+		append(sql.getSql());
 		this.params.addAll(sql.getParams());
 		return this;
 	}
 
 	@Override
 	public Sql append(char ch) {
-		checkTemp();
-		sb.append(ch);
+		super.append(ch);
 		return this;
 	}
 
 	@Override
 	public Sql append(CharSequence csq) {
-		checkTemp();
-		sb.append(csq);
+		super.append(csq);
 		return this;
 	}
 
 	@Override
 	public Sql append(CharSequence csq, int start, int end) {
-		checkTemp();
-		sb.append(csq, start, end);
+		super.append(csq, start, end);
 		return this;
 	}
 
+	@Override
 	public Sql append(String str, int times) {
-		checkTemp();
-		for (int i = 0; i < times; i++)
-			sb.append(str);
+		super.append(str, times);
+		return this;
+	}
+
+	@Override
+	public Sql append(String str, int times, char delimiter) {
+		super.append(str, times, delimiter);
 		return this;
 	}
 
@@ -104,12 +100,13 @@ public class Sql implements Appendable, ISql {
 	 * @param str
 	 * @return
 	 */
+	@Override
 	public Sql appendTemp(String str) {
-		checkTemp();
-		this.tempStr = str;
+		super.appendTemp(str);
 		return this;
 	}
 
+	@Override
 	public Sql appendTempComma() {
 		return this.appendTemp(",");
 	}
@@ -119,15 +116,10 @@ public class Sql implements Appendable, ISql {
 	 * 
 	 * @return
 	 */
+	@Override
 	public Sql clearTemp() {
-		this.tempStr = null;
+		super.clearTemp();
 		return this;
-	}
-
-	private void checkTemp() {
-		if (tempStr != null)
-			sb.append(tempStr);
-		tempStr = null;
 	}
 
 	public List<Object> getParams() {

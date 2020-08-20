@@ -1,18 +1,13 @@
 package rainbow.core.bundle;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 /**
- * 对应bundle.xml的bundle描述对象
+ * bundle描述对象
  * 
  * @author lijinghui
  * 
  */
-@XmlRootElement(name = "bundle")
-@XmlAccessorType(XmlAccessType.FIELD)
 public class BundleData {
 
 	/**
@@ -25,8 +20,7 @@ public class BundleData {
 	 */
 	protected String desc;
 
-	@XmlElement(name = "parent")
-	protected String[] parents;
+	protected List<String> requires;
 
 	protected String father;
 
@@ -46,12 +40,12 @@ public class BundleData {
 		this.desc = desc;
 	}
 
-	public String[] getParents() {
-		return parents;
+	public List<String> getRequires() {
+		return requires;
 	}
 
-	public void setParents(String[] parents) {
-		this.parents = parents;
+	public void setRequires(List<String> requires) {
+		this.requires = requires;
 	}
 
 	public String getFather() {

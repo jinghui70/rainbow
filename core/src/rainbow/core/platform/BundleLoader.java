@@ -5,12 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import rainbow.core.bundle.Bundle;
-import rainbow.core.bundle.BundleData;
-import rainbow.core.util.XmlBinder;
 
 public interface BundleLoader {
-
-	public static final XmlBinder<BundleData> binder = new XmlBinder<BundleData>(BundleData.class);
 
 	/**
 	 * 加载新的bundle

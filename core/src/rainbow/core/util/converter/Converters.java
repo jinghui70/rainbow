@@ -73,9 +73,8 @@ public class Converters {
 			return null;
 		}
 		Class<?> fromClass = from.getClass();
-		if (fromClass == toClass || toClass.isAssignableFrom(fromClass))
+		if (fromClass == toClass)
 			return (T) from;
-
 		Class<?> toClass2 = toClass;
 		// 处理Primitive类型
 		if (toClass.isPrimitive()) {
@@ -95,14 +94,17 @@ public class Converters {
 				toClass2 = Boolean.class;
 			else if (toClass == char.class)
 				toClass2 = Character.class;
-		}
-		// 处理 Enum
-		if (toClass.isEnum()) {
+		} else if (toClass.isEnum()) {
 			toClass2 = Enum.class;
 		}
 		if (fromClass.isEnum()) {
+			if (toClass.isEnum())
+				throw new ConvertException(fromClass, toClass);
 			fromClass = Enum.class;
 		}
+		if (fromClass == toClass2 || toClass2.isAssignableFrom(fromClass))
+			return (T) from;
+
 		Converter<F, T> c = (Converter<F, T>) getConverter(fromClass, toClass2);
 		if (c != null)
 			return c.convert(from, toClass);

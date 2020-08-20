@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <config xmlns="http://rainbow/db/config">
 	<physic id="demo">
-		<driverClass>org.h2.Driver</driverClass>
+		<type>H2</type>
 		<jdbcUrl>jdbc:h2:~/db/DEMO;AUTO_SERVER=TRUE;IFEXISTS=FALSE</jdbcUrl>
 		<username>sa</username>
 		<password></password>	

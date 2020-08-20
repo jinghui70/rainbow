@@ -1,8 +1,10 @@
 package rainbow.db.database;
 
+import java.util.Collection;
 import java.util.List;
 
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.model.Entity;
 import rainbow.db.model.Field;
 
 /**
@@ -68,5 +70,21 @@ public interface Dialect {
 	 * @return
 	 */
 	String clearTable(String tableName);
+
+	/**
+	 * 转换一组实体为DDL字符串
+	 * 
+	 * @param entities
+	 * @return
+	 */
+	String toDDL(Collection<Entity> entities);
+
+	/**
+	 * 转换一个实体为DDL字符串
+	 * 
+	 * @param entity
+	 * @return
+	 */
+	String toDDL(Entity entity);
 
 }

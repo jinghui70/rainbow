@@ -1,6 +1,5 @@
 package rainbow.core.bundle;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -57,15 +56,6 @@ public class Bundle {
 		return data.getDesc();
 	}
 
-	public Collection<String> getParentIds() {
-		Set<String> result = new HashSet<String>();
-		if (Utils.hasContent(data.getFather()))
-			result.add(data.getFather());
-		if (data.getParents() != null && data.getParents().length > 0)
-			Arrays.stream(data.getParents()).forEach(result::add);
-		return result;
-	}
-
 	public BundleState getState() {
 		return state;
 	}
@@ -119,8 +109,17 @@ public class Bundle {
 		return Utils.hasContent(data.father);
 	}
 
-	public boolean isFather(String parentId) {
-		return data.getFather().equals(parentId);
+	public boolean isFather(String id) {
+		return data.getFather().equals(id);
+	}
+
+	public Collection<String> getParentIds() {
+		Set<String> result = new HashSet<String>();
+		if (hasFather())
+			result.add(data.getFather());
+		if (!Utils.isNullOrEmpty(data.getRequires()))
+			data.getRequires().forEach(result::add);
+		return result;
 	}
 
 	@Override

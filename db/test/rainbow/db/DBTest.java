@@ -7,13 +7,14 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 
-import rainbow.db.dao.DaoUtils;
 import rainbow.db.dao.memory.MemoryDao;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.database.DatabaseUtils;
 import rainbow.db.model.Model;
 
 public final class DBTest {
@@ -21,10 +22,10 @@ public final class DBTest {
 	private DBTest() {
 	}
 
-	public static MemoryDao createMemoryDao(Object source) throws IOException {
+	public static MemoryDao createMemoryDao(Object source) throws IOException, SQLException {
 		try (InputStream is = sourceToInputStream(source)) {
 			Model model = JSONObject.parseObject(is, Model.class);
-			Map<String, Entity> entityMap = DaoUtils.resolveModel(model);
+			Map<String, Entity> entityMap = DatabaseUtils.resolveModel(model);
 			return new MemoryDao(entityMap);
 		}
 	}

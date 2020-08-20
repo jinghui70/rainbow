@@ -6,6 +6,7 @@
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %msg %logger{36} %n</pattern> 
 		</encoder>
 	</appender>
+	<logger name="com.zaxxer.hikari" level="ERROR" />
 	<root level="DEBUG"> 
 		<appender-ref ref="FILE" /> 
 	</root> 

@@ -5,6 +5,7 @@ import java.util.List;
 
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.FatherBundle;
+import rainbow.db.database.Dialect;
 import rainbow.db.internal.DaoManagerImpl;
 import rainbow.db.refinery.Refinery;
 
@@ -12,7 +13,7 @@ public class Activator extends BundleActivator implements FatherBundle {
 
 	@Override
 	protected List<Class<?>> extensionPoints() {
-		return Arrays.asList(Refinery.class);
+		return Arrays.asList(Dialect.class, Refinery.class);
 	}
 
 	@Override
