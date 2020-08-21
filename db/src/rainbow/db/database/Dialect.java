@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.model.Field;
 
@@ -87,4 +88,20 @@ public interface Dialect {
 	 */
 	String toDDL(Entity entity);
 
+	/**
+	 * 生成建表语句
+	 * 
+	 * @param tableName
+	 * @param columns
+	 * @return
+	 */
+	String toDDL(String tableName, List<Column> columns);
+
+	/**
+	 * 删除表的语句
+	 * 
+	 * @param tableName
+	 * @return
+	 */
+	String dropTable(String tableName);
 }

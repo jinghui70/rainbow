@@ -291,4 +291,15 @@ public class DaoImpl extends NameObject implements Dao {
 			return jdbcTemplate.update(sql, params);
 	}
 
+	@Override
+	public void createTable(String tableName, List<Column> columns) {
+		String ddl = dialect.toDDL(tableName, columns);
+		this.execSql(ddl);
+	}
+
+	@Override
+	public void dropTable(String tableName) {
+		this.execSql(dialect.dropTable(tableName));
+	}
+
 }

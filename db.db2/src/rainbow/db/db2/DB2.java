@@ -1,8 +1,6 @@
 package rainbow.db.db2;
 
 import rainbow.core.bundle.Extension;
-import rainbow.core.util.StringBuilderX;
-import rainbow.db.dao.model.Entity;
 import rainbow.db.database.AbstractDialect;
 import rainbow.db.database.Dialect;
 
@@ -31,11 +29,6 @@ public class DB2 extends AbstractDialect {
 	@Override
 	public String wrapDirtyRead(String sql) {
 		return sql + " WITH UR";
-	}
-
-	@Override
-	protected void toDDL(StringBuilderX ddl, Entity entity) {
-
 	}
 
 }
