@@ -119,6 +119,9 @@ public class Column extends NameObject {
 		return DataType.dataClass(type);
 	}
 
+	public Column() {
+	}
+
 	public Column(Field src) {
 		this.name = src.getName();
 		this.code = src.getCode();
