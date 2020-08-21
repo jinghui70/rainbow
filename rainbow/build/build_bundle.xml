@@ -26,19 +26,34 @@
 			// 分析一个bundle的依赖
 			var bundles = [];
 			var initBundle = function(file, bundle) {
-				echo.setMessage("find bundle: " + bundle);
+				echo.setMessage("find bundle:" + bundle+":");
 				echo.perform();
 				var content = java.nio.file.Files.readAllLines(file.toPath());
 				var id = "";
 				var parents = {};
+			    var curKey = "";
+				var p;
 				content.forEach(function(line){
 					line = line.trim();
-					if (line.slice(0,4)=="<id>") {
-						id = line.slice(4, -5);
-						if (id!=bundle) throw Error("Bad id [" + id + "] of bundle [" + bundle + "]!");
-					} else if (line.slice(0,8)=="<parent>") {
-						parent = line.slice(8, -9);
-						if (!presets[parent]) parents[parent] = true;
+					var parts = line.split(':');
+					if (parts.length > 1) {
+						curKey = parts[0];
+						if (!parts[1]) return;
+					}
+					switch(curKey) {
+					case "id": 
+						id = parts[1].trim();
+						break;
+					case "father":
+						p = parts[1].trim();
+						if (!presets[p]) parents[p] = true;
+						break;
+					case "requires":
+						p = line.slice(1).trim();
+						if (p && !presets[p]) {
+							parents[p] = true;
+						}
+						break;
 					}
 				});
 				bundles.push({id: id, parents: parents});
@@ -47,11 +62,11 @@
 		    var basedir  = project.getBaseDir().getParentFile();
 			fs = project.createDataType("fileset");
 			fs.setDir(basedir);
-			fs.setIncludes("*/src/bundle.xml");
+			fs.setIncludes("*/src/bundle.yaml");
 			ds = fs.getDirectoryScanner(project);
 			files = ds.getIncludedFiles();
 			for(var i=0;i<files.length;i++) {
-				var bundle = files[i].slice(0, -15);
+				var bundle = files[i].slice(0, -16);
 				file = new java.io.File(basedir, files[i]);
 				initBundle(file, bundle);
 			}
