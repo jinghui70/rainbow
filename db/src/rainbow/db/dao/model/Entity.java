@@ -1,12 +1,14 @@
 package rainbow.db.dao.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import rainbow.core.model.object.NameObject;
+import rainbow.core.util.Utils;
 import rainbow.db.model.Table;
 
 public class Entity extends NameObject {
@@ -47,6 +49,8 @@ public class Entity extends NameObject {
 
 	public void setColumns(List<Column> columns) {
 		this.columns = columns;
+		this.keys = this.columns.stream().filter(c -> c.isKey()).collect(Collectors.toList());
+		this.columnMap = this.columns.stream().collect(Collectors.toMap(Column::getName, Function.identity()));
 	}
 
 	public Map<String, String> getTags() {
@@ -101,14 +105,27 @@ public class Entity extends NameObject {
 		return null;
 	}
 
+	public Entity() {
+	}
+
+	/**
+	 * 主要给MemoryDao使用的构造函数，所以默认code与name一致
+	 * 
+	 * @param name
+	 * @param columns
+	 */
+	public Entity(String name, Column... columns) {
+		this.name = name;
+		this.code = name;
+		setColumns(Arrays.asList(columns));
+	}
+
 	public Entity(Table src) {
 		this.name = src.getName();
 		this.code = src.getCode();
 		this.label = src.getLabel();
-		this.columns = src.getFields().stream().map(Column::new).collect(Collectors.toList());
+		setColumns(Utils.transform(src.getFields(), Column::new));
 		this.tags = src.getTags();
-		this.keys = this.columns.stream().filter(c -> c.isKey()).collect(Collectors.toList());
-		this.columnMap = this.columns.stream().collect(Collectors.toMap(Column::getName, Function.identity()));
 	}
 
 	@Override

@@ -2,35 +2,28 @@ package rainbow.db.dao.model;
 
 import java.util.Map;
 
-import rainbow.core.model.object.NameObject;
+import rainbow.core.model.object.INameObject;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.model.DataType;
 import rainbow.db.model.Field;
 
-public class Column extends NameObject {
+public class Column extends PureColumn implements INameObject {
 
-	private String code;
+	private String name;
 
 	private String label;
 
-	private DataType type;
-
-	private int length;
-
-	private int precision;
-
 	private boolean key;
-
-	private boolean mandatory;
 
 	private Map<String, String> tags;
 
-	public String getCode() {
-		return code;
+	@Override
+	public String getName() {
+		return name;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getLabel() {
@@ -41,44 +34,12 @@ public class Column extends NameObject {
 		this.label = label;
 	}
 
-	public DataType getType() {
-		return type;
-	}
-
-	public void setType(DataType type) {
-		this.type = type;
-	}
-
-	public int getLength() {
-		return length;
-	}
-
-	public void setLength(int length) {
-		this.length = length;
-	}
-
-	public int getPrecision() {
-		return precision;
-	}
-
-	public void setPrecision(int precision) {
-		this.precision = precision;
-	}
-
 	public boolean isKey() {
 		return key;
 	}
 
 	public void setKey(boolean key) {
 		this.key = key;
-	}
-
-	public boolean isMandatory() {
-		return mandatory;
-	}
-
-	public void setMandatory(boolean mandatory) {
-		this.mandatory = mandatory;
 	}
 
 	public Map<String, String> getTags() {
@@ -120,6 +81,23 @@ public class Column extends NameObject {
 	}
 
 	public Column() {
+	}
+
+	public Column(String name, DataType type) {
+		this(name, type, 0, 0, false);
+	}
+
+	public Column(String name, DataType type, int length) {
+		this(name, type, length, 0, false);
+	}
+
+	public Column(String name, int length, int precision) {
+		this(name, DataType.NUMERIC, length, 0, false);
+	}
+
+	public Column(String name, DataType type, int length, int precision, boolean mandatory) {
+		super(name, type, length, precision, mandatory);
+		this.name = name;
 	}
 
 	public Column(Field src) {

@@ -9,6 +9,7 @@ import rainbow.core.util.StringBuilderX;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.PureColumn;
 import rainbow.db.model.Field;
 
 /**
@@ -64,20 +65,7 @@ public abstract class AbstractDialect implements Dialect {
 		ddl.append("CREATE TABLE ").append(tableName).append("(");
 		List<Column> keys = new ArrayList<Column>();
 		for (Column column : columns) {
-			ddl.append(column.getCode()).append("\t").append(column.getType());
-			switch (column.getType()) {
-			case CHAR:
-			case VARCHAR:
-				ddl.append("(").append(column.getLength()).append(")");
-				break;
-			case NUMERIC:
-				ddl.append("(").append(column.getLength()).append(",").append(column.getPrecision()).append(")");
-				break;
-			default:
-				break;
-			}
-			if (column.isMandatory())
-				ddl.append(" NOT NULL");
+			column2DDL(ddl, column);
 			ddl.appendTempComma();
 			if (column.isKey())
 				keys.add(column);
@@ -96,8 +84,60 @@ public abstract class AbstractDialect implements Dialect {
 	}
 
 	@Override
+	public void column2DDL(StringBuilderX sb, PureColumn column) {
+		sb.append(column.getCode()).append(" ").append(column.getType());
+		switch (column.getType()) {
+		case CHAR:
+		case VARCHAR:
+			sb.append("(").append(column.getLength()).append(")");
+			break;
+		case NUMERIC:
+			sb.append("(").append(column.getLength()).append(",").append(column.getPrecision()).append(")");
+			break;
+		default:
+			break;
+		}
+		if (column.isMandatory())
+			sb.append(" NOT NULL");
+	}
+
+	@Override
 	public String dropTable(String tableName) {
 		return String.format("DROP TABLE IF EXISTS %s CASCADE", tableName);
+	}
+
+	@Override
+	public String addColumn(String tableName, PureColumn... columns) {
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
+		for (PureColumn column : columns) {
+			sb.append("ADD COLUMN ");
+			column2DDL(sb, column);
+			sb.appendTempComma();
+		}
+		sb.clearTemp();
+		return sb.toString();
+	}
+
+	@Override
+	public String delColumn(String tableName, String... columnNames) {
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
+		for (String name : columnNames) {
+			sb.append("DROP COLUMN ").append(name).appendTempComma();
+		}
+		sb.clearTemp();
+		return sb.toString();
+	}
+
+	@Override
+	public String alterColumn(String tableName, PureColumn... columns) {
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
+		for (PureColumn column : columns) {
+			sb.append("MODIFY COLUMN ");
+			column2DDL(sb, column);
+			sb.appendTempComma();
+		}
+		sb.clearTemp();
+		return sb.toString();
 	}
 
 }

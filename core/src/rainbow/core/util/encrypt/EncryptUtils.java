@@ -7,7 +7,7 @@ import rainbow.core.extension.ExtensionRegistry;
 public class EncryptUtils {
 
 	public static Cipher getCipher(String type) {
-		Cipher cipher = ExtensionRegistry.getExtensionObject(Cipher.class, type);
+		Cipher cipher = ExtensionRegistry.getExtensionObject(Cipher.class, type).orElse(null);
 		return checkNotNull(cipher, "cipher [{}] not found", type);
 	}
 

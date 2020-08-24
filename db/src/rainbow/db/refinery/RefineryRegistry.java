@@ -17,6 +17,7 @@ public class RefineryRegistry {
 	}
 
 	public static Refinery getRefinery(String name) {
-		return ExtensionRegistry.getExtensionObject(Refinery.class, name);
+		return ExtensionRegistry.getExtensionObject(Refinery.class, name)
+				.orElseThrow(() -> new RuntimeException(Utils.format("Refinery [{}] not defined!", name)));
 	}
 }

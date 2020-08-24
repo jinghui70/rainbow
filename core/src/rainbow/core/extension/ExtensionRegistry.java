@@ -5,6 +5,7 @@ import static rainbow.core.util.Preconditions.checkState;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,8 +155,8 @@ public abstract class ExtensionRegistry {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static <T> T getExtensionObject(Class<T> clazz, String name) {
+	public static <T> Optional<T> getExtensionObject(Class<T> clazz, String name) {
 		ExtensionPoint point = getExtensionPoint(clazz);
-		return (T) point.getExtensionObject(name);
+		return (Optional<T>) point.getExtensionObject(name);
 	}
 }

@@ -30,7 +30,8 @@ public class DatabaseUtils {
 	private static final Logger logger = LoggerFactory.getLogger(DatabaseUtils.class);
 
 	public static Dialect dialect(String type) {
-		return ExtensionRegistry.getExtensionObject(Dialect.class, type);
+		return ExtensionRegistry.getExtensionObject(Dialect.class, type)
+				.orElseThrow(() -> new RuntimeException(Utils.format("Dialect [{}] not found!", type)));
 	}
 
 	public static HikariDataSource createDataSource(DataSourceConfig config) {

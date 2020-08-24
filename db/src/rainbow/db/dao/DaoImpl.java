@@ -20,6 +20,7 @@ import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.PureColumn;
 import rainbow.db.database.Dialect;
 import rainbow.db.jdbc.ColumnMapRowMapper;
 import rainbow.db.jdbc.DataAccessException;
@@ -300,6 +301,25 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public void dropTable(String tableName) {
 		this.execSql(dialect.dropTable(tableName));
+	}
+
+	@Override
+	public void addColumn(String tableName, PureColumn... columns) {
+		String sql = dialect.addColumn(tableName, columns);
+		this.execSql(sql);
+	}
+
+	@Override
+	public void delColumn(String tableName, String... columnNames) {
+		String sql = dialect.delColumn(tableName, columnNames);
+		this.execSql(sql);
+
+	}
+
+	@Override
+	public void alterColumn(String tableName, PureColumn... columns) {
+		String sql = dialect.alterColumn(tableName, columns);
+		this.execSql(sql);
 	}
 
 }

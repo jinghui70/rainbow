@@ -79,7 +79,7 @@ public class Gate extends AbstractHandler {
 		} else {
 			inx = target.indexOf('/');
 			String routeString = inx > 0 ? target.substring(0, inx) : target;
-			route = ExtensionRegistry.getExtensionObject(RequestHandler.class, routeString);
+			route = ExtensionRegistry.getExtensionObject(RequestHandler.class, routeString).orElse(null);
 		}
 		if (route == null) {
 			if (webdir != null) {

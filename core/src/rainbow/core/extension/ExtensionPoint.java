@@ -70,7 +70,7 @@ public class ExtensionPoint {
 			if (eo instanceof INameObject) {
 				name = ((INameObject) eo).getName();
 			} else {
-				name = eo.getClass().getName();
+				name = eo.getClass().getSimpleName();
 			}
 		}
 		for (Extension e : extensions) {
@@ -108,8 +108,8 @@ public class ExtensionPoint {
 	 * @param name
 	 * @return
 	 */
-	public Object getExtensionObject(String name) {
-		return getExtension(name).map(Extension::getObject).orElse(null);
+	public Optional<Object> getExtensionObject(String name) {
+		return getExtension(name).map(Extension::getObject);
 	}
 
 }

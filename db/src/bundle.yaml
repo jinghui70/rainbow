@@ -1,2 +1,9 @@
 id: db
 desc: 数据库支持插件
+lib:
+  - group: com.zaxxer
+    artifact: HikariCP
+    version: 3.4.5
+  - group: com.h2database
+    artifact: h2
+    version: 1.4.200

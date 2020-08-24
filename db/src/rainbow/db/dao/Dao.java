@@ -7,6 +7,7 @@ import com.google.common.base.Supplier;
 import rainbow.core.model.object.INameObject;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
+import rainbow.db.dao.model.PureColumn;
 import rainbow.db.database.Dialect;
 import rainbow.db.jdbc.JdbcTemplate;
 
@@ -216,4 +217,28 @@ public interface Dao extends INameObject {
 	 * @param tableName
 	 */
 	void dropTable(String tableName);
+
+	/**
+	 * 添加字段
+	 * 
+	 * @param tableName
+	 * @param columns
+	 */
+	void addColumn(String tableName, PureColumn... columns);
+
+	/**
+	 * 删除字段
+	 * 
+	 * @param tableName
+	 * @param columns
+	 */
+	void delColumn(String tableName, String... columnNames);
+
+	/**
+	 * 修改字段
+	 * 
+	 * @param tableName
+	 * @param column
+	 */
+	void alterColumn(String tableName, PureColumn... columns);
 }

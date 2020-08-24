@@ -27,10 +27,8 @@ public class ApplicationContext extends Context {
 	protected Object getInjectBean(String injectName, Class<?> injectType, String destClassName) {
 		Object injectBean = super.getInjectBean(injectName, injectType, destClassName);
 		if (injectBean == null) {
-			InjectProvider ip = ExtensionRegistry.getExtensionObject(InjectProvider.class, injectType.getName());
-			if (ip != null) {
-				injectBean = ip.getInjectObject(injectName, destClassName);
-			}
+			injectBean = ExtensionRegistry.getExtensionObject(InjectProvider.class, injectType.getName())
+					.map(ip -> ip.getInjectObject(injectName, destClassName)).orElse(null);
 		}
 		return injectBean;
 	}

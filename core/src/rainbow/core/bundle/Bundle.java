@@ -106,7 +106,7 @@ public class Bundle {
 	}
 
 	public boolean hasFather() {
-		return Utils.hasContent(data.father);
+		return Utils.hasContent(data.getFather());
 	}
 
 	public boolean isFather(String id) {
