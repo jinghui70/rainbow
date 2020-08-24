@@ -7,7 +7,6 @@ import java.util.List;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.StringBuilderX;
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.PureColumn;
 import rainbow.db.model.Field;
@@ -55,16 +54,16 @@ public abstract class AbstractDialect implements Dialect {
 	 * @return
 	 */
 	@Override
-	public String toDDL(String tableName, List<Column> columns) {
+	public String toDDL(String tableName, List<? extends PureColumn> columns) {
 		StringBuilderX ddl = new StringBuilderX();
 		toDDL(ddl, tableName, columns);
 		return ddl.toString();
 	}
 
-	protected void toDDL(StringBuilderX ddl, String tableName, List<Column> columns) {
+	protected void toDDL(StringBuilderX ddl, String tableName, List<? extends PureColumn> columns) {
 		ddl.append("CREATE TABLE ").append(tableName).append("(");
-		List<Column> keys = new ArrayList<Column>();
-		for (Column column : columns) {
+		List<PureColumn> keys = new ArrayList<PureColumn>();
+		for (PureColumn column : columns) {
 			column2DDL(ddl, column);
 			ddl.appendTempComma();
 			if (column.isKey())
@@ -74,7 +73,7 @@ public abstract class AbstractDialect implements Dialect {
 			ddl.clearTemp();
 		} else {
 			ddl.append("PRIMARY KEY(");
-			for (Column c : keys) {
+			for (PureColumn c : keys) {
 				ddl.append(c.getCode()).appendTempComma();
 			}
 			ddl.clearTemp();
@@ -83,8 +82,7 @@ public abstract class AbstractDialect implements Dialect {
 		ddl.append(");");
 	}
 
-	@Override
-	public void column2DDL(StringBuilderX sb, PureColumn column) {
+	protected void column2DDL(StringBuilderX sb, PureColumn column) {
 		sb.append(column.getCode()).append(" ").append(column.getType());
 		switch (column.getType()) {
 		case CHAR:
@@ -110,7 +108,7 @@ public abstract class AbstractDialect implements Dialect {
 	public String addColumn(String tableName, PureColumn... columns) {
 		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
 		for (PureColumn column : columns) {
-			sb.append("ADD COLUMN ");
+			sb.append("ADD ");
 			column2DDL(sb, column);
 			sb.appendTempComma();
 		}
@@ -119,10 +117,10 @@ public abstract class AbstractDialect implements Dialect {
 	}
 
 	@Override
-	public String delColumn(String tableName, String... columnNames) {
+	public String dropColumn(String tableName, String... columnNames) {
 		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
 		for (String name : columnNames) {
-			sb.append("DROP COLUMN ").append(name).appendTempComma();
+			sb.append("DROP ").append(name).appendTempComma();
 		}
 		sb.clearTemp();
 		return sb.toString();
@@ -132,7 +130,7 @@ public abstract class AbstractDialect implements Dialect {
 	public String alterColumn(String tableName, PureColumn... columns) {
 		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
 		for (PureColumn column : columns) {
-			sb.append("MODIFY COLUMN ");
+			sb.append("MODIFY ");
 			column2DDL(sb, column);
 			sb.appendTempComma();
 		}

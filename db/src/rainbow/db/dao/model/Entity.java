@@ -1,7 +1,6 @@
 package rainbow.db.dao.model;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -114,10 +113,10 @@ public class Entity extends NameObject {
 	 * @param name
 	 * @param columns
 	 */
-	public Entity(String name, Column... columns) {
+	public Entity(String name, List<Column> columns) {
 		this.name = name;
 		this.code = name;
-		setColumns(Arrays.asList(columns));
+		setColumns(columns);
 	}
 
 	public Entity(Table src) {

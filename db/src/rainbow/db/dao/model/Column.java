@@ -11,10 +11,6 @@ public class Column extends PureColumn implements INameObject {
 
 	private String name;
 
-	private String label;
-
-	private boolean key;
-
 	private Map<String, String> tags;
 
 	@Override
@@ -24,22 +20,6 @@ public class Column extends PureColumn implements INameObject {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getLabel() {
-		return label;
-	}
-
-	public void setLabel(String label) {
-		this.label = label;
-	}
-
-	public boolean isKey() {
-		return key;
-	}
-
-	public void setKey(boolean key) {
-		this.key = key;
 	}
 
 	public Map<String, String> getTags() {
@@ -84,15 +64,18 @@ public class Column extends PureColumn implements INameObject {
 	}
 
 	public Column(String name, DataType type) {
-		this(name, type, 0, 0, false);
+		super(name, type);
+		this.name = name;
 	}
 
 	public Column(String name, DataType type, int length) {
-		this(name, type, length, 0, false);
+		super(name, type, length);
+		this.name = name;
 	}
 
 	public Column(String name, int length, int precision) {
-		this(name, DataType.NUMERIC, length, 0, false);
+		super(name, length, precision);
+		this.name = name;
 	}
 
 	public Column(String name, DataType type, int length, int precision, boolean mandatory) {
@@ -103,7 +86,6 @@ public class Column extends PureColumn implements INameObject {
 	public Column(Field src) {
 		this.name = src.getName();
 		this.code = src.getCode();
-		this.label = src.getLabel();
 		this.key = src.isKey();
 		this.mandatory = src.isMandatory();
 		this.length = src.getLength();

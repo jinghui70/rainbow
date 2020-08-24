@@ -3,9 +3,7 @@ package rainbow.db.database;
 import java.util.Collection;
 import java.util.List;
 
-import rainbow.core.util.StringBuilderX;
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.PureColumn;
 import rainbow.db.model.Field;
@@ -97,15 +95,7 @@ public interface Dialect {
 	 * @param columns
 	 * @return
 	 */
-	String toDDL(String tableName, List<Column> columns);
-
-	/**
-	 * 字段定义转为DDL描述
-	 * 
-	 * @param sb
-	 * @param column
-	 */
-	void column2DDL(StringBuilderX sb, PureColumn column);
+	String toDDL(String tableName, List<? extends PureColumn> columns);
 
 	/**
 	 * 删除表的语句
@@ -129,7 +119,7 @@ public interface Dialect {
 	 * @param tableName
 	 * @param columns
 	 */
-	String delColumn(String tableName, String... columnNames);
+	String dropColumn(String tableName, String... columnNames);
 
 	/**
 	 * 修改字段

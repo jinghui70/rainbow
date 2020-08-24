@@ -293,7 +293,7 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
-	public void createTable(String tableName, List<Column> columns) {
+	public void createTable(String tableName, List<? extends PureColumn> columns) {
 		String ddl = dialect.toDDL(tableName, columns);
 		this.execSql(ddl);
 	}
@@ -310,8 +310,8 @@ public class DaoImpl extends NameObject implements Dao {
 	}
 
 	@Override
-	public void delColumn(String tableName, String... columnNames) {
-		String sql = dialect.delColumn(tableName, columnNames);
+	public void dropColumn(String tableName, String... columnNames) {
+		String sql = dialect.dropColumn(tableName, columnNames);
 		this.execSql(sql);
 
 	}

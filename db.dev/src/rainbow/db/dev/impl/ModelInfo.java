@@ -86,7 +86,7 @@ public class ModelInfo {
 	}
 
 	private ColumnNode convertColumn(Column column) {
-		ColumnNode result = new ColumnNode(column.getName(), column.getLabel());
+		ColumnNode result = new ColumnNode(column.getName(), column.getName());
 		result.setType(column.getType());
 		if (!Utils.isNullOrEmpty(column.getTags())) {
 			List<String> tags = new ArrayList<String>(column.getTags().size());

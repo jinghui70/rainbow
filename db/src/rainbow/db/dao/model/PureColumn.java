@@ -20,6 +20,8 @@ public class PureColumn {
 
 	protected boolean mandatory;
 
+	protected boolean key;
+
 	public String getCode() {
 		return code;
 	}
@@ -58,6 +60,14 @@ public class PureColumn {
 
 	public void setMandatory(boolean mandatory) {
 		this.mandatory = mandatory;
+	}
+
+	public boolean isKey() {
+		return key;
+	}
+
+	public void setKey(boolean key) {
+		this.key = key;
 	}
 
 	public PureColumn() {

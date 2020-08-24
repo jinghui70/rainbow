@@ -9,9 +9,11 @@ import com.google.common.collect.Maps;
 
 import rainbow.core.bundle.Extension;
 import rainbow.core.model.exception.AppException;
+import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Sql;
+import rainbow.db.dao.model.PureColumn;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.model.DataType;
 import rainbow.db.model.Field;
@@ -133,4 +135,41 @@ public class H2 extends AbstractDialect {
 			throw new AppException("H2 DataType [%s] not support", physic);
 	}
 
+	@Override
+	public String addColumn(String tableName, PureColumn... columns) {
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ADD ");
+		if (columns.length == 1) {
+			column2DDL(sb, columns[0]);
+		} else {
+			sb.append("(");
+			for (PureColumn column : columns) {
+				column2DDL(sb, column);
+				sb.appendTempComma();
+			}
+			sb.clearTemp();
+			sb.append(")");
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public String dropColumn(String tableName, String... columnNames) {
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" DROP COLUMN ");
+		for (String name : columnNames) {
+			sb.append(name).appendTempComma();
+		}
+		sb.clearTemp();
+		return sb.toString();
+	}
+
+	@Override
+	public String alterColumn(String tableName, PureColumn... columns) {
+		StringBuilderX sb = new StringBuilderX();
+		for (PureColumn column : columns) {
+			sb.append("ALTER TABLE ").append(tableName).append(" ALTER COLUMN ");
+			column2DDL(sb, column);
+			sb.append(";");
+		}
+		return sb.toString();
+	}
 }
