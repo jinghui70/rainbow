@@ -59,6 +59,8 @@ public class PureColumn {
 	}
 
 	public void setMandatory(boolean mandatory) {
+		if (isKey())
+			mandatory = true;
 		this.mandatory = mandatory;
 	}
 
@@ -68,6 +70,8 @@ public class PureColumn {
 
 	public void setKey(boolean key) {
 		this.key = key;
+		if (key)
+			this.mandatory = true;
 	}
 
 	public PureColumn() {
