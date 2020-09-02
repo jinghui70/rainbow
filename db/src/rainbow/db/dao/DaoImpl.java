@@ -300,7 +300,8 @@ public class DaoImpl extends NameObject implements Dao {
 
 	@Override
 	public void dropTable(String tableName) {
-		this.execSql(dialect.dropTable(tableName));
+		if (this.existsOfTable(tableName))
+			this.execSql(dialect.dropTable(tableName));
 	}
 
 	@Override

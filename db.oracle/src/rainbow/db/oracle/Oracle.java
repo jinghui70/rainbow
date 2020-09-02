@@ -78,6 +78,11 @@ public class Oracle extends AbstractDialect {
 	}
 
 	@Override
+	public String dropTable(String tableName) {
+		return String.format("DROP TABLE %s CASCADE CONSTRAINTS PURGE", tableName);
+	}
+
+	@Override
 	public String dropColumn(String tableName, String... columnNames) {
 		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName);
 		if (columnNames.length == 1) {
