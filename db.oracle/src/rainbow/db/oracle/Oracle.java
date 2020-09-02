@@ -25,7 +25,7 @@ public class Oracle extends AbstractDialect {
 	public String wrapPagedSql(String sql, int pageSize, int pageNo) {
 		int from = (pageNo - 1) * pageSize + 1;
 		int to = pageNo * pageSize;
-		return String.format("select * from (select A.*,ROWNUM AS RNfrom (%s) A where ROWNUM <=%d) where RN>=%d", sql,
+		return String.format("select * from (select A.*,ROWNUM AS RN from (%s) A where ROWNUM <=%d) where RN>=%d", sql,
 				to, from);
 	}
 
@@ -75,6 +75,21 @@ public class Oracle extends AbstractDialect {
 		}
 		if (column.isMandatory())
 			sb.append(" NOT NULL");
+	}
+
+	@Override
+	public String dropColumn(String tableName, String... columnNames) {
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName);
+		if (columnNames.length == 1) {
+			sb.append(" DROP COLUMN ").append(columnNames[0]);
+		} else {
+			sb.append(" DROP(");
+			for (String name : columnNames) {
+				sb.append(name).appendTempComma();
+			}
+			sb.clearTemp().append(")");
+		}
+		return sb.toString();
 	}
 
 }

@@ -251,12 +251,12 @@ public class Select extends Where<Select> implements ISelect {
 		sql.append(" FROM ");
 		sql.append(entity.getCode());
 		if (isLinkSql()) {
-			sql.append(" AS A");
+			sql.append(" A"); // oracle not support as A
 			char alias = 'A';
 			for (Link link : links) {
 				alias++;
 				sql.append(" LEFT JOIN ").append(link.getTargetEntity().getCode());
-				sql.append(" AS ").append(alias).append(" ON ");
+				sql.append(" ").append(alias).append(" ON ");
 				for (int i = 0; i < link.getColumns().size(); i++) {
 					Column c = link.getColumns().get(i);
 					Column cl = link.getTargetColumns().get(i);

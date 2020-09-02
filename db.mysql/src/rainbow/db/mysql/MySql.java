@@ -62,4 +62,13 @@ public class MySql extends AbstractDialect {
 			sb.append(" NOT NULL");
 	}
 
+	@Override
+	public String dropColumn(String tableName, String... columnNames) {
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
+		for (String name : columnNames) {
+			sb.append("DROP ").append(name).appendTempComma();
+		}
+		sb.clearTemp();
+		return sb.toString();
+	}
 }

@@ -118,9 +118,9 @@ public abstract class AbstractDialect implements Dialect {
 
 	@Override
 	public String dropColumn(String tableName, String... columnNames) {
-		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" ");
+		StringBuilderX sb = new StringBuilderX("ALTER TABLE ").append(tableName).append(" DROP ");
 		for (String name : columnNames) {
-			sb.append("DROP ").append(name).appendTempComma();
+			sb.append(name).appendTempComma();
 		}
 		sb.clearTemp();
 		return sb.toString();
