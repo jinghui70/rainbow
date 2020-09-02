@@ -294,33 +294,29 @@ public class DaoImpl extends NameObject implements Dao {
 
 	@Override
 	public void createTable(String tableName, List<? extends PureColumn> columns) {
-		String ddl = dialect.toDDL(tableName, columns);
-		this.execSql(ddl);
+		execSql(dialect.toDDL(tableName, columns));
 	}
 
 	@Override
 	public void dropTable(String tableName) {
-		if (this.existsOfTable(tableName))
-			this.execSql(dialect.dropTable(tableName));
+		if (existsOfTable(tableName))
+			execSql(dialect.dropTable(tableName));
 	}
 
 	@Override
 	public void addColumn(String tableName, PureColumn... columns) {
-		String sql = dialect.addColumn(tableName, columns);
-		this.execSql(sql);
+		execSql(dialect.addColumn(tableName, columns));
 	}
 
 	@Override
 	public void dropColumn(String tableName, String... columnNames) {
-		String sql = dialect.dropColumn(tableName, columnNames);
-		this.execSql(sql);
+		execSql(dialect.dropColumn(tableName, columnNames));
 
 	}
 
 	@Override
 	public void alterColumn(String tableName, PureColumn... columns) {
-		String sql = dialect.alterColumn(tableName, columns);
-		this.execSql(sql);
+		execSql(dialect.alterColumn(tableName, columns));
 	}
 
 }
