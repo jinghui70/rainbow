@@ -37,7 +37,10 @@ public abstract class AbstractDialect implements Dialect {
 	@Override
 	public String toDDL(Collection<Entity> entities) {
 		StringBuilderX ddl = new StringBuilderX();
-		entities.forEach(entity -> toDDL(ddl, entity.getCode(), entity.getColumns()));
+		entities.forEach(entity -> {
+			toDDL(ddl, entity.getCode(), entity.getColumns());
+			ddl.append(";\n");
+		});
 		return ddl.toString();
 	}
 
@@ -79,7 +82,7 @@ public abstract class AbstractDialect implements Dialect {
 			ddl.clearTemp();
 			ddl.append(")");
 		}
-		ddl.append(");");
+		ddl.append(")");
 	}
 
 	protected void column2DDL(StringBuilderX sb, PureColumn column) {
