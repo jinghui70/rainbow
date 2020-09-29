@@ -46,20 +46,6 @@
 			</xsl:when>
 			<xsl:otherwise>&#xA;) ;&#xA;&#xA;</xsl:otherwise>
 		</xsl:choose>
-		<xsl:text>comment on table </xsl:text>
-		<xsl:value-of select="r:dbName"/>
-		<xsl:text> is '</xsl:text>
-		<xsl:value-of select="r:cnName"/>
-		<xsl:text>';&#xA;&#xA;</xsl:text>
-		<xsl:for-each select="r:columns/r:column">
-			<xsl:text>comment on column </xsl:text>
-			<xsl:value-of select="$tableName"/>
-			<xsl:text>.</xsl:text>
-			<xsl:value-of select="r:dbName" />
-			<xsl:text> is '</xsl:text>
-			<xsl:value-of select="r:cnName"/>
-			<xsl:text>';&#xA;&#xA;</xsl:text>
-		</xsl:for-each>
 
 		<xsl:for-each select="r:indexes/r:index">
 			<xsl:choose>
