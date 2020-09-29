@@ -167,18 +167,14 @@ public class DaoImpl extends NameObject implements Dao {
 		Object obj = list.get(0);
 		NeoBean neo = toNeoBean(obj);
 		Entity entity = neo.getEntity();
-		StringBuilder sql = new StringBuilder().append("insert into ").append(entity.getCode()).append("(");
-		int i = 0;
+		StringBuilderX sql = new Sql("insert into ").append(entity.getCode()).append("(");
 		for (Column column : entity.getColumns()) {
-			if (i == 0) {
-				i++;
-			} else {
-				sql.append(",");
-			}
 			sql.append(column.getCode());
+			sql.appendTempComma();
 		}
+		sql.clearTemp();
 		sql.append(") values (?");
-		for (i = 1; i < entity.getColumns().size(); i++)
+		for (int i = 1; i < entity.getColumns().size(); i++)
 			sql.append(",?");
 		sql.append(")");
 

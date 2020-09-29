@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,10 +30,12 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
 
 import rainbow.core.model.exception.AppException;
+import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.NeoBean;
+import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.database.DataSourceConfig;
 import rainbow.db.database.DatabaseUtils;
@@ -105,37 +108,10 @@ public class Worker {
 		String server = Utils.substringBetween(jdbc.getJdbcUrl(), "jdbc:", ":").toLowerCase();
 		System.out.append("process database ").println(server);
 		generateDDL(server);
+		generatePreset();
 		DataSource dataSource = DatabaseUtils.createDataSource(jdbc);
 		DaoImpl dao = new DaoImpl(dataSource, new H2(), entityMap);
 		generateDatabase(dao, server);
-		for (Path p : preset) {
-			System.out.println("loading preset data " + p.getFileName());
-			Files.list(p).filter(f -> f.getFileName().toString().endsWith(".json")).sorted().forEach(f -> {
-				try {
-					loadPresetData(dao, f);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			});
-			System.out.println("Done!");
-		}
-	}
-
-	private void loadPresetData(Dao dao, Path file) throws IOException {
-		String entityName = Utils.substringBefore(file.getFileName().toString(), ".json");
-		System.out.print("processing ");
-		System.out.println(entityName);
-		Entity entity = dao.getEntity(entityName);
-		if (entity == null)
-			System.out.println("entity not defined");
-		else {
-			List<String> lines = Files.readAllLines(file);
-			List<NeoBean> neoList = Utils.transform(lines, line -> {
-				Map<String, Object> map = JSON.parseObject(line, MAP_TYPE);
-				return dao.makeNeoBean(entityName, map);
-			});
-			dao.insert(neoList);
-		}
 	}
 
 	private void writeUnit(PrintWriter writer, Unit unit) {
@@ -192,19 +168,92 @@ public class Worker {
 	}
 
 	private void generateDDL(String server) throws IOException, TransformerException {
-		Path ddl = output.resolve(server + ".sql");
+		String fileName = server + ".sql";
+		Path ddl = output.resolve(fileName);
 		Path rdm = output.resolve(model.getName() + ".rdm");
 		try (InputStream is = Worker.class.getResourceAsStream(server + ".xsl")) {
 			Transformer transformer = tf.newTransformer(new StreamSource(is));
 			transformer.transform(new StreamSource(Files.newBufferedReader(rdm)),
 					new StreamResult(Files.newOutputStream(ddl)));
 		}
+		System.out.println(fileName + " generated!");
+	}
+
+	private void generatePreset() throws IOException {
+		Path presetFile = output.resolve("preset.sql");
+		try (PrintWriter writer = new PrintWriter(Files.newBufferedWriter(presetFile))) {
+			for (Path p : preset) {
+				System.out.println("loading preset data " + p.getFileName());
+				Files.list(p).filter(f -> f.getFileName().toString().endsWith(".json")).sorted().forEach(f -> {
+					try {
+						loadPresetData(writer, f);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				});
+			}
+		}
+		System.out.println("preset.sql generated!");
+	}
+
+	private void loadPresetData(PrintWriter writer, Path file) throws IOException {
+		String entityName = Utils.substringBefore(file.getFileName().toString(), ".json");
+		System.out.print("processing ");
+		System.out.println(entityName);
+		Entity entity = entityMap.get(entityName);
+		if (entity == null)
+			System.out.println("entity not defined");
+		else {
+			List<String> lines = Files.readAllLines(file);
+			List<String> values = new ArrayList<String>();
+			for (String line : lines) {
+				Map<String, Object> map = JSON.parseObject(line, MAP_TYPE);
+				NeoBean neo = new NeoBean(entity, map);
+				values.clear();
+				StringBuilderX sql = new StringBuilderX("insert into ").append(entity.getCode()).append("(");
+				for (Column column : entity.getColumns()) {
+					Object v = neo.getObject(column);
+					if (v != null) {
+						sql.append(column.getCode());
+						sql.appendTempComma();
+						switch (column.getType()) {
+						case DOUBLE:
+						case INT:
+						case NUMERIC:
+						case LONG:
+						case SMALLINT:
+							values.add(v.toString());
+							break;
+						case BLOB:
+							throw new RuntimeException("not support byte");
+						default:
+							values.add("'" + v.toString() + "'");
+							break;
+						}
+					}
+				}
+				sql.clearTemp().append(") values(");
+				for (String v : values) {
+					sql.append(v).appendTempComma();
+				}
+				sql.clearTemp().append(");");
+				writer.println(sql.toString());
+			}
+		}
 	}
 
 	private void generateDatabase(Dao dao, String server) throws IOException {
+		System.out.println("creating database....");
 		Path ddlFile = output.resolve(server + ".sql");
 		String ddl = String.join("", Files.readAllLines(ddlFile));
 		dao.execSql(ddl);
+		Path presetFile = output.resolve("preset.sql");
+		String p = String.join("", Files.readAllLines(presetFile));
+		if (Utils.hasContent(p)) {
+			System.out.println("inserting preset data...");
+			dao.execSql(p);
+		}
+		System.out.println("Done!");
 	}
 
 }
