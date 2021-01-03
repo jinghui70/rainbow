@@ -1,7 +1,0 @@
-id: db.oracle
-desc: Oracle数据库支持
-father: db
-lib:
-  - group: com.oracle
-    artifact: ojdbc6
-    version: 12.1.0.1-atlassian-hosted

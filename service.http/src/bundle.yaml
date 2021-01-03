@@ -1,5 +1,0 @@
-id: service.http
-desc: 通过web调用服务插件
-requires: 
-  - service
-  - httpserver

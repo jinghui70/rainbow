@@ -12,6 +12,7 @@
 		<mkdir dir="${lib}/src"/>
 		<mkdir dir="${lib}/dev"/>
 	</target>
+	
 	<target name="download-lib">
 		<script language="javascript"> <![CDATA[
 			var echo = project.createTask("echo");

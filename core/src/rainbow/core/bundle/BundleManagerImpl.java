@@ -4,12 +4,14 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 import static rainbow.core.util.Preconditions.checkState;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
@@ -17,14 +19,9 @@ import javax.management.MBeanServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Multimap;
-
-import rainbow.core.platform.BundleAncestor;
 import rainbow.core.platform.BundleLoader;
-import rainbow.core.util.Utils;
+import rainbow.core.util.dag.Dag;
+import rainbow.core.util.dag.DagImpl;
 import rainbow.core.util.ioc.Context;
 import rainbow.core.util.ioc.DisposableBean;
 import rainbow.core.util.ioc.Inject;
@@ -33,13 +30,13 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 
 	private static Logger logger = LoggerFactory.getLogger(BundleManagerImpl.class);
 
-	private Map<String, Bundle> bundles = new HashMap<String, Bundle>();
-
-	private Multimap<Bundle, Bundle> bundleChildren = LinkedListMultimap.create();
+	private Map<String, Bundle> bundleMap = new HashMap<String, Bundle>();
 
 	private BundleLoader bundleLoader;
 
 	private MBeanServer mBeanServer;
+
+	private Dag<Bundle> dag;
 
 	@Inject
 	public void setBundleLoader(BundleLoader bundleLoader) {
@@ -56,7 +53,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		List<Bundle> newBundles;
 		try {
 			Set<String> idSets = new HashSet<String>();
-			idSets.addAll(bundles.keySet());
+			idSets.addAll(bundleMap.keySet());
 			newBundles = bundleLoader.loadBundle(idSets);
 		} catch (IOException e) {
 			logger.error("load bundle failed", e);
@@ -64,9 +61,35 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		}
 		logger.info("found {} new bundles", newBundles.size());
 		if (!newBundles.isEmpty()) {
-			newBundles.forEach(b -> bundles.put(b.getId(), b));
-			refreshUnactiveBundles();
+			newBundles.forEach(b -> bundleMap.put(b.getId(), b));
+			buildDag();
 		}
+	}
+
+	private void buildDag() {
+		Dag<Bundle> dag = new DagImpl<>();
+		bundleMap.values().forEach(bundle -> {
+			if (bundle.getState() == BundleState.READY || bundle.getState() == BundleState.ERROR)
+				bundle.setState(BundleState.FOUND);
+			List<Bundle> parents = new ArrayList<>();
+			for (String parentId : bundle.getParentIds()) {
+				Bundle parent = bundleMap.get(parentId);
+				if (parent == null)
+					return;
+				parents.add(parent);
+			}
+			parents.forEach(p -> dag.addEdge(p, bundle));
+		});
+		dag.dfsList().stream().forEach(b -> {
+			if (b.getState() == BundleState.FOUND) {
+				Set<Bundle> ancestors = dag.getAncestors(b);
+				b.setAncestors(ancestors);
+				if (!ancestors.stream().map(Bundle::getState).anyMatch(Predicate.isEqual(BundleState.FOUND))) {
+					b.setState(BundleState.READY);
+				}
+			}
+		});
+		this.dag = dag;
 	}
 
 	/**
@@ -76,12 +99,12 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 */
 	@Override
 	public synchronized void uninstallBundle(String id) {
-		Bundle bundle = bundles.get(id);
+		Bundle bundle = bundleMap.get(id);
 		if (bundle != null) {
 			if (bundle.getState() == BundleState.FOUND || bundle.getState() == BundleState.READY) {
-				bundles.remove(id);
+				bundleMap.remove(id);
 				bundle.destroy();
-				refreshUnactiveBundles();
+				buildDag();
 			}
 		}
 	}
@@ -89,13 +112,13 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	@Override
 	public void destroy() throws Exception {
 		stopAll();
-		bundles.values().forEach(Bundle::destroy);
-		bundles.clear();
+		bundleMap.values().forEach(Bundle::destroy);
+		bundleMap.clear();
 	}
 
 	@Override
 	public Bundle getBundle(String id) {
-		return checkNotNull(bundles.get(id), "bundle not found: {}", id);
+		return checkNotNull(bundleMap.get(id), "bundle not found: {}", id);
 	}
 
 	/**
@@ -105,62 +128,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 */
 	@Override
 	public Collection<Bundle> getBundles() {
-		return bundles.values();
-	}
-
-	/**
-	 * 当发现了新bundle或者删掉了一个bundle，要重新计算bundle的解析状态
-	 */
-	private void refreshUnactiveBundles() {
-		Collection<Bundle> bundles = getBundles();
-		for (Bundle bundle : bundles)
-			if (bundle.getState() == BundleState.READY || bundle.getState() == BundleState.ERROR)
-				bundle.setState(BundleState.FOUND);
-		for (Bundle bundle : bundles)
-			resolveBundle(bundle);
-	}
-
-	/**
-	 * 解析一个包所依赖的所有父包
-	 * 
-	 * @param bundle
-	 * @return
-	 */
-	private boolean resolveBundle(Bundle bundle) {
-		if (bundle.getState() != BundleState.FOUND)
-			return false;
-		bundle.setState(BundleState.RESOLVING);
-		try {
-			bundle.setParents(null);
-			Collection<String> parentIds = bundle.getParentIds();
-			if (parentIds.isEmpty()) {
-				bundle.setState(BundleState.READY);
-				return true;
-			}
-			List<Bundle> parentBundles = parentIds.stream().map(id -> bundles.get(id)).filter(Predicates.notNull())
-					.collect(Collectors.toList());
-			if (parentBundles.size() != parentIds.size()) // 有不存在的依赖插件
-				return false;
-			BundleAncestor ancestor = new BundleAncestor();
-			for (Bundle parent : parentBundles) {
-				if (ancestor.unaware(parent)) {
-					if (parent.getState() == BundleState.FOUND) {
-						if (!resolveBundle(parent))
-							return false;
-					}
-					ancestor.addParent(parent);
-				}
-			}
-			bundle.setState(BundleState.READY);
-			bundle.setParents(ancestor.getParents());
-			bundle.setAncestors(ancestor.getAncestors());
-			return true;
-		} finally {
-			if (bundle.getState() != BundleState.READY) {
-				bundle.setState(BundleState.FOUND);
-				bundle.setParents(null);
-			}
-		}
+		return bundleMap.values();
 	}
 
 	@Override
@@ -184,8 +152,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 				return false;
 		}
 		logger.info("[{}]-preparing to start ...", bundle);
-		logger.info("[{}]-starting parents: ", bundle, bundle.getParents());
-		for (Bundle parent : bundle.getParents()) {
+		for (Bundle parent : dag.getPredecessor(bundle)) {
 			if (!startBundle(parent)) {
 				logger.debug("start bundle {} failed, parent {} not ready", bundle.getId(), parent.getId());
 				return false;
@@ -218,13 +185,12 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	private void doStartBundle(Bundle bundle) throws BundleException {
 		BundleActivator activator = createActivator(bundle);
 		List<Context> parentContexts = null;
-		if (bundle.getParents() != null)
-			parentContexts = Utils.transform(bundle.getParents(), p -> p.getActivator().getContext());
+		Set<Bundle> parents = dag.getPredecessor(bundle);
+		if (!parents.isEmpty()) {
+			parentContexts = parents.stream().map(p -> p.getActivator().getContext()).collect(Collectors.toList());
+		}
 		bundle.setActivator(activator);
 		activator.start(mBeanServer, parentContexts);
-		for (Bundle parent : bundle.getParents()) {
-			bundleChildren.put(parent, bundle);
-		}
 	}
 
 	private BundleActivator createActivator(Bundle bundle) throws BundleException {
@@ -239,7 +205,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 			}
 			checkState(BundleActivator.class.isAssignableFrom(activatorClass), "wrong activator class {}",
 					activatorClass);
-			BundleActivator activator = (BundleActivator) activatorClass.newInstance();
+			BundleActivator activator = (BundleActivator) activatorClass.getDeclaredConstructor().newInstance();
 			activator.setBundleId(bundle.getId());
 			return activator;
 		} catch (Throwable e) {
@@ -261,18 +227,14 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		logger.debug("stopping bundle {}...", bundle.getId());
 		bundle.setState(BundleState.STOPPING);
 		// stopping children first
-		for (Bundle child : ImmutableList.copyOf(bundleChildren.get(bundle))) {
+		for (Bundle child : dag.getSuccessor(bundle)) {
 			stopBundle(child);
 		}
-		bundleChildren.removeAll(bundle);
-
 		// stop self
 		if (bundle.activator != null) {
 			bundle.activator.stop();
 			bundle.setActivator(null);
 		}
-		for (Bundle parent : bundle.getParents())
-			bundleChildren.remove(parent, bundle);
 		bundle.setState(BundleState.READY);
 
 		logger.info("bundle {} stopped!", bundle.getId());
@@ -285,8 +247,8 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 */
 	@Override
 	public void initStart() {
-		logger.info("starting all bundles: {}", bundles.keySet().stream().collect(Collectors.joining(",")));
-		getBundles().forEach(this::startBundle);
+		logger.info("starting all bundles: {}", bundleMap.keySet().stream().collect(Collectors.joining(",")));
+		dag.dfsList().forEach(this::startBundle);
 	}
 
 	/**
@@ -294,7 +256,10 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	 */
 	@Override
 	public synchronized void stopAll() {
-		getBundles().forEach(this::stopBundle);
+		List<Bundle> list = dag.dfsList();
+		for (int i = list.size() - 1; i >= 0; i--) {
+			stopBundle(list.get(i));
+		}
 	}
 
 	/**

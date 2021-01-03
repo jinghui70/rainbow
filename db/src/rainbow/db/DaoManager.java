@@ -1,6 +1,9 @@
 package rainbow.db;
 
+import java.util.List;
+
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.DaoConfig;
 
 /**
  * 数据库Dao管理器
@@ -18,4 +21,18 @@ public interface DaoManager {
 	 */
 	Dao getDao(String name);
 
+	/**
+	 * 返回系统配置的所有Dao名字
+	 * 
+	 * @return
+	 */
+	List<String> getDaoNames();
+
+	/**
+	 * 获取制定数据库连接配置
+	 * 
+	 * @param name
+	 * @return
+	 */
+	DaoConfig loadConfig(String name);
 }

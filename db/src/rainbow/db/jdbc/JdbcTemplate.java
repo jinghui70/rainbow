@@ -2,6 +2,8 @@ package rainbow.db.jdbc;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -120,6 +122,17 @@ public class JdbcTemplate implements JdbcOperations {
 	 */
 	public JdbcTemplate(DataSource dataSource) {
 		this.dataSource = dataSource;
+	}
+
+	public void close() throws IOException {
+		if (dataSource == null)
+			return;
+		if (dataSource instanceof Closeable) {
+			Closeable c = (Closeable) dataSource;
+			dataSource = null;
+			c.close();
+		} else
+			dataSource = null;
 	}
 
 	/**

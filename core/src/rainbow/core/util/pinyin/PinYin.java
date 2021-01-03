@@ -1,6 +1,6 @@
 package rainbow.core.util.pinyin;
 
-import static rainbow.core.util.Preconditions.*;
+import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.io.IOException;
 import java.util.Properties;

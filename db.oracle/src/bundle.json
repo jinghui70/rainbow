@@ -1,0 +1,10 @@
+{
+	"id": "db.oracle",
+	"desc": "Oracle数据库支持",
+	"father": "db",
+	"libs": [
+		{
+			"jar": "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
+		}
+	]
+}

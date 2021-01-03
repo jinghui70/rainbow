@@ -6,11 +6,10 @@ import static rainbow.core.util.Preconditions.checkState;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.MapMaker;
 
 import rainbow.core.util.Utils;
 
@@ -24,7 +23,7 @@ public abstract class ExtensionRegistry {
 
 	private static Logger logger = LoggerFactory.getLogger(ExtensionRegistry.class);
 
-	private static Map<Class<?>, ExtensionPoint> pointMap = new MapMaker().concurrencyLevel(1).makeMap();
+	private static Map<Class<?>, ExtensionPoint> pointMap = new ConcurrentHashMap<>();
 
 	/**
 	 * 注册一个扩展点

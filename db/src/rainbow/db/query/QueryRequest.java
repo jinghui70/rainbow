@@ -2,9 +2,7 @@ package rainbow.db.query;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSON;
-
-import rainbow.core.util.Utils;
+import rainbow.core.util.json.JSON;
 
 /**
  * 通用的查询请求
@@ -72,6 +70,6 @@ public class QueryRequest extends QueryInfo {
 
 	@Override
 	public String toString() {
-		return Utils.toJson(this);
+		return JSON.toJSONString(this);
 	}
 }

@@ -6,7 +6,6 @@ import java.util.List;
 import rainbow.core.bundle.BundleActivator;
 import rainbow.core.bundle.FatherBundle;
 import rainbow.db.database.Dialect;
-import rainbow.db.internal.DaoManagerImpl;
 import rainbow.db.refinery.Refinery;
 
 public class Activator extends BundleActivator implements FatherBundle {
@@ -18,8 +17,6 @@ public class Activator extends BundleActivator implements FatherBundle {
 
 	@Override
 	public void afterSonLoaded() throws Exception {
-		DaoManagerImpl daoManager = getBean("daoManager", DaoManagerImpl.class);
-		daoManager.init();
 	}
 
 }

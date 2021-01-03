@@ -1,156 +1,137 @@
 package rainbow.db.internal;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
-import static rainbow.core.util.Preconditions.checkState;
 
-import java.io.Closeable;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.DumperOptions;
-import org.yaml.snakeyaml.Yaml;
 
 import rainbow.core.bundle.Bean;
 import rainbow.core.bundle.ConfigAwareObject;
 import rainbow.core.bundle.Extension;
 import rainbow.core.model.IAdaptable;
-import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
-import rainbow.core.util.converter.Converters;
 import rainbow.core.util.encrypt.Cipher;
 import rainbow.core.util.encrypt.EncryptUtils;
 import rainbow.core.util.ioc.DisposableBean;
+import rainbow.core.util.ioc.InitializingBean;
 import rainbow.core.util.ioc.InjectProvider;
+import rainbow.core.util.json.JSON;
 import rainbow.db.DaoManager;
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.DaoConfig;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.model.Entity;
-import rainbow.db.database.DaoConfig;
 import rainbow.db.database.DatabaseUtils;
+import rainbow.db.database.Dialect;
 
 @Bean
 @Extension(point = InjectProvider.class)
-public class DaoManagerImpl extends ConfigAwareObject implements DaoManager, IAdaptable, DisposableBean {
+public class DaoManagerImpl extends ConfigAwareObject
+		implements DaoManager, IAdaptable, InitializingBean, DisposableBean {
 
 	private static Logger logger = LoggerFactory.getLogger(DaoManagerImpl.class);
 
-	private Map<String, Dao> daoMap = Collections.emptyMap();
+	private Map<String, Dao> daoMap;
 
-	private Dao defaultDao;
+	private List<String> daoNames;
+
+	private String defaultDao;
+
+	@Override
+	public void afterPropertiesSet() throws Exception {
+		Path path = bundleConfig.getConfigPath();
+		daoNames = Files.list(path).map(Path::getFileName).map(Path::toString).filter(s -> s.endsWith(".json"))
+				.map(s -> Utils.substringBefore(s, ".json")).collect(Collectors.toList());
+		int size = daoNames.size();
+		if (size == 1)
+			defaultDao = daoNames.get(0);
+		if (size > 0) {
+			daoMap = new HashMap<>(size);
+			logger.info("{} db config found: {}", size, daoNames);
+		}
+	}
+
+	@Override
+	public List<String> getDaoNames() {
+		return daoNames;
+	}
 
 	@Override
 	public Dao getDao(String name) {
-		return daoMap.get(name);
+		Dao dao = daoMap.get(name);
+		if (dao == null) {
+			dao = createDao(name);
+			daoMap.put(name, dao);
+		}
+		return dao;
 	}
 
-	private Path loadConfig(String filename) throws FileNotFoundException {
-		Path file = bundleConfig.getConfigFile(filename);
-		return Files.exists(file) ? file : null;
+	private synchronized Dao createDao(String name) {
+		if (daoMap.get(name) != null) {
+			return daoMap.get(name);
+		}
+		DaoConfig config = loadConfig(name);
+		Map<String, Entity> entityMap = loadModel(config.getModel());
+		logger.info("connecting to db [{}]", name);
+		if (config.getRef() == null) {
+			DataSource dataSource = DatabaseUtils.createDataSource(config);
+			Dialect dialect = DatabaseUtils.dialect(config.getType());
+			return new DaoImpl(dataSource, dialect, entityMap);
+		} else {
+			Dao refDao = getDao(config.getRef());
+			return new DaoImpl(refDao, entityMap);
+		}
 	}
 
-	public void init() throws Exception {
-		Path file = null;
-		if (Platform.isDev())
-			file = loadConfig("database.yaml.dev");
-		if (file == null)
-			file = loadConfig("database.yaml");
-		if (file == null)
-			return;
-
-		List<DaoConfig> configs = new ArrayList<DaoConfig>();
-		List<Map<String, Object>> maps = new ArrayList<Map<String, Object>>();
-		boolean changed = false;
-
-		DumperOptions options = new DumperOptions();
-		options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-		Yaml yaml = new Yaml(options);
-
-		try (InputStream is = Files.newInputStream(file)) {
-			for (Object o : yaml.loadAll(is)) {
-				@SuppressWarnings("unchecked")
-				Map<String, Object> map = (Map<String, Object>) o;
-				DaoConfig config = Converters.map2Object(map, DaoConfig.class);
-				if (encryptThing(map, config))
-					changed = true;
-				configs.add(config);
-				maps.add(map);
+	@Override
+	public DaoConfig loadConfig(String name) {
+		Path file = checkNotNull(bundleConfig.getConfigFile(name + ".json"), "dao config file [{}.json] not exist",
+				name);
+		DaoConfig config = JSON.parseObject(file, DaoConfig.class);
+		if (Utils.isNullOrEmpty(config.getRef()) && Utils.hasContent(config.getCipher())) {
+			Cipher cipher = EncryptUtils.getCipher(config.getCipher());
+			if (config.isEncrypted()) {
+				config.setUsername(cipher.decode(config.getUsername()));
+				config.setPassword(cipher.decode(config.getPassword()));
+			} else {
+				String username = config.getUsername();
+				String password = config.getPassword();
+				config.setEncrypted(true);
+				config.setUsername(cipher.encode(username));
+				config.setPassword(cipher.encode(password));
+				JSON.toJSON(config, file, true);
+				config.setUsername(username);
+				config.setPassword(password);
 			}
 		}
-		if (changed) {
-			try (Writer writer = Files.newBufferedWriter(file)) {
-				yaml.dumpAll(maps.iterator(), writer);
-			}
-		}
-		daoMap = new HashMap<String, Dao>();
-		for (DaoConfig config : configs) {
-			logger.info("creating dao: {}...", config.getName());
-			Dao dao = createDao(config);
-			if (defaultDao == null)
-				defaultDao = dao;
-			daoMap.put(config.getName(), dao);
-		}
+		return config;
+	}
+
+	private Map<String, Entity> loadModel(String name) {
+		Path file = checkNotNull(bundleConfig.getConfigFile(name), "model file [{}] not exist", name);
+		return DatabaseUtils.resolveModel(file);
 	}
 
 	@Override
 	public void destroy() throws Exception {
 		daoMap.forEach((id, dao) -> {
-			DataSource dataSource = dao.getJdbcTemplate().getDataSource();
-			if (dataSource instanceof Closeable) {
-				try {
-					((Closeable) dataSource).close();
-				} catch (IOException e) {
-					logger.error("closing dataSource[{}] error", id, e);
-				}
+			logger.info("closeing dataSource: {}", id);
+			try {
+				dao.close();
+			} catch (IOException e) {
+				logger.error("closeing dao [{}] error", id, e);
 			}
 		});
-	}
-
-	private boolean encryptThing(Map<String, Object> map, DaoConfig config) {
-		if (!Utils.isNullOrEmpty(config.getPhysicSource()))
-			return false;
-		String cipherType = config.getCipher();
-		if (Utils.isNullOrEmpty(cipherType))
-			return false;
-		Cipher cipher = EncryptUtils.getCipher(cipherType);
-		if (config.isEncrypted()) {
-			config.setUsername(cipher.decode(config.getUsername()));
-			config.setPassword(cipher.decode(config.getPassword()));
-			return false;
-		} else {
-			map.put("encrypted", true);
-			map.put("username", cipher.encode(config.getUsername()));
-			map.put("password", cipher.encode(config.getPassword()));
-			return true;
-		}
-	}
-
-	private Dao createDao(DaoConfig config) {
-		Map<String, Entity> entityMap = null;
-		String modelFileName = config.getModel();
-		if (!Utils.isNullOrEmpty(modelFileName)) {
-			Path modelFile = bundleConfig.getConfigFile(modelFileName);
-			checkState(Files.exists(modelFile), "database model file not exist:{}", modelFileName);
-			entityMap = DatabaseUtils.resolveModel(modelFile);
-		}
-		if (!Utils.isNullOrEmpty(config.getPhysicSource())) {
-			Dao refDao = checkNotNull(daoMap.get(config.getPhysicSource()), "physic datasource [{}] not defined!",
-					config.getPhysicSource());
-			return new DaoImpl(refDao.getJdbcTemplate().getDataSource(), refDao.getDialect(), entityMap);
-		}
-		return DatabaseUtils.createDao(config, entityMap);
 	}
 
 	@Override
@@ -165,9 +146,13 @@ public class DaoManagerImpl extends ConfigAwareObject implements DaoManager, IAd
 
 			@Override
 			public Object getInjectObject(String name, String destClassName) {
-				if (daoMap.size() == 1 || "dao".equals(name))
-					return defaultDao;
-				return daoMap.get(name);
+				if ("dao".equals(name)) {
+					if (defaultDao != null)
+						return getDao(defaultDao);
+					else
+						return null;
+				}
+				return getDao(name);
 			}
 		};
 	}

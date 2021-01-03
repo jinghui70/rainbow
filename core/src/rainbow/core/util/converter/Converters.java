@@ -138,7 +138,7 @@ public class Converters {
 	private static void addDefault(Class<? extends AbstractConverter<?, ?>> convertClass) {
 		AbstractConverter<?, ?> c;
 		try {
-			c = convertClass.newInstance();
+			c = convertClass.getDeclaredConstructor().newInstance();
 			table.put(c.getFromClass(), c.getToClass(), c);
 		} catch (Exception e) {
 			e.printStackTrace();

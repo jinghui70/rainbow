@@ -2,6 +2,7 @@ package rainbow.core.bundle;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -109,8 +110,9 @@ public abstract class BundleActivator {
 			Object object = null;
 			if (Utils.isNullOrEmpty(extConfig.getBeanName())) {
 				try {
-					object = extConfig.getClazz().newInstance();
-				} catch (InstantiationException | IllegalAccessException e) {
+					object = extConfig.getClazz().getDeclaredConstructor().newInstance();
+				} catch (InstantiationException | IllegalAccessException | IllegalArgumentException
+						| InvocationTargetException | NoSuchMethodException | SecurityException e) {
 					throw new BundleException("create extension object of[{}] failed", extConfig.getClazz(), e);
 				}
 			} else {

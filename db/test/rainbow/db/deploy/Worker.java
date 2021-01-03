@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.lang.reflect.Type;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -26,12 +24,10 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
-
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
+import rainbow.core.util.json.JSON;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.NeoBean;
@@ -45,9 +41,6 @@ import rainbow.db.model.Model;
 import rainbow.db.model.Unit;
 
 public class Worker {
-
-	private static Type MAP_TYPE = new TypeReference<Map<String, Object>>() {
-	}.getType();
 
 	private TransformerFactory tf = TransformerFactory.newInstance();
 
@@ -75,7 +68,7 @@ public class Worker {
 		Path modelFile = Paths.get(fileName);
 		if (Files.exists(modelFile) && Files.isRegularFile(modelFile)) {
 			try (InputStream is = Files.newInputStream(modelFile)) {
-				model = JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
+				model = JSON.parseObject(is, Model.class);
 				entityMap = DatabaseUtils.resolveModel(model);
 			}
 		} else
@@ -207,7 +200,7 @@ public class Worker {
 			List<String> lines = Files.readAllLines(file);
 			List<String> values = new ArrayList<String>();
 			for (String line : lines) {
-				Map<String, Object> map = JSON.parseObject(line, MAP_TYPE);
+				Map<String, Object> map = JSON.parseObject(line);
 				NeoBean neo = new NeoBean(entity, map);
 				values.clear();
 				StringBuilderX sql = new StringBuilderX("insert into ").append(entity.getCode()).append("(");

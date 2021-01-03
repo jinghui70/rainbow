@@ -2,20 +2,12 @@ package rainbow.core.bundle;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONException;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.TypeReference;
+import java.util.Map;
 
 import rainbow.core.platform.Platform;
-import rainbow.core.util.Utils;
+import rainbow.core.util.json.JSON;
 
 /**
  * 
@@ -32,11 +24,11 @@ import rainbow.core.util.Utils;
  */
 public class BundleConfig {
 
-	private JSONObject root;
+	private Map<String, Object> root;
 
-	private Path path;
+	private Path configFile;
 
-	private Path bundleConfigPath;
+	private Path configPath;
 
 	private boolean standalone = true;
 
@@ -47,32 +39,39 @@ public class BundleConfig {
 	 * @param bundleConfig 配置数据文件
 	 * @param configPath   配置文件目录
 	 */
-	public BundleConfig(Path bundleConfig, Path configPath) {
-		this.path = bundleConfig;
-		root = loadConfigFile(path);
-		this.bundleConfigPath = configPath;
+	public BundleConfig(Path configFile, Path configPath) {
+		this.configFile = configFile;
+		this.configPath = configPath;
+		root = JSON.parseObject(configFile);
 	}
 
+	@SuppressWarnings("unchecked")
 	public BundleConfig(String bundleId, boolean checkExist) {
 		init(bundleId);
 		if (checkExist)
-			checkNotNull(root, "config file not found: {}", path.getFileName());
+			checkNotNull(root, "config file not found: {}", configFile.getFileName());
 		if (root == null) {
 			standalone = false;
 			init("core");
-			root = root.getJSONObject(bundleId);
+			Object obj = root.get(bundleId);
+			if (obj != null) {
+				if (obj instanceof Map)
+					root = (Map<String, Object>) obj;
+				else
+					root = null;
+			}
 		}
-		bundleConfigPath = Platform.getHome().resolve("conf").resolve(bundleId);
+		configPath = Platform.getHome().resolve("conf").resolve(bundleId);
 	}
 
 	private void init(String bundleId) {
 		if (Platform.isDev()) {
-			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json.dev");
-			root = loadConfigFile(path);
+			configFile = Platform.getHome().resolve("conf").resolve(bundleId + ".json.dev");
+			root = JSON.parseObject(configFile);
 		}
 		if (root == null) {
-			path = Platform.getHome().resolve("conf").resolve(bundleId + ".json");
-			root = loadConfigFile(path);
+			configFile = Platform.getHome().resolve("conf").resolve(bundleId + ".json");
+			root = JSON.parseObject(configFile);
 		}
 	}
 
@@ -88,7 +87,7 @@ public class BundleConfig {
 	 * @return
 	 */
 	public String getString(String key) {
-		return root == null ? null : root.getString(key);
+		return root == null ? null : (String) root.get(key);
 	}
 
 	/**
@@ -111,7 +110,7 @@ public class BundleConfig {
 	 * @return
 	 */
 	public int getInt(String key) {
-		return root == null ? 0 : root.getIntValue(key);
+		return root == null ? 0 : (Integer) root.get(key);
 	}
 
 	/**
@@ -136,7 +135,7 @@ public class BundleConfig {
 	public boolean getBool(String key) {
 		if (root == null)
 			return false;
-		return Boolean.TRUE.equals(root.getBoolean(key));
+		return Boolean.TRUE.equals(root.get(key));
 	}
 
 	/**
@@ -148,55 +147,8 @@ public class BundleConfig {
 	public boolean getBool(String key, boolean defaultVal) {
 		if (root == null)
 			return defaultVal;
-		Boolean val = root.getBoolean(key);
+		Boolean val = (Boolean) root.get(key);
 		return val == null ? defaultVal : val.booleanValue();
-	}
-
-	/**
-	 * 获取bundle配置单项内容,并转为字符串列表
-	 * 
-	 * @param bundleId
-	 * @param key
-	 * @return
-	 */
-	public List<String> getList(String key) {
-		if (root == null)
-			return Collections.emptyList();
-		List<String> result = root.getObject(key, TypeReference.LIST_STRING);
-		return result == null ? Collections.emptyList() : result;
-	}
-
-	/**
-	 * 获取bundle配置的对象
-	 * 
-	 * @param key
-	 * @param type
-	 * @return
-	 */
-	public <T> T getObject(String key, TypeReference<T> type) {
-		if (root == null)
-			return null;
-		return root.getObject(key, type.getType());
-	}
-
-	/**
-	 * 读取json配置文件（支持//注释）
-	 * 
-	 * @param path
-	 * @return
-	 */
-	public static JSONObject loadConfigFile(Path path) {
-		if (!Files.exists(path))
-			return null;
-		try {
-			String text = Files.lines(path).map(String::trim).filter(s -> !s.startsWith("//"))
-					.collect(Collectors.joining());
-			return JSON.parseObject(text);
-		} catch (JSONException je) {
-			throw new RuntimeException("fail to parse json file:" + path.toString(), je);
-		} catch (IOException e) {
-			throw new RuntimeException("fail to read json file:" + path.toString(), e);
-		}
 	}
 
 	/**
@@ -205,75 +157,22 @@ public class BundleConfig {
 	 * @return
 	 */
 	public Path getConfigPath() {
-		return bundleConfigPath;
+		return configPath;
 	}
 
 	/**
-	 * 返回Bundle的配置目录下的指定文件
+	 * 返回Bundle的配置目录下的指定文件，开发模式下优先返回.dev后缀的配置文件
 	 * 
 	 * @param fileName 文件名
 	 * @return
 	 */
 	public Path getConfigFile(String fileName) {
-		return getConfigPath().resolve(fileName);
-	}
-
-	/**
-	 * 返回Bundle的配置目录下的指定文件，并读为一个字符串
-	 * 
-	 * @param fileName
-	 * @return 文件内容
-	 * @throws IOException
-	 */
-	public String getConfigFileAsString(String fileName) throws IOException {
-		Path file = getConfigFile(fileName);
-		return Utils.streamToString(Files.newInputStream(file));
-	}
-
-	/**
-	 * 如果配置文件是一个json文件，直接解析为一个对象
-	 * 
-	 * @param fileName
-	 * @param clazz
-	 * @return
-	 * @throws IOException
-	 */
-	public final <T> T getConfigFile(final String fileName, Class<T> clazz) {
-		Path file = getConfigFile(fileName);
-		if (!Files.exists(file))
-			return null;
-		try {
-			String text = Files.lines(file).map(String::trim).filter(s -> !s.startsWith("//"))
-					.collect(Collectors.joining());
-			return JSON.parseObject(text, clazz);
-		} catch (JSONException je) {
-			throw new RuntimeException("fail to parse json file:" + file.toString(), je);
-		} catch (IOException e) {
-			throw new RuntimeException("fail to read json file:" + file.toString(), e);
-		}
-	}
-
-	/**
-	 * 如果配置文件是一个json文件，直接解析为一个对象
-	 * 
-	 * @param fileName
-	 * @param tr
-	 * @return
-	 * @throws IOException
-	 */
-	public <T> T getConfigFile(final String fileName, TypeReference<T> tr) {
-		Path file = getConfigFile(fileName);
-		if (!Files.exists(file))
-			return null;
-		try {
-			String text = Files.lines(file).map(String::trim).filter(s -> !s.startsWith("//"))
-					.collect(Collectors.joining());
-			return JSON.parseObject(text, tr);
-		} catch (JSONException je) {
-			throw new RuntimeException("fail to parse json file:" + file.toString(), je);
-		} catch (IOException e) {
-			throw new RuntimeException("fail to read json file:" + file.toString(), e);
-		}
+		Path file = null;
+		if (Platform.isDev())
+			file = getConfigPath().resolve(fileName + ".dev");
+		if (Files.exists(file) == false)
+			file = getConfigPath().resolve(fileName);
+		return Files.exists(file) ? file : null;
 	}
 
 }

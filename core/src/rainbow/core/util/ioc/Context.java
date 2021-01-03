@@ -6,7 +6,6 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +49,10 @@ public class Context {
 
 	public Context(Map<String, Bean> beans, List<Context> parents) {
 		this.beans = beans;
-		this.parents = parents;
+		if (parents == null)
+			this.parents = Collections.emptyList();
+		else
+			this.parents = parents;
 	}
 
 	public Context addBean(String name, Bean bean) {
@@ -79,7 +81,7 @@ public class Context {
 		beans.entrySet().forEach(entry -> {
 			Bean bean = entry.getValue();
 			if (!bean.isPrototype())
-				getSingletonBean(entry.getKey(), bean);
+				getBean(entry.getKey(), bean);
 		});
 	}
 
@@ -95,23 +97,6 @@ public class Context {
 		if (bean != null)
 			return bean;
 		throw new NoSuchBeanDefinitionException(id);
-	}
-
-	/**
-	 * 返回指定id和类型的bean定义
-	 * 
-	 * @param id
-	 * @param clazz
-	 * @return bean定义对象
-	 * @throws BeanNotOfRequiredTypeException
-	 */
-	private Bean getBeanDef(String id, Class<?> clazz) throws BeanNotOfRequiredTypeException {
-		Bean bean = getBeanDef(id);
-		if (bean == null)
-			throw new NoSuchBeanDefinitionException(id);
-		if (clazz.isAssignableFrom(bean.getClazz()))
-			return bean;
-		throw new BeanNotOfRequiredTypeException(id, clazz, bean.getClazz());
 	}
 
 	/**
@@ -134,8 +119,16 @@ public class Context {
 	 */
 	@SuppressWarnings("unchecked")
 	public <T> T getLocalBean(String id, Class<T> clazz) {
-		Bean bean = getBeanDef(id, clazz);
-		return (T) getBean(id, bean);
+		Bean bean = getBeanDef(id);
+		Class<?> checkClass = bean.getClazz();
+		if (bean.isFactory()) {
+			Factory<?> factory = (Factory<?>) getBeanObject(id, bean);
+			checkClass = factory.targetClass();
+		}
+		if (clazz.isAssignableFrom(checkClass)) {
+			return (T) getBean(id, bean);
+		}
+		throw new BeanNotOfRequiredTypeException(id, clazz, checkClass);
 	}
 
 	/**
@@ -148,8 +141,14 @@ public class Context {
 	public <T> T getLocalBean(Class<T> clazz) {
 		for (Entry<String, Bean> entry : beans.entrySet()) {
 			Bean bean = entry.getValue();
-			if (clazz.isAssignableFrom(bean.getClazz()))
-				return (T) getBean(entry.getKey(), bean);
+			String id = entry.getKey();
+			Class<?> checkClass = bean.getClazz();
+			if (bean.isFactory()) {
+				Factory<?> factory = (Factory<?>) getBeanObject(id, bean);
+				checkClass = factory.targetClass();
+			}
+			if (clazz.isAssignableFrom(checkClass))
+				return (T) getBean(id, bean);
 		}
 		throw new NoSuchBeanDefinitionException(clazz.getName());
 	}
@@ -212,42 +211,41 @@ public class Context {
 		}
 	}
 
-	/**
-	 * 返回符合指定定义类型的一组Bean对象
-	 * 
-	 * @param clazz
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public <T> List<T> getBeans(Class<T> clazz) {
-		List<T> result = new ArrayList<T>();
-		for (Entry<String, Bean> entry : beans.entrySet()) {
-			Bean bean = entry.getValue();
-			if (!bean.isPrototype() && clazz.isAssignableFrom(bean.getClazz()))
-				result.add((T) getSingletonBean(entry.getKey(), bean));
-		}
-		return result;
-	}
-
 	private Object getBean(String id, Bean bean) {
-		if (bean.isPrototype())
+		if (bean.isFactory()) {
+			Factory<?> factory = (Factory<?>) getBeanObject(id, bean);
+			if (bean.isPrototype())
+				return factory.create();
+			return getTargetObject(factory, bean);
+		} else if (bean.isPrototype())
 			return getPrototypeBean(id, bean);
-		return getSingletonBean(id, bean);
+		return getBeanObject(id, bean);
 	}
 
-	private Object getSingletonBean(String id, Bean bean) throws BeanInitializationException {
-		synchronized (this) {
-			if (bean.getObject() != null)
-				return bean.getObject();
-			bean.setObject(getPrototypeBean(id, bean));
-			return bean.getObject();
+	private Object getTargetObject(Factory<?> factory, Bean bean) {
+		if (bean.getTargetObject() == null) {
+			synchronized (this) {
+				if (bean.getTargetObject() == null)
+					bean.setTargetObject(factory.create());
+			}
 		}
+		return bean.getTargetObject();
+	}
+
+	private Object getBeanObject(String id, Bean bean) throws BeanInitializationException {
+		if (bean.getObject() == null) {
+			synchronized (this) {
+				if (bean.getObject() == null)
+					bean.setObject(getPrototypeBean(id, bean));
+			}
+		}
+		return bean.getObject();
 	}
 
 	private Object getPrototypeBean(String id, Bean bean) throws BeanInitializationException {
 		Object object = null;
 		try {
-			object = bean.getClazz().newInstance();
+			object = bean.getClazz().getDeclaredConstructor().newInstance();
 			dependInject(object);
 			if (object instanceof InitializingBean) {
 				((InitializingBean) object).afterPropertiesSet();
@@ -345,9 +343,9 @@ public class Context {
 	public void close() {
 		logger.info("closing context");
 		for (Bean bean : beans.values()) {
-			if (!bean.isPrototype()) {
+			if (!bean.isPrototype() || bean.isFactory()) {
 				Object object = bean.getObject();
-				if (object instanceof DisposableBean) {
+				if (object != null && object instanceof DisposableBean) {
 					try {
 						((DisposableBean) object).destroy();
 					} catch (Exception e) {

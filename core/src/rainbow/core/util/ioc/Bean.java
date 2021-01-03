@@ -8,13 +8,36 @@ package rainbow.core.util.ioc;
  */
 public final class Bean {
 
+	/**
+	 * Bean 的类型
+	 */
 	private Class<?> clazz;
 
-	private Object object;
-
+	/**
+	 * 是否是原型Bean
+	 */
 	boolean prototype;
 
+	/**
+	 * 如果是单例Bean，这就是保存的单例对象
+	 */
+	private volatile Object object;
+
+	/**
+	 * 工厂模式下，这是生产用的bean类
+	 */
+	private Class<?> targetClass;
+
+	/**
+	 * 工厂模式下的单例Bean对象
+	 */
+	private volatile Object targetObject;
+
 	private Bean() {
+	}
+
+	public boolean isFactory() {
+		return Factory.class.isAssignableFrom(clazz);
 	}
 
 	/**
@@ -39,6 +62,22 @@ public final class Bean {
 		this.object = object;
 	}
 
+	public Class<?> getTargetClass() {
+		return targetClass;
+	}
+
+	public void setTargetClass(Class<?> targetClass) {
+		this.targetClass = targetClass;
+	}
+
+	public Object getTargetObject() {
+		return targetObject;
+	}
+
+	public void setTargetObject(Object targetObject) {
+		this.targetObject = targetObject;
+	}
+
 	/**
 	 * 返回bean是否是原型bean，原型bean在每次获取时都创建一个新的实例
 	 * 
@@ -51,8 +90,7 @@ public final class Bean {
 	/**
 	 * 创建一个原型bean定义
 	 * 
-	 * @param clazz
-	 *            bean类型
+	 * @param clazz bean类型
 	 * @return 创建的原型Bean定义
 	 */
 	public static Bean prototype(Class<?> clazz) {
@@ -78,10 +116,8 @@ public final class Bean {
 	/**
 	 * 创建一个单例Bean
 	 * 
-	 * @param object
-	 *            对象
-	 * @param clazz
-	 *            超类
+	 * @param object 对象
+	 * @param clazz  超类
 	 * @return
 	 */
 	public static <T> Bean singleton(T object, Class<T> clazz) {
@@ -95,8 +131,7 @@ public final class Bean {
 	/**
 	 * 创建一个单例Bean
 	 * 
-	 * @param object
-	 *            对象
+	 * @param object 对象
 	 * @return
 	 */
 	public static <T> Bean singleton(T object) {

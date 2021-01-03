@@ -1,0 +1,10 @@
+{
+	"id": "db.mysql",
+	"desc": "MySql数据库支持",
+	"father": "db",
+	"libs": [
+		{
+			"jar": "mysql:mysql-connector-java:8.0.15"
+		}
+	]
+}

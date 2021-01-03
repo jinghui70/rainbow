@@ -1,0 +1,66 @@
+{
+  "repository" : "https://maven.aliyun.com/repository/public",
+  "dev" : [ {
+    "jar" : "org.junit.platform:junit-platform-commons:1.6.0"
+  }, {
+    "jar" : "org.junit.platform:junit-platform-engine:1.6.0"
+  }, {
+    "jar" : "org.junit.platform:junit-platform-launcher:1.6.0"
+  }, {
+    "jar" : "org.junit.jupiter:junit-jupiter-api:5.6.0"
+  }, {
+    "jar" : "org.junit.jupiter:junit-jupiter-engine:5.6.0"
+  }, {
+    "jar" : "org.apiguardian:apiguardian-api:1.1.0"
+  }, {
+    "jar" : "org.opentest4j:opentest4j:1.2.0"
+  } ],
+  "runtime" : [ {
+    "jar" : "org.slf4j:slf4j-api:1.7.26"
+  }, {
+    "jar" : "ch.qos.logback:logback-classic:1.2.3"
+  }, {
+    "jar" : "ch.qos.logback:logback-core:1.2.3"
+  }, {
+    "jar" : "com.fasterxml.jackson.core:jackson-core:2.11.3",
+    "source" : true
+  }, {
+    "jar" : "com.fasterxml.jackson.core:jackson-annotations:2.11.3"
+  }, {
+    "jar" : "com.fasterxml.jackson.core:jackson-databind:2.11.3"
+  }, {
+    "jar" : "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3"
+  }, {
+    "jar" : "com.google.guava:guava:28.2-jre"
+  }, {
+    "jar" : "javax.servlet:javax.servlet-api:3.1.0"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-continuation:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-http:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-io:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-security:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-server:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-servlet:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-util:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-webapp:9.4.15.v20190215"
+  }, {
+    "jar" : "org.eclipse.jetty:jetty-xml:9.4.15.v20190215"
+  }, {
+    "jar" : "com.zaxxer:HikariCP:3.4.5"
+  }, {
+    "jar" : "com.h2database:h2:1.4.200"
+  }, {
+    "jar" : "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
+  }, {
+    "jar" : "com.ibm.db2.jcc:db2jcc:db2jcc4"
+  }, {
+    "jar" : "mysql:mysql-connector-java:8.0.15"
+  } ]
+}

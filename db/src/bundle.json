@@ -1,0 +1,8 @@
+{
+	"id": "db",
+	"desc": "数据库支持插件",
+	"libs": [
+		{"jar": "com.zaxxer:HikariCP:3.4.5"},
+		{"jar": "com.h2database:h2:1.4.200"}
+	]
+}

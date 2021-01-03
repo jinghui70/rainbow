@@ -8,10 +8,10 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 
 import rainbow.core.util.Utils;
+import rainbow.core.util.json.JSON;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Column;
@@ -50,7 +50,7 @@ public class LinkQueryAnalyzer extends QueryInfo {
 			// 先做翻译
 			info.getConditions().stream().map(s -> {
 				if (s.trim().charAt(0) == '[') {
-					List<Condition> cs = JSON.parseArray(s, Condition.class);
+					List<Condition> cs = JSON.parseList(s, Condition.class);
 					for (Condition c : cs) {
 						c.setField(QueryField.parse(c.getOp(), targetEntity));
 					}

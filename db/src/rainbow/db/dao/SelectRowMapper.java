@@ -6,6 +6,7 @@ import java.util.List;
 
 import rainbow.core.util.converter.DataMaker;
 import rainbow.core.util.converter.ObjectMaker;
+import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.RowMapper;
 import rainbow.db.refinery.Refinery;
 import rainbow.db.refinery.RefineryRegistry;
@@ -26,7 +27,7 @@ public final class SelectRowMapper<T> implements RowMapper<T> {
 		T result = maker.makeInstance();
 		int index = 1;
 		for (SelectField field : fields) {
-			Object value = DaoUtils.getResultSetValue(rs, index++, field.getType());
+			Object value = JdbcUtils.getResultSetValue(rs, index++, field.getType());
 			String key = field.getName();
 			if (field.getRefinery() != null) {
 				Refinery refinery = RefineryRegistry.getRefinery(field.getRefinery());

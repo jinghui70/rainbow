@@ -5,10 +5,9 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
-
-import com.google.common.base.Objects;
 
 import rainbow.core.model.IAdaptable;
 import rainbow.core.model.object.INameObject;
@@ -99,7 +98,7 @@ public class ExtensionPoint {
 	 * @return
 	 */
 	public Optional<Extension> getExtension(String name) {
-		return extensions.parallelStream().filter(e -> Objects.equal(e.getName(), name)).findFirst();
+		return extensions.parallelStream().filter(e -> Objects.equals(e.getName(), name)).findFirst();
 	}
 
 	/**

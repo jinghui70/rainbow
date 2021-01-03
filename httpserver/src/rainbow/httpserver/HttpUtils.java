@@ -8,9 +8,9 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.ImmutableMap;
+
+import rainbow.core.util.json.JSON;
 
 public abstract class HttpUtils {
 
@@ -72,9 +72,7 @@ public abstract class HttpUtils {
 		response.setContentType("application/json");
 		response.setCharacterEncoding(StandardCharsets.UTF_8.name());
 		try (Writer writer = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
-			String content = JSON.toJSONString(result, SerializerFeature.DisableCircularReferenceDetect,
-					SerializerFeature.WriteEnumUsingName, SerializerFeature.WriteDateUseDateFormat);
-			// content = AES.encode(request, content);
+			String content = JSON.toJSONString(result);
 			writer.write(content);
 		}
 	}

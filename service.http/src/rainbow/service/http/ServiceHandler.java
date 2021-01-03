@@ -2,9 +2,11 @@ package rainbow.service.http;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -14,8 +16,7 @@ import org.eclipse.jetty.server.Request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import rainbow.core.bundle.Bean;
 import rainbow.core.bundle.Extension;
@@ -24,11 +25,11 @@ import rainbow.core.model.exception.AppException;
 import rainbow.core.platform.SessionException;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Inject;
+import rainbow.core.util.json.JSON;
 import rainbow.httpserver.HttpUtils;
 import rainbow.httpserver.RequestHandler;
 import rainbow.service.Service;
 import rainbow.service.ServiceMethod;
-import rainbow.service.ServiceParam;
 import rainbow.service.ServiceRegistry;
 import rainbow.service.StreamResult;
 import rainbow.service.exception.InvalidServiceException;
@@ -36,6 +37,9 @@ import rainbow.service.exception.InvalidServiceException;
 @Bean
 @Extension(name = "service")
 public class ServiceHandler implements RequestHandler {
+
+	public static final TypeReference<Map<String, String>> mapType = new TypeReference<Map<String, String>>() {
+	};
 
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -120,11 +124,12 @@ public class ServiceHandler implements RequestHandler {
 			String param = Utils.streamToString(request.getInputStream());
 			if (param.startsWith("json="))
 				param = param.substring(5);
-			JSONObject jo = JSON.parseObject(param);
+
+			Map<String, Object> map = JSON.toMap(param, method.getParamTypeMap());
 			Object[] args = new Object[method.paramCount()];
 			int i = 0;
-			for (ServiceParam p : method.getParams()) {
-				args[i++] = jo.getObject(p.getName(), p.getType());
+			for (Parameter p : method.getParams()) {
+				args[i++] = map.get(p.getName());
 			}
 			return args;
 		} catch (Throwable e) {

@@ -1,24 +1,19 @@
 package rainbow.db.database;
 
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.alibaba.fastjson.JSON;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import rainbow.core.extension.ExtensionRegistry;
 import rainbow.core.util.Utils;
+import rainbow.core.util.json.JSON;
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.DaoConfig;
 import rainbow.db.dao.DaoImpl;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
@@ -26,8 +21,6 @@ import rainbow.db.model.Model;
 import rainbow.db.model.Unit;
 
 public class DatabaseUtils {
-
-	private static final Logger logger = LoggerFactory.getLogger(DatabaseUtils.class);
 
 	public static Dialect dialect(String type) {
 		return ExtensionRegistry.getExtensionObject(Dialect.class, type)
@@ -70,13 +63,7 @@ public class DatabaseUtils {
 	 * @return
 	 */
 	public static Model loadModel(Path modelFile) {
-		try (InputStream is = Files.newInputStream(modelFile)) {
-			return JSON.parseObject(is, StandardCharsets.UTF_8, Model.class);
-		} catch (Exception e) {
-			logger.error("load rdmx file {} faild", modelFile.toString());
-			throw new RuntimeException(e);
-		}
-
+		return JSON.parseObject(modelFile, Model.class);
 	}
 
 	/**

@@ -1,7 +1,0 @@
-id: db.db2
-desc: DB2数据库支持
-father: db
-lib:
-  - group: com.ibm.db2.jcc
-    artifact: db2jcc
-    version: db2jcc4

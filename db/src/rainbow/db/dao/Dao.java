@@ -1,10 +1,10 @@
 package rainbow.db.dao;
 
+import java.io.Closeable;
 import java.util.List;
 
 import com.google.common.base.Supplier;
 
-import rainbow.core.model.object.INameObject;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.PureColumn;
 import rainbow.db.database.Dialect;
@@ -16,7 +16,7 @@ import rainbow.db.jdbc.JdbcTemplate;
  * @author lijinghui
  * 
  */
-public interface Dao extends INameObject {
+public interface Dao extends Closeable {
 
 	public static final String NOW = "_NOW_";
 	public static final String COUNT = "COUNT(1)";

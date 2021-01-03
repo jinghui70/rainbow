@@ -22,9 +22,6 @@ import java.util.RandomAccess;
 import java.util.UUID;
 import java.util.function.Function;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-
 /**
  * 通用工具类
  * 
@@ -211,18 +208,6 @@ public abstract class Utils {
 
 	public static String toString(long value) {
 		return Long.toString(value, 36).toUpperCase();
-	}
-
-	/**
-	 * 设定全局的toJson函数
-	 * 
-	 * @param obj
-	 * @return
-	 */
-	public static String toJson(Object obj) {
-		return JSON.toJSONString(obj, SerializerFeature.UseSingleQuotes, SerializerFeature.SkipTransientField,
-				SerializerFeature.WriteEnumUsingToString, SerializerFeature.SortField,
-				SerializerFeature.DisableCircularReferenceDetect, SerializerFeature.WriteDateUseDateFormat);
 	}
 
 	/**

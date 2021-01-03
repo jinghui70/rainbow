@@ -3,6 +3,7 @@ package rainbow.db.dao;
 import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +16,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableMap;
 
-import rainbow.core.model.object.NameObject;
 import rainbow.core.util.StringBuilderX;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Column;
@@ -26,7 +26,7 @@ import rainbow.db.jdbc.ColumnMapRowMapper;
 import rainbow.db.jdbc.DataAccessException;
 import rainbow.db.jdbc.JdbcTemplate;
 
-public class DaoImpl extends NameObject implements Dao {
+public class DaoImpl implements Dao {
 
 	private static Logger logger = LoggerFactory.getLogger(DaoImpl.class);
 
@@ -36,18 +36,16 @@ public class DaoImpl extends NameObject implements Dao {
 
 	private JdbcTemplate jdbcTemplate;
 
-	public DaoImpl(DataSource dataSource, Dialect dialect) {
-		this(dataSource, dialect, null);
-	}
-
 	public DaoImpl(DataSource dataSource, Dialect dialect, Map<String, Entity> entityMap) {
-		setDataSource(dataSource);
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.dialect = dialect;
 		setEntityMap(entityMap);
 	}
 
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	public DaoImpl(Dao ref, Map<String, Entity> entityMap) {
+		this.dialect = ref.getDialect();
+		this.jdbcTemplate = ref.getJdbcTemplate();
+		setEntityMap(entityMap);
 	}
 
 	public void setEntityMap(Map<String, Entity> entityMap) {
@@ -313,6 +311,11 @@ public class DaoImpl extends NameObject implements Dao {
 	@Override
 	public void alterColumn(String tableName, PureColumn... columns) {
 		execSql(dialect.alterColumn(tableName, columns));
+	}
+
+	@Override
+	public void close() throws IOException {
+		getJdbcTemplate().close();
 	}
 
 }

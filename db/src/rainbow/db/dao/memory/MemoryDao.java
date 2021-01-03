@@ -11,7 +11,7 @@ import rainbow.db.database.DatabaseUtils;
 public class MemoryDao extends DaoImpl implements DisposableBean {
 
 	public MemoryDao() {
-		super(new MemoryDataSource(), DatabaseUtils.dialect("H2"));
+		super(new MemoryDataSource(), DatabaseUtils.dialect("H2"), null);
 	}
 
 	public MemoryDao(Map<String, Entity> model) {

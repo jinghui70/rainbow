@@ -1,37 +1,60 @@
-<project name="rainbow" default="build" basedir=".">
+<project name="rainbow" basedir=".">
 	<property name="application-name" value="RAINBOW" />
 	<tstamp>
 		<format property="BUILD_TIME" pattern="yyyyMMdd-HHmm" />
 	</tstamp>
-	<property name="version" value="4.0_${BUILD_TIME}" />
+	<property name="version" value="4.5_${BUILD_TIME}" />
 	<property name="dist" location="../dist" />
+	<property name="dev" location="${dist}/dev" />
+	<property name="deploy" location="${dist}/deploy" />
+	<property name="build" location="${dist}/build" />
 
-	<target name="build" description="build dev version">
-		<ant antfile="../core/build.xml" target="build" useNativeBaseDir="true" />
-		
-		<ant antfile="build/build_bundle.xml" target="clean" />		
-		
-		<ant antfile="build/build_bundle.xml" target="build_dev" />
-		<copy todir="${dist}/dev/build" includeEmptyDirs="false">
-			<fileset dir="build" includes="*.*" />
-		</copy>
+	<path id="classpath">
+		<fileset dir="lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
 
-		<ant antfile="build/build_bundle.xml" target="build_deploy" />
-		<ant antfile="build/common.xml" target="build_deploy">
-			<property name="root" location="${dist}/deploy" />
-			<property name="dest" value="lib" />
-			<property name="basedir" location="../bootstrap" />
-		</ant>		
-		<copy todir="${dist}/deploy/bin">
-			<fileset dir="build/bin" />
-		</copy>
-		<copy todir="${dist}/dev/web">
-			<fileset dir="web" />
-		</copy>
-		
-		<zip destfile="${dist}/dev.zip" basedir="${dist}/dev" />
-		<zip destfile="${dist}/deploy.zip" basedir="${dist}/deploy" />
-		<delete dir="${dist}/dev" />
-		<delete dir="${dist}/deploy" />
+	<target name="clean" description="clean dist dir">
+		<delete dir="${dist}" />
+		<mkdir dir="${dev}" />
+		<mkdir dir="${deploy}" />
+		<mkdir dir="${build}" />
+	</target>
+
+	<target name="init">
+		<ant antfile="corelib.xml" />
+		<ant antfile="../core/build.xml" target="build" useNativeBasedir="true" />
+	</target>
+
+	<target name="makeLibraryFile">
+	</target>
+
+	<target name="downloadLibrary" depends="init">
+		<java classname="rainbow.core.ant.LibraryWorker">
+			<classpath>
+				<pathelement location="${dev}/lib/core.jar" />
+				<path refid="classpath" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="eclipseUserLibrary" depends="downloadLibrary">
+	</target>
+
+	<target name="library" depends="makeLibraryFile, downloadLibrary, eclipseUserLibrary" description="library work">
+	</target>
+
+	<target name="classpath" description="set classpath">
+		<java classname="rainbow.core.ant.ClassPathMaker">
+			<arg value="core" />
+			<classpath>
+				<pathelement location="${dev}/lib/core.jar" />
+				<path refid="classpath" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="deploy" description="deploy">
 	</target>
 </project>

@@ -1,0 +1,10 @@
+{
+	"id": "db.db2",
+	"desc": "DB2数据库支持",
+	"father": "db",
+	"libs": [
+		{
+			"jar": "com.ibm.db2.jcc:db2jcc:db2jcc4"
+		}
+	]
+}

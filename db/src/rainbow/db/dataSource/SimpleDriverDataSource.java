@@ -2,6 +2,7 @@ package rainbow.db.dataSource;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -79,8 +80,9 @@ public class SimpleDriverDataSource extends AbstractDriverBasedDataSource {
 	 */
 	public void setDriverClass(Class<? extends Driver> driverClass) {
 		try {
-			this.driver = driverClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			this.driver = driverClass.getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException("create driver class faild:" + driverClass.getName());
 		}
 	}

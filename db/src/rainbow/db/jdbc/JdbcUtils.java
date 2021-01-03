@@ -13,6 +13,8 @@ import java.sql.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import rainbow.db.model.DataType;
+
 /**
  * Generic utility methods for working with JDBC. Mainly for internal use within
  * the framework, but also useful for custom JDBC access code.
@@ -32,8 +34,7 @@ public abstract class JdbcUtils {
 	 * Close the given JDBC Connection and ignore any thrown exception. This is
 	 * useful for typical finally blocks in manual JDBC code.
 	 * 
-	 * @param con
-	 *            the JDBC Connection to close (may be <code>null</code>)
+	 * @param con the JDBC Connection to close (may be <code>null</code>)
 	 */
 	public static void closeConnection(Connection con) {
 		if (con != null) {
@@ -53,8 +54,7 @@ public abstract class JdbcUtils {
 	 * Close the given JDBC Statement and ignore any thrown exception. This is
 	 * useful for typical finally blocks in manual JDBC code.
 	 * 
-	 * @param stmt
-	 *            the JDBC Statement to close (may be <code>null</code>)
+	 * @param stmt the JDBC Statement to close (may be <code>null</code>)
 	 */
 	public static void closeStatement(Statement stmt) {
 		if (stmt != null) {
@@ -74,8 +74,7 @@ public abstract class JdbcUtils {
 	 * Close the given JDBC ResultSet and ignore any thrown exception. This is
 	 * useful for typical finally blocks in manual JDBC code.
 	 * 
-	 * @param rs
-	 *            the JDBC ResultSet to close (may be <code>null</code>)
+	 * @param rs the JDBC ResultSet to close (may be <code>null</code>)
 	 */
 	public static void closeResultSet(ResultSet rs) {
 		if (rs != null) {
@@ -98,19 +97,15 @@ public abstract class JdbcUtils {
 	 * Uses the specifically typed ResultSet accessor methods, falling back to
 	 * {@link #getResultSetValue(java.sql.ResultSet, int)} for unknown types.
 	 * <p>
-	 * Note that the returned value may not be assignable to the specified
-	 * required type, in case of an unknown type. Calling code needs to deal
-	 * with this case appropriately, e.g. throwing a corresponding exception.
+	 * Note that the returned value may not be assignable to the specified required
+	 * type, in case of an unknown type. Calling code needs to deal with this case
+	 * appropriately, e.g. throwing a corresponding exception.
 	 * 
-	 * @param rs
-	 *            is the ResultSet holding the data
-	 * @param index
-	 *            is the column index
-	 * @param requiredType
-	 *            the required value type (may be <code>null</code>)
+	 * @param rs           is the ResultSet holding the data
+	 * @param index        is the column index
+	 * @param requiredType the required value type (may be <code>null</code>)
 	 * @return the value object
-	 * @throws SQLException
-	 *             if thrown by the JDBC API
+	 * @throws SQLException if thrown by the JDBC API
 	 */
 	@SuppressWarnings("unchecked")
 	public static <T> T getResultSetValue(ResultSet rs, int index, Class<T> requiredType) throws SQLException {
@@ -175,24 +170,20 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Retrieve a JDBC column value from a ResultSet, using the most appropriate
-	 * value type. The returned value should be a detached value object, not
-	 * having any ties to the active ResultSet: in particular, it should not be
-	 * a Blob or Clob object but rather a byte array respectively String
-	 * representation.
+	 * value type. The returned value should be a detached value object, not having
+	 * any ties to the active ResultSet: in particular, it should not be a Blob or
+	 * Clob object but rather a byte array respectively String representation.
 	 * <p>
 	 * Uses the <code>getObject(index)</code> method, but includes additional
 	 * "hacks" to get around Oracle 10g returning a non-standard object for its
-	 * TIMESTAMP datatype and a <code>java.sql.Date</code> for DATE columns
-	 * leaving out the time portion: These columns will explicitly be extracted
-	 * as standard <code>java.sql.Timestamp</code> object.
+	 * TIMESTAMP datatype and a <code>java.sql.Date</code> for DATE columns leaving
+	 * out the time portion: These columns will explicitly be extracted as standard
+	 * <code>java.sql.Timestamp</code> object.
 	 * 
-	 * @param rs
-	 *            is the ResultSet holding the data
-	 * @param index
-	 *            is the column index
+	 * @param rs    is the ResultSet holding the data
+	 * @param index is the column index
 	 * @return the value object
-	 * @throws SQLException
-	 *             if thrown by the JDBC API
+	 * @throws SQLException if thrown by the JDBC API
 	 * @see java.sql.Blob
 	 * @see java.sql.Clob
 	 * @see java.sql.Timestamp
@@ -216,8 +207,7 @@ public abstract class JdbcUtils {
 	/**
 	 * Check whether the given SQL type is numeric.
 	 * 
-	 * @param sqlType
-	 *            the SQL type to be checked
+	 * @param sqlType the SQL type to be checked
 	 * @return whether the type is numeric
 	 */
 	public static boolean isNumeric(int sqlType) {
@@ -228,11 +218,14 @@ public abstract class JdbcUtils {
 
 	/**
 	 * Return whether the given JDBC driver supports JDBC 2.0 batch updates.
-	 * <p>Typically invoked right before execution of a given set of statements:
-	 * to decide whether the set of SQL statements should be executed through
-	 * the JDBC 2.0 batch mechanism or simply in a traditional one-by-one fashion.
-	 * <p>Logs a warning if the "supportsBatchUpdates" methods throws an exception
-	 * and simply returns {@code false} in that case.
+	 * <p>
+	 * Typically invoked right before execution of a given set of statements: to
+	 * decide whether the set of SQL statements should be executed through the JDBC
+	 * 2.0 batch mechanism or simply in a traditional one-by-one fashion.
+	 * <p>
+	 * Logs a warning if the "supportsBatchUpdates" methods throws an exception and
+	 * simply returns {@code false} in that case.
+	 * 
 	 * @param con the Connection to check
 	 * @return whether JDBC 2.0 batch updates are supported
 	 * @see java.sql.DatabaseMetaData#supportsBatchUpdates()
@@ -244,15 +237,64 @@ public abstract class JdbcUtils {
 				if (dbmd.supportsBatchUpdates()) {
 					logger.debug("JDBC driver supports batch updates");
 					return true;
-				}
-				else {
+				} else {
 					logger.debug("JDBC driver does not support batch updates");
 				}
 			}
-		}
-		catch (SQLException ex) {
+		} catch (SQLException ex) {
 			logger.debug("JDBC driver 'supportsBatchUpdates' method threw exception", ex);
 		}
 		return false;
 	}
+
+	public static Object getResultSetValue(ResultSet rs, int index, DataType dataType) throws SQLException {
+		Object value = null;
+		boolean wasNullCheck = false;
+		switch (dataType) {
+		case SMALLINT:
+			value = rs.getShort(index);
+			wasNullCheck = true;
+			break;
+		case INT:
+			value = rs.getInt(index);
+			wasNullCheck = true;
+			break;
+		case LONG:
+			value = rs.getLong(index);
+			wasNullCheck = true;
+			break;
+		case DOUBLE:
+			value = rs.getDouble(index);
+			wasNullCheck = true;
+			break;
+		case NUMERIC:
+			value = rs.getBigDecimal(index);
+			break;
+		case DATE:
+			value = rs.getDate(index);
+			break;
+		case TIME:
+			value = rs.getTime(index);
+			break;
+		case TIMESTAMP:
+			value = rs.getTimestamp(index);
+			break;
+		case CHAR:
+		case VARCHAR:
+		case CLOB:
+			value = rs.getString(index);
+			break;
+		case BLOB:
+			value = rs.getBytes(index);
+			break;
+		default:
+			value = rs.getObject(index);
+			break;
+		}
+		if (wasNullCheck && value != null && rs.wasNull()) {
+			value = null;
+		}
+		return value;
+	}
+
 }

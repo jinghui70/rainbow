@@ -1,9 +1,6 @@
 package rainbow.db.query;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import com.alibaba.fastjson.JSONArray;
 
 import rainbow.core.util.Utils;
 import rainbow.core.util.converter.Converters;
@@ -50,9 +47,10 @@ public class Condition {
 		switch (op) {
 		case "in":
 		case "not in":
-			this.param = ((JSONArray) this.param).stream()
-					.map(v -> Converters.convert(v, field.getColumn().dataClass()))
-					.collect(Collectors.toList());
+			// TODO fuck this line
+			// this.param = ((JSONArray) this.param).stream()
+			// .map(v -> Converters.convert(v,
+			// field.getColumn().dataClass())).collect(Collectors.toList());
 			break;
 		default:
 			this.param = Converters.convert(this.param, field.getColumn().dataClass());

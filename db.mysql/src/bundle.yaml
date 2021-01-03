@@ -1,7 +1,0 @@
-id: db.mysql
-desc: MySql数据库支持
-father: db
-lib:
-  - group: mysql
-    artifact: mysql-connector-java
-    version: 8.0.15

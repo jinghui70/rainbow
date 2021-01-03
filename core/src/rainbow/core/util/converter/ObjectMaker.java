@@ -35,7 +35,7 @@ public class ObjectMaker<T> implements DataMaker<T> {
 	@Override
 	public T makeInstance() {
 		try {
-			return clazz.newInstance();
+			return clazz.getDeclaredConstructor().newInstance();
 		} catch (Exception e) {
 			logger.error("create instance of {} failed", clazz.getName(), e);
 			throw new RuntimeException(e);

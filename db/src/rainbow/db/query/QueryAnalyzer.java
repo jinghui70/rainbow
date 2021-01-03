@@ -14,10 +14,10 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
 import com.google.common.collect.Maps;
 
 import rainbow.core.util.Utils;
+import rainbow.core.util.json.JSON;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Column;
@@ -66,7 +66,7 @@ public class QueryAnalyzer {
 		if (!Utils.isNullOrEmpty(info.getConditions())) {
 			conditions = info.getConditions().stream().map(s -> {
 				if (s.trim().charAt(0) == '[') {
-					List<Condition> cs = JSON.parseArray(s, Condition.class);
+					List<Condition> cs = JSON.parseList(s, Condition.class);
 					for (Condition c : cs)
 						c.setField(createField(c.getProp()));
 					return cs;

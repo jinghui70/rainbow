@@ -7,6 +7,7 @@ import java.util.List;
 import rainbow.core.util.Utils;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.jdbc.DataAccessException;
+import rainbow.db.jdbc.JdbcUtils;
 import rainbow.db.jdbc.RowMapper;
 
 public class NeoBeanMapper implements RowMapper<NeoBean> {
@@ -31,7 +32,7 @@ public class NeoBeanMapper implements RowMapper<NeoBean> {
 		int index = 1;
 		for (SelectField field : fields) {
 			try {
-				bean.setObject(field.getColumn(), DaoUtils.getResultSetValue(rs, index, field.getType()));
+				bean.setObject(field.getColumn(), JdbcUtils.getResultSetValue(rs, index, field.getType()));
 			} catch (SQLException e) {
 				throw new DataAccessException(e);
 			}

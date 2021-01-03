@@ -2,9 +2,11 @@ package rainbow.core.platform;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.registry.LocateRegistry;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.management.MBeanServer;
@@ -14,8 +16,6 @@ import javax.management.remote.JMXServiceURL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.bundle.BundleConfig;
 import rainbow.core.bundle.BundleManager;
@@ -59,7 +59,7 @@ public final class Platform {
 
 	private JMXConnectorServer cs;
 
-	private Context context = new Context(ImmutableMap.of( //
+	private Context context = new Context(Map.of( //
 			"mBeanServer", Bean.singleton(ManagementFactory.getPlatformMBeanServer(), MBeanServer.class), //
 			"bundleLoader", Bean.singleton(BundleLoader.class), //
 			"bundleManager", Bean.singleton(BundleManagerImpl.class) //
@@ -107,11 +107,12 @@ public final class Platform {
 		try {
 			// 开发环境
 			Class<?> clazz = Class.forName("rainbow.core.platform.ProjectBundleLoader");
-			bundleLoader = (BundleLoader) clazz.newInstance();
+			bundleLoader = (BundleLoader) clazz.getDeclaredConstructor().newInstance();
 			dev = true;
 		} catch (ClassNotFoundException e) {
-			bundleLoader = new JarBundleLoader(); // 生产环境
-		} catch (InstantiationException | IllegalAccessException e) {
+			bundleLoader = new JarBundleLoader(Platform.getHome().resolve("bundle")); // 生产环境
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
+				| NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException("create bundleloader failed", e);
 		}
 		context.setBean("bundleLoader", bundleLoader);

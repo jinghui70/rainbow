@@ -2,7 +2,6 @@ package rainbow.db.dev.impl;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -15,8 +14,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.TypeReference;
 import com.google.common.base.Objects;
 
 import rainbow.core.bundle.Bean;
@@ -24,6 +21,7 @@ import rainbow.core.bundle.ConfigAwareObject;
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.Utils;
 import rainbow.core.util.ioc.Inject;
+import rainbow.core.util.json.JSON;
 import rainbow.db.dao.Dao;
 import rainbow.db.dao.NeoBean;
 import rainbow.db.dao.Select;
@@ -38,9 +36,6 @@ public class PresetServiceImpl extends ConfigAwareObject implements PresetServic
 
 	private Dao dao;
 
-	private static Type MAP_TYPE = new TypeReference<Map<String, Object>>() {
-	}.getType();
-
 	@Inject
 	public void setDao(Dao dao) {
 		this.dao = dao;
@@ -53,11 +48,7 @@ public class PresetServiceImpl extends ConfigAwareObject implements PresetServic
 	 */
 	@Override
 	public List<String> types() {
-		List<String> dataSets = bundleConfig.getList("dataSets");
-		if (Utils.isNullOrEmpty(dataSets)) {
-			dataSets = Arrays.asList("测试数据", "预置数据");
-		}
-		return dataSets;
+		return Arrays.asList("测试数据", "预置数据");
 	}
 
 	/**
@@ -74,7 +65,7 @@ public class PresetServiceImpl extends ConfigAwareObject implements PresetServic
 			return Collections.emptyList();
 		try {
 			List<String> lines = Files.readAllLines(file);
-			return Utils.transform(lines, line -> JSON.parseObject(line, MAP_TYPE));
+			return Utils.transform(lines, line -> JSON.parseObject(line));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -99,7 +90,7 @@ public class PresetServiceImpl extends ConfigAwareObject implements PresetServic
 							if (v != null)
 								map.put(column.getName(), v);
 						}
-						writer.write(Utils.toJson(map));
+						writer.write(JSON.toJSONString(map));
 						writer.write('\r');
 					}
 				}
@@ -157,7 +148,7 @@ public class PresetServiceImpl extends ConfigAwareObject implements PresetServic
 				}
 				try (Writer writer = Files.newBufferedWriter(file)) {
 					for (Map<String, Object> item : list) {
-						writer.write(Utils.toJson(item));
+						writer.write(JSON.toJSONString(item));
 						writer.write('\r');
 					}
 				}
@@ -183,7 +174,7 @@ public class PresetServiceImpl extends ConfigAwareObject implements PresetServic
 					try {
 						List<String> lines = Files.readAllLines(file);
 						List<NeoBean> neoList = Utils.transform(lines, line -> {
-							Map<String, Object> map = JSON.parseObject(line, MAP_TYPE);
+							Map<String, Object> map = JSON.parseObject(line);
 							return dao.makeNeoBean(entityName, map);
 						});
 						dao.insert(neoList);

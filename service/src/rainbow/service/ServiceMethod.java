@@ -3,7 +3,11 @@ package rainbow.service;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +23,7 @@ public class ServiceMethod {
 
 	private Method method;
 
-	private ServiceParam[] params;
+	private Map<String, Type> paramTypeMap;
 
 	public Service getService() {
 		return service;
@@ -29,28 +33,27 @@ public class ServiceMethod {
 		return method;
 	}
 
+	public Map<String, Type> getParamTypeMap() {
+		return paramTypeMap;
+	}
+
 	public String getName() {
 		return method.getName();
 	}
 
-	public ServiceParam[] getParams() {
-		return params;
+	public Parameter[] getParams() {
+		return method.getParameters();
 	}
 
 	public int paramCount() {
-		return params.length;
+		return method.getParameterCount();
 	}
 
 	public ServiceMethod(Service service, Method method) {
 		this.service = service;
 		this.method = method;
-		Parameter[] ps = method.getParameters();
-		params = new ServiceParam[ps.length];
-		if (ps.length > 0) {
-			for (int i = 0; i < ps.length; i++) {
-				params[i] = new ServiceParam(ps[i]);
-			}
-		}
+		paramTypeMap = Arrays.stream(method.getParameters())
+				.collect(Collectors.toMap(Parameter::getName, Parameter::getParameterizedType));
 	}
 
 	public Object invoke(Object... args) throws Throwable {

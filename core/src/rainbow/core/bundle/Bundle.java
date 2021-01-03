@@ -1,9 +1,7 @@
 package rainbow.core.bundle;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import rainbow.core.util.Utils;
@@ -19,15 +17,7 @@ public class Bundle {
 
 	private BundleClassLoader classLoader;
 
-	/**
-	 * 所有的前辈
-	 */
-	private List<Bundle> ancestors = Collections.emptyList();
-
-	/**
-	 * 父辈
-	 */
-	private List<Bundle> parents = Collections.emptyList();
+	private Set<Bundle> ancestors;
 
 	/**
 	 * Bundle入口类
@@ -64,27 +54,6 @@ public class Bundle {
 		this.state = state;
 	}
 
-	public List<Bundle> getAncestors() {
-		if (ancestors == null)
-			return Collections.emptyList();
-		return ancestors;
-	}
-
-	void setAncestors(List<Bundle> ancestors) {
-		this.ancestors = ancestors;
-	}
-
-	public List<Bundle> getParents() {
-		return parents;
-	}
-
-	void setParents(List<Bundle> parents) {
-		if (parents == null)
-			this.parents = Collections.emptyList();
-		else
-			this.parents = parents;
-	}
-
 	void setActivator(BundleActivator activator) {
 		this.activator = activator;
 	}
@@ -94,8 +63,6 @@ public class Bundle {
 	}
 
 	public void destroy() {
-		setParents(null);
-		setAncestors(null);
 		classLoader.destroy();
 		classLoader = null;
 	}
@@ -118,8 +85,16 @@ public class Bundle {
 		if (hasFather())
 			result.add(data.getFather());
 		if (!Utils.isNullOrEmpty(data.getRequires()))
-			data.getRequires().forEach(result::add);
+			result.addAll(data.getRequires());
 		return result;
+	}
+
+	public Set<Bundle> getAncestors() {
+		return ancestors;
+	}
+
+	public void setAncestors(Set<Bundle> ancestors) {
+		this.ancestors = ancestors;
 	}
 
 	@Override

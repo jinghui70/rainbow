@@ -2,31 +2,21 @@ package rainbow.db.dev.impl;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.CustomClassLoaderConstructor;
-
 import rainbow.core.bundle.Bean;
-import rainbow.core.platform.Platform;
 import rainbow.core.util.Utils;
-import rainbow.core.util.ioc.InitializingBean;
 import rainbow.core.util.ioc.Inject;
 import rainbow.db.DaoManager;
 import rainbow.db.dao.Dao;
+import rainbow.db.dao.DaoConfig;
 import rainbow.db.dao.Sql;
 import rainbow.db.dao.model.Column;
 import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.Link;
-import rainbow.db.database.DaoConfig;
 import rainbow.db.dev.api.DataService;
 import rainbow.db.dev.api.EntityNodeX;
 import rainbow.db.dev.api.Node;
@@ -37,49 +27,41 @@ import rainbow.db.refinery.RefineryDef;
 import rainbow.db.refinery.RefineryRegistry;
 
 @Bean
-public class DataServiceImpl implements DataService, InitializingBean {
+public class DataServiceImpl implements DataService {
 
 	private Map<String, ModelInfo> modelMap = new HashMap<String, ModelInfo>();
 
 	@Inject
 	private DaoManager daoManager;
 
-	private Path loadConfig(String filename) throws FileNotFoundException {
-		Path file = Platform.getHome().resolve("conf/db").resolve(filename);
-		return Files.exists(file) ? file : null;
+	private ModelInfo getModel(String name) {
+		ModelInfo m = modelMap.get(name);
+		if (m == null) {
+			m = readModel(name);
+			modelMap.put(name, m);
+		}
+		return m;
 	}
 
-	@Override
-	public void afterPropertiesSet() throws Exception {
-		Path file = null;
-		if (Platform.isDev())
-			file = loadConfig("database.yaml.dev");
-		if (file == null)
-			file = loadConfig("database.yaml");
-
-		CustomClassLoaderConstructor constructor = new CustomClassLoaderConstructor(DaoConfig.class,
-				getClass().getClassLoader());
-		Yaml yaml = new Yaml(constructor);
-		try (InputStream is = Files.newInputStream(file)) {
-			for (Object o : yaml.loadAll(is)) {
-				DaoConfig config = (DaoConfig) o;
-				if (Utils.isNullOrEmpty(config.getPhysicSource()) && config.getModel() != null) {
-					ModelInfo modelInfo = new ModelInfo(daoManager.getDao(config.getName()), config.getModel());
-					modelMap.put(config.getName(), modelInfo);
-				}
-			}
+	synchronized private ModelInfo readModel(String name) {
+		ModelInfo result = modelMap.get(name);
+		if (result == null) {
+			DaoConfig config = daoManager.loadConfig(name);
+			Dao dao = daoManager.getDao(name);
+			result = new ModelInfo(dao, config.getModel());
 		}
+		return result;
 	}
 
 	@Override
 	public Node dataTree(String model) {
-		ModelInfo m = modelMap.get(model);
+		ModelInfo m = getModel(model);
 		return m.getTree();
 	}
 
 	@Override
 	public EntityNodeX entity(String model, String name) {
-		ModelInfo m = modelMap.get(model);
+		ModelInfo m = getModel(model);
 		return m.getEntity(name);
 	}
 
@@ -130,7 +112,7 @@ public class DataServiceImpl implements DataService, InitializingBean {
 	}
 
 	@Override
-	public Collection<String> dataSources() {
-		return modelMap.keySet();
+	public List<String> dataSources() {
+		return daoManager.getDaoNames();
 	}
 }

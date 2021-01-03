@@ -1,5 +1,6 @@
 package rainbow.core.bundle;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,7 +25,7 @@ public class BundleData {
 
 	private String father;
 
-	private List<Jar3rd> lib;
+	private List<Jar> libs;
 
 	public String getId() {
 		return id;
@@ -43,6 +44,8 @@ public class BundleData {
 	}
 
 	public List<String> getRequires() {
+		if (requires == null)
+			return Collections.emptyList();
 		return requires;
 	}
 
@@ -58,12 +61,12 @@ public class BundleData {
 		this.father = father;
 	}
 
-	public List<Jar3rd> getLib() {
-		return lib;
+	public List<Jar> getLibs() {
+		return libs;
 	}
 
-	public void setLib(List<Jar3rd> lib) {
-		this.lib = lib;
+	public void setLibs(List<Jar> libs) {
+		this.libs = libs;
 	}
 
 }
