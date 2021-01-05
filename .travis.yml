@@ -5,10 +5,8 @@ jdk:
 
 branches:
   only:
-    - master
+    - next
 
 script:
   - ant -version
-  - ant -f rainbow/build/library.xml init
-  - ant -f rainbow/build/library.xml download-lib
-  - ant -f rainbow/build.xml
+  - ant -f rainbow/build.xml deploy
