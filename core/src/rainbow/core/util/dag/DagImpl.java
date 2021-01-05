@@ -4,6 +4,7 @@ import static rainbow.core.util.Preconditions.checkArgument;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -104,14 +105,14 @@ public class DagImpl<T> implements Dag<T> {
 	}
 
 	@Override
-	public Set<T> getPredecessor(T t) {
+	public Collection<T> getPredecessor(T t) {
 		checkNotNull(t);
 		Vertex<T> vertex = checkNotNull(map.get(t));
 		return vertex.getObjectInSet();
 	}
 
 	@Override
-	public Set<T> getSuccessor(T t) {
+	public Collection<T> getSuccessor(T t) {
 		checkNotNull(t);
 		Vertex<T> vertex = checkNotNull(map.get(t));
 		return vertex.getObjectOutSet();

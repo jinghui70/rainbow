@@ -1,10 +1,10 @@
 package rainbow.core.ant;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,25 +18,37 @@ import rainbow.core.bundle.Jar;
 import rainbow.core.util.dag.Dag;
 import rainbow.core.util.json.JSON;
 
+/**
+ * 处理BuildPath的工具类
+ * 
+ * @author lijinghui
+ *
+ */
 public class LibraryWorker {
 
 	private Logger logger = LoggerFactory.getLogger(LibraryWorker.class);
 
+	/**
+	 * 平台/项目开发标记
+	 * 
+	 * 平台开发中，core是一个project，取值 true
+	 * 
+	 * 项目开发中，core应处于lib中，取值 false
+	 */
+	private boolean rainbow = false;
+
 	private LibraryFile libraryFile;
+
+	private LibraryWorker(boolean rainbow) {
+		this.rainbow = rainbow;
+	}
 
 	private LibraryFile readLibraryFile() {
 		Path file = Paths.get("library.json");
 		if (!Files.exists(file)) {
-			LibraryFile result = new LibraryFile();
-			result.setRepository("https://maven.aliyun.com/repository/public");
-			return result;
+			return generateLibraryFile();
 		}
-		try (InputStream is = Files.newInputStream(file)) {
-			return JSON.parseObject(is, LibraryFile.class);
-		} catch (IOException e) {
-			logger.error("read library.json failed");
-			throw new RuntimeException(e);
-		}
+		return JSON.parseObject(file, LibraryFile.class);
 	}
 
 	private LibraryFile getLibraryFile() {
@@ -50,10 +62,10 @@ public class LibraryWorker {
 	 * 
 	 * @throws IOException
 	 */
-	public void generateLibraryFile() throws IOException {
+	public LibraryFile generateLibraryFile() {
 		Dag<Bundle> dag = BundleAware.loadBundleDag();
 		LibraryFileMaker maker = new LibraryFileMaker();
-		maker.make(dag);
+		return maker.make(dag);
 	}
 
 	/**
@@ -69,11 +81,12 @@ public class LibraryWorker {
 		downloader.setRepository(file.getRepository());
 
 		Set<String> runtime = new HashSet<String>();
+		if (!rainbow)
+			runtime.add("core.jar");
 		Set<String> source = new HashSet<String>();
 		Set<String> dev = new HashSet<String>();
 
 		for (Jar j : file.getRuntime()) {
-			logger.info(j.toString());
 			downloader.downloadJar(j);
 			runtime.add(j.fileName());
 			if (j.isSource())
@@ -119,6 +132,9 @@ public class LibraryWorker {
 		String key = "org.eclipse.jdt.core.userLibrary.Rainbow\\ Library=";
 		StringBuilder sb = new StringBuilder(key).append("<?xml version\\=\"1.0\" encoding\\=\"UTF-8\"?>\\n")
 				.append("<userlibrary systemlibrary\\=\"false\" version\\=\"2\">\\n");
+		if (!rainbow) {
+			sb.append("\\t<archive path\\=\"/rainbow/lib/core.jar\" sourceattachment\\=\"/rainbow/lib/core.jar\"/>\\n");
+		}
 		LibraryFile file = getLibraryFile();
 
 		file.getRuntime().stream().forEach(j -> {
@@ -143,10 +159,18 @@ public class LibraryWorker {
 		Files.write(path, lines);
 	}
 
+	/**
+	 * 生成library.json 下载libaray 生成Eclipse User Library
+	 * 
+	 * @param args
+	 * @throws IOException
+	 */
 	public static void main(String[] args) throws IOException {
-		LibraryWorker worker = new LibraryWorker();
+		Set<String> params = Arrays.stream(args).collect(Collectors.toSet());
+		LibraryWorker worker = new LibraryWorker(params.contains("rainbow"));
 		worker.generateLibraryFile();
 		worker.download();
-		worker.eclipseUserLibrary();
+		if (params.contains("eclipse"))
+			worker.eclipseUserLibrary();
 	}
 }

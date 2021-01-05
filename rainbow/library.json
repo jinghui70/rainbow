@@ -16,7 +16,7 @@
     "jar" : "org.opentest4j:opentest4j:1.2.0"
   } ],
   "runtime" : [ {
-    "jar" : "org.slf4j:slf4j-api:1.7.26"
+    "jar" : "org.slf4j:slf4j-api:1.7.30"
   }, {
     "jar" : "ch.qos.logback:logback-classic:1.2.3"
   }, {

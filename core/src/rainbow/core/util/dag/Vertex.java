@@ -1,9 +1,11 @@
 package rainbow.core.util.dag;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Vertex<T> {
 
@@ -45,16 +47,22 @@ public class Vertex<T> {
 		return outSet;
 	}
 
-	public Set<T> getObjectInSet() {
+	public Collection<T> getObjectInSet() {
 		if (inSet == null)
 			return Collections.emptySet();
-		return getInSet().stream().map(Vertex<T>::getObject).collect(Collectors.toSet());
+		Stream<T> stream = inSet.stream().map(Vertex<T>::getObject);
+		if (object instanceof Comparable)
+			stream = stream.sorted();
+		return stream.collect(Collectors.toList());
 	}
 
-	public Set<T> getObjectOutSet() {
+	public Collection<T> getObjectOutSet() {
 		if (outSet == null)
 			return Collections.emptySet();
-		return getOutSet().stream().map(Vertex<T>::getObject).collect(Collectors.toSet());
+		Stream<T> stream = outSet.stream().map(Vertex<T>::getObject);
+		if (object instanceof Comparable)
+			stream = stream.sorted();
+		return stream.collect(Collectors.toList());
 	}
 
 	public int inDegree() {

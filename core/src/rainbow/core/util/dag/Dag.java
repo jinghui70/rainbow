@@ -1,5 +1,6 @@
 package rainbow.core.util.dag;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -46,9 +47,9 @@ public interface Dag<T> {
 	 */
 	void bfsSuccessor(T t, Consumer<T> consumer);
 
-	Set<T> getPredecessor(T t);
+	Collection<T> getPredecessor(T t);
 
-	Set<T> getSuccessor(T t);
+	Collection<T> getSuccessor(T t);
 
 	/**
 	 * 返回一个点的所有祖先

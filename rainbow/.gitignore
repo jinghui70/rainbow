@@ -1,3 +1,2 @@
-/deploy.zip
-/dev.zip
 /lib/
+!bin

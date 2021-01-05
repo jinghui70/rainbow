@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import rainbow.core.bundle.Bundle;
 import rainbow.core.platform.BundleLoader;
 import rainbow.core.platform.ProjectBundleLoader;
+import rainbow.core.platform.ProjectClassLoader;
 import rainbow.core.util.dag.Dag;
 import rainbow.core.util.dag.DagImpl;
 
@@ -45,5 +46,13 @@ public class BundleAware {
 
 	public static Dag<Bundle> loadBundleDag() {
 		return loadBundleDag(loadBundle());
+	}
+
+	public static void main(String[] args) {
+		String bundles = loadBundleDag(loadBundle()).dfsList().stream() //
+				.filter(b -> b.getClassLoader() instanceof ProjectClassLoader) //
+				.map(Bundle::getId) //
+				.collect(Collectors.joining(","));
+		System.err.println(bundles);
 	}
 }

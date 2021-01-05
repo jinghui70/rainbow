@@ -185,7 +185,7 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 	private void doStartBundle(Bundle bundle) throws BundleException {
 		BundleActivator activator = createActivator(bundle);
 		List<Context> parentContexts = null;
-		Set<Bundle> parents = dag.getPredecessor(bundle);
+		Collection<Bundle> parents = dag.getPredecessor(bundle);
 		if (!parents.isEmpty()) {
 			parentContexts = parents.stream().map(p -> p.getActivator().getContext()).collect(Collectors.toList());
 		}

@@ -14,7 +14,7 @@ import rainbow.core.util.dag.Dag;
 
 public class ClassPathMaker {
 
-	private void make(Bundle bundle, Set<Bundle> ancestors, boolean core) {
+	private void make(Bundle bundle, Set<Bundle> ancestors, boolean rainbow) {
 		System.out.println("generating classpath of " + bundle.getId());
 		Path root = Paths.get("../").resolve(bundle.getId());
 		List<Bundle> p = new ArrayList<>();
@@ -32,7 +32,7 @@ public class ClassPathMaker {
 		if (Files.exists(root.resolve("test"))) {
 			lines.add("\t<classpathentry kind=\"src\" path=\"test\"/>");
 		}
-		if (core)
+		if (rainbow)
 			lines.add("\t<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/core\"/>");
 		for (Bundle b : p) {
 			lines.add(String.format("\t<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/%s\"/>",

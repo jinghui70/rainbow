@@ -2,7 +2,7 @@
 
 	<property name="src" location="src" />
 	<property name="test" location="test" />
-	<property name="build" location="${dist}/temp" />
+	<property name="build" location="${dist}/build" />
 	<property name="dest" value="bundle" />
 	<basename property="project" file="${basedir}" />
 
@@ -13,35 +13,41 @@
 		<fileset dir="../rainbow/lib">
 			<include name="**/*.jar" />
 		</fileset>
-		<fileset dir="${root}/lib" />
-		<fileset dir="${root}/bundle" />
+	</path>
+	<path id="deploy.classpath">
+		<fileset dir="${dist}/deploy/lib" />
+		<fileset dir="${dist}/deploy/bundle" />
+	</path>
+	<path id="dev.classpath">
+		<fileset dir="${dist}/dev/lib" />
+		<fileset dir="${dist}/dev/bundle" />
 	</path>
 
-	<target name="init">
-		<echo>${project}</echo>
+	<target name="show">
+		<echo>deploying bundle: ${project}</echo>
+	</target>
+	<target name="build_deploy" depends="show">
 		<delete dir="${build}" />
 		<mkdir dir="${build}" />
-	</target>
-
-	<target name="compile_deploy" depends="init" description="compile the source ">
 		<javac srcdir="${src}" destdir="${build}" encoding="UTF-8" includeAntRuntime="no">
 			<classpath refid="compile.classpath" />
+			<classpath refid="deploy.classpath" />
 			<compilerarg value="-Xlint:deprecation" />
 			<compilerarg value="-parameters" />
 		</javac>
-	</target>
-
-	<target name="build_deploy" depends="compile_deploy">
 		<copy todir="${build}">
 			<fileset dir="${src}" excludes="**/*.java" />
 		</copy>
-		<jar jarfile="${root}/${dest}/${project}.jar" basedir="${build}" />
+		<jar jarfile="${dist}/deploy/bundle/${project}.jar" basedir="${build}" />
 		<delete dir="${build}" />
 	</target>
 
-	<target name="compile_dev" depends="init" description="compile the source for development">
+	<target name="compile_dev">
+		<delete dir="${build}" />
+		<mkdir dir="${build}" />
 		<javac srcdir="${src}" destdir="${build}" encoding="UTF-8" debug="on" includeAntRuntime="no">
 			<classpath refid="compile.classpath" />
+			<classpath refid="dev.classpath" />
 			<compilerarg value="-Xlint:deprecation" />
 			<compilerarg value="-parameters" />
 		</javac>
@@ -49,30 +55,24 @@
 			<fileset dir="${src}" />
 		</copy>
 	</target>
-
-	<target name="compile_dev_test" depends="compile_dev" if="test.present">
+	
+	<target name="compile_dev_test" if="test.present">
 		<javac srcdir="${test}" destdir="${build}" encoding="UTF-8" debug="on" includeAntRuntime="no">
 			<classpath refid="compile.classpath" />
+			<classpath refid="dev.classpath" />
 			<compilerarg value="-Xlint:deprecation" />
 		</javac>
 		<copy todir="${build}">
 			<fileset dir="${test}" />
 		</copy>
 	</target>
-
-	<!--执行测试用例同时生成junit测试报告和emma代码覆盖率报告-->
-	<target name="runjunit" depends="compile_dev_test" if="test.present">
-		<junit fork="true" forkmode="once" printsummary="withOutAndErr" errorproperty="test.error" showoutput="on">
-			<classpath refid="compile.classpath" />
-			<formatter type="xml" />
-			<!--执行所有以Test开头的junit测试用例-->
-			<test name="${project}.TestSuite" todir="${report}/junit" outfile="${project}.test" haltonfailure="no" />
-		</junit>
+	
+	<target name="build_dev" depends="compile_dev, compile_dev_test">
+		<jar jarfile="${dist}/dev/bundle/${project}.jar" basedir="${build}" />
+		<delete dir="${build}" />
 	</target>
 
-	<target name="build_dev" depends="compile_dev_test" description="build bundle for development">
-		<jar jarfile="${root}/${dest}/${project}.jar" basedir="${build}" />
-		<delete dir="${build}" />
+	<target name="build" depends="build_dev, build_deploy">
 	</target>
 
 </project>

@@ -31,7 +31,7 @@ public class JarBundleLoader implements BundleLoader {
 	@Override
 	public List<Bundle> loadBundle(Set<String> bundles) throws IOException {
 		if (!Files.exists(bundleDir) || !Files.isDirectory(bundleDir)) {
-			logger.error("bundle directory not exists: {}", bundleDir.toAbsolutePath().toString());
+			logger.warn("bundle directory not exists: {}", bundleDir.toAbsolutePath().toString());
 			return new ArrayList<Bundle>();
 		}
 		List<Path> bundleFiles = Files.list(bundleDir).filter(f -> f.getFileName().toString().endsWith(".jar"))

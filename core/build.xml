@@ -4,11 +4,10 @@
 	<property name="test" location="test"/>
 	<property name="dist" location="../dist"/>
 	<property name="build" location="${dist}/build"/>
-	<property name="rainbow" location="../rainbow"/>
 
 	<path id="compile.classpath">
 		<pathelement path="${build}"/>
-		<fileset dir="${rainbow}/lib">
+		<fileset dir="../rainbow/lib">
 			<include name="**/*.jar"/>
 		</fileset>
 	</path>

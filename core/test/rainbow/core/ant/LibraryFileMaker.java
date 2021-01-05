@@ -3,8 +3,6 @@ package rainbow.core.ant;
 import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -32,7 +30,7 @@ public class LibraryFileMaker {
 	private Map<String, Jar> oldMap;
 	private Map<String, Jar> libMap;
 
-	public void make(Dag<Bundle> dag) throws IOException {
+	public LibraryFile make(Dag<Bundle> dag) {
 		libMap = new HashMap<>();
 		libs = new ArrayList<>();
 		logger.info("read library.json");
@@ -53,9 +51,8 @@ public class LibraryFileMaker {
 		libraryFile.setDev(libs.stream().filter(Jar::isDev).collect(Collectors.toList()));
 		libraryFile.setRuntime(libs.stream().filter(j -> !j.isDev()).collect(Collectors.toList()));
 		Path file = Paths.get("library.json");
-		try (OutputStream os = Files.newOutputStream(file)) {
-			JSON.toJSON(libraryFile, os, true);
-		}
+		JSON.toJSON(libraryFile, file, true);
+		return libraryFile;
 	}
 
 	private LibraryFile readLibraryFile() {
@@ -65,12 +62,7 @@ public class LibraryFileMaker {
 			result.setRepository("https://maven.aliyun.com/repository/public");
 			return result;
 		}
-		try (InputStream is = Files.newInputStream(file)) {
-			return JSON.parseObject(is, LibraryFile.class);
-		} catch (IOException e) {
-			logger.error("read library.json failed");
-			throw new RuntimeException(e);
-		}
+		return JSON.parseObject(file, LibraryFile.class);
 	}
 
 	/**

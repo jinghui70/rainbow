@@ -6,7 +6,7 @@ import java.util.Set;
 
 import rainbow.core.util.Utils;
 
-public class Bundle {
+public class Bundle implements Comparable<Bundle> {
 
 	/**
 	 * Bundle的配置信息
@@ -112,5 +112,10 @@ public class Bundle {
 			return false;
 		Bundle other = (Bundle) obj;
 		return getId().equals(other.getId());
+	}
+
+	@Override
+	public int compareTo(Bundle o) {
+		return getId().compareTo(o.getId());
 	}
 }
