@@ -61,6 +61,7 @@
 				<path refid="classpath" />
 			</classpath>
 		</java>
+		<echo>${bundles}</echo>
 		<mkdir dir="${dist}/dev/bundle" />
 		<mkdir dir="${dist}/deploy/bundle" />
 		<ant antfile="../core/build.xml" target="build_deploy" useNativeBasedir="true" />
