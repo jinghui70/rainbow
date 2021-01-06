@@ -57,10 +57,10 @@
   }, {
     "jar" : "com.h2database:h2:1.4.200"
   }, {
-    "jar" : "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
-  }, {
     "jar" : "com.ibm.db2.jcc:db2jcc:db2jcc4"
   }, {
     "jar" : "mysql:mysql-connector-java:8.0.15"
+  }, {
+    "jar" : "com.oracle:ojdbc6:12.1.0.1-atlassian-hosted"
   } ]
 }

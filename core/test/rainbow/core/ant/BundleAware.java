@@ -53,6 +53,6 @@ public class BundleAware {
 				.filter(b -> b.getClassLoader() instanceof ProjectClassLoader) //
 				.map(Bundle::getId) //
 				.collect(Collectors.joining(","));
-		System.err.println(bundles);
+		System.out.println(bundles);
 	}
 }

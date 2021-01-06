@@ -41,7 +41,6 @@ public class ProjectBundleLoader extends JarBundleLoader {
 						BundleClassLoader classLoader = new ProjectClassLoader(root);
 						result.add(new Bundle(data, classLoader));
 						bundles.add(data.getId());
-						logger.debug("find new bundle: {}", data.getId());
 					} else
 						logger.error("project name not match with bundle id: {}", data.getId());
 				}

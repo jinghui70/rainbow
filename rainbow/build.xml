@@ -55,7 +55,8 @@
 				<path refid="classpath" />
 			</classpath>
 		</java>
-		<java classname="rainbow.core.ant.BundleAware" errorproperty="bundles">
+		<ant antfile="../core/build.xml" target="build_deploy" useNativeBasedir="true" />
+		<java classname="rainbow.core.ant.BundleAware" outputproperty="bundles">
 			<classpath>
 				<pathelement location="${dev}/lib/core.jar" />
 				<path refid="classpath" />
@@ -64,7 +65,6 @@
 		<echo>${bundles}</echo>
 		<mkdir dir="${dist}/dev/bundle" />
 		<mkdir dir="${dist}/deploy/bundle" />
-		<ant antfile="../core/build.xml" target="build_deploy" useNativeBasedir="true" />
 		<subant target="build" genericantfile="build_bundle.xml" inheritall="true" failonerror="true">
 			<filelist dir="../" files="${bundles}" />
 		</subant>
