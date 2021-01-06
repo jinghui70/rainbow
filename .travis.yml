@@ -19,7 +19,9 @@ before_deploy:
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file: ../dist/*
+  file:
+    - dist/dev.zip
+    - ../dist/deploy.zip
   skip_cleanup: true
   on:
     branch: next
