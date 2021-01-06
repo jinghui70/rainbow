@@ -112,6 +112,9 @@ public class LibraryFileMaker {
 	private void readCoreLib() {
 		logger.info("read corelib.xml");
 		Path file = Paths.get("corelib.xml");
+		System.out.print("BBBBBBBBBBBBBBB ");
+		System.out.println(file.toAbsolutePath().toString());
+
 		try {
 			Files.lines(file).map(String::trim).filter(s -> s.startsWith("<getjar")).forEach(s -> {
 				Jar jar = new Jar();
