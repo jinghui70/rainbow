@@ -9,7 +9,8 @@ branches:
     - next
 
 script:
-  - ant -f rainbow/build.xml deploy
+  - cd rainbow
+  - ant deploy
 before_deploy:
   - git config --local user.name jinghui70
   - git config --local user.email jinghui70@gmail.com
@@ -20,3 +21,5 @@ deploy:
   api_key: $GITHUB_TOKEN
   file: dist/*
   skip_cleanup: true
+  on:
+    branches: next
