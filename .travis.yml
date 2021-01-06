@@ -10,16 +10,16 @@ branches:
 
 script:
   - cd rainbow
+  - export VERSION=v5.0.$TRAVIS_BUILD_NUMBER.$(date +'%Y%m%d%H%M%S')
   - ant deploy
 before_deploy:
   - git config --local user.name "jinghui70"
   - git config --local user.email "jinghui70@gmail.com"
-  - export TRAVIS_TAG=v5.0.0-$(date +'%Y%m%d%H%M%S')
-  - git tag $TRAVIS_TAG
+  - git tag $VERSION
 deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
-  file: dist/*
+  file: ../dist/*
   skip_cleanup: true
   on:
     branch: next

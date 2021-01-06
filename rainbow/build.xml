@@ -1,9 +1,8 @@
 <project name="rainbow" basedir=".">
 	<property name="application-name" value="RAINBOW" />
-	<tstamp>
-		<format property="BUILD_TIME" pattern="yyyyMMdd-HHmm" />
-	</tstamp>
-	<property name="version" value="5.0_${BUILD_TIME}" />
+	
+	<property environment="env"/>
+	<property name="version" value="${env.VERSION}" />
 	<property name="dist" location="../dist" />
 	<property name="dev" location="${dist}/dev" />
 	<property name="deploy" location="${dist}/deploy" />
@@ -76,10 +75,11 @@
 				<include name="conf/core.json" />
 			</fileset>
 		</copy>
-		<!-- 打包 -->
+		<!-- 打包 
 		<zip destfile="${dist}/dev.zip" basedir="${dist}/dev" />
 		<zip destfile="${dist}/deploy.zip" basedir="${dist}/deploy" />
 		<delete dir="${dist}/dev" />
 		<delete dir="${dist}/deploy" />
+		-->
 	</target>
 </project>
