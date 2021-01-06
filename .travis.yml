@@ -6,7 +6,7 @@ jdk:
 
 branches:
   only:
-    - next
+    - master
 
 script:
   - cd rainbow
@@ -20,8 +20,8 @@ deploy:
   provider: releases
   api_key: $GITHUB_TOKEN
   file:
-    - dist/dev.zip
+    - ../dist/dev.zip
     - ../dist/deploy.zip
   skip_cleanup: true
   on:
-    branch: next
+    branch: master
