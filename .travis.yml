@@ -22,4 +22,4 @@ deploy:
   file: dist/*
   skip_cleanup: true
   on:
-    branches: next
+    branch: next
