@@ -23,7 +23,7 @@
 		<copy todir="${build}">
 			<fileset dir="${src}" excludes="**/*.java"/>
 		</copy>
-		<jar jarfile="${dist}/deploy/lib/core.jar" basedir="${build}"/>
+		<jar jarfile="${dist}/deploy/lib/core-${version}.jar" basedir="${build}"/>
 		<delete dir="${build}" />
 	</target>
 

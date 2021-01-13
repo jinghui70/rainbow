@@ -1,7 +1,5 @@
 <project name="rainbow" basedir=".">
-	<property name="application-name" value="RAINBOW" />
-	
-	<property environment="env"/>
+	<property environment="env" />
 	<property name="version" value="${env.VERSION}" />
 	<property name="dist" location="../dist" />
 	<property name="dev" location="${dist}/dev" />
@@ -47,8 +45,21 @@
 		</java>
 	</target>
 
-	<!-- 发布版本 -->
-	<target name="deploy" depends="init" description="deploy">
+	<target name="bundles">
+		<java classname="rainbow.core.ant.BundleAware">
+			<classpath>
+				<pathelement location="${dev}/lib/core.jar" />
+				<path refid="classpath" />
+			</classpath>
+		</java>
+		<property file="${dist}/bundles.properties">
+		</property>
+		<echo>${BUNDLES}</echo>
+		<delete file="${dist}/bundles.properties">
+		</delete>
+	</target>
+
+	<target name="build" depends="init, bundles" description="deploy">
 		<java classname="rainbow.core.ant.LibraryWorker">
 			<classpath>
 				<pathelement location="${dev}/lib/core.jar" />
@@ -56,30 +67,44 @@
 			</classpath>
 		</java>
 		<ant antfile="../core/build.xml" target="build_deploy" useNativeBasedir="true" />
-		<java classname="rainbow.core.ant.BundleAware" outputproperty="bundles">
-			<classpath>
-				<pathelement location="${dev}/lib/core.jar" />
-				<path refid="classpath" />
-			</classpath>
-		</java>
-		<echo>${bundles}</echo>
 		<mkdir dir="${dist}/dev/bundle" />
 		<mkdir dir="${dist}/deploy/bundle" />
 		<subant target="build" genericantfile="build_bundle.xml" inheritall="true" failonerror="true">
-			<filelist dir="../" files="${bundles}" />
+			<filelist dir="../" files="${BUNDLES}" />
 		</subant>
+	</target>
+
+	<target name="deploy" depends="build">
+		<!-- 处理dev版本-->
 		<copy todir="${dist}/dev">
 			<fileset dir=".">
-				<include name="bin/*.*" />
 				<include name="build_bundle.xml" />
 				<include name="corelib.xml" />
-				<include name="conf/core.json" />
 			</fileset>
 		</copy>
-		<!-- 打包 -->
 		<zip destfile="${dist}/dev.zip" basedir="${dist}/dev" />
-		<zip destfile="${dist}/deploy.zip" basedir="${dist}/deploy" />
+		<!--
 		<delete dir="${dist}/dev" />
+		-->	
+		<!-- 处理deploy版本 -->
+		<copy todir="${dist}/deploy/bin" >
+			<fileset dir="bin" />
+		</copy>
+		<delete>
+			<fileset dir="${dist}/deploy/bundle" includes="*.dev.jar" />
+		</delete>
+		<zip destfile="${dist}/deploy.zip" basedir="${dist}/deploy" />
+		<!--
 		<delete dir="${dist}/deploy" />
+		-->
+		
+		<!-- 处理workspace -->
+		<copy todir="${dist}/workspace" preservelastmodified="true">
+			<fileset dir="init" includes="**/*.*" defaultexcludes="no"/>
+		</copy>
+		<copy todir="${dist}/workspace/rainbow/conf" file="conf/core.json" />
+		<echo file="${dist}/workspace/rainbow/rainbow.version">${version}</echo>
+		<zip destfile="${dist}/workspace.zip" basedir="${dist}/workspace" />
+
 	</target>
 </project>

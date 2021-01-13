@@ -36,7 +36,7 @@ echo $RAINBOW_HOME
 #----------------end of parse home-----------------------------
 
 MEM_ARG="-Xms512m -Xmx1024m -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.country=CN"
-CLASS_PATH="$RAINBOW_HOME/lib/core.jar"
+CLASS_PATH="$RAINBOW_HOME/lib/core*.jar"
 RAINBOWCMD="java $MEM_ARG -classpath $CLASS_PATH rainbow.core.platform.Shutdown" 
 echo $RAINBOWCMD
 

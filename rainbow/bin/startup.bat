@@ -17,6 +17,6 @@ goto end
 :okHome
 set CLASSPATH=%RAINBOW_HOME%\lib\bootstrap.jar
 set MEM_ARG=-Xms512m -Xmx1024m
-java %MEM_ARG% -classpath "%CLASSPATH%" rainbow.Launcher %1 %2 %3 %4
+java %MEM_ARG% -classpath "%CLASSPATH%" rainbow.Launcher
 
 :end

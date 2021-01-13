@@ -2,10 +2,15 @@ package rainbow.core.ant;
 
 import static rainbow.core.util.Preconditions.checkNotNull;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,11 +53,16 @@ public class BundleAware {
 		return loadBundleDag(loadBundle());
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		String bundles = loadBundleDag(loadBundle()).dfsList().stream() //
 				.filter(b -> b.getClassLoader() instanceof ProjectClassLoader) //
 				.map(Bundle::getId) //
 				.collect(Collectors.joining(","));
-		System.out.println(bundles);
+		Properties p = new Properties();
+		p.put("BUNDLES", bundles);
+		Path file = Paths.get("../dist").resolve("bundles.properties");
+		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
+			p.store(writer, "");
+		}
 	}
 }

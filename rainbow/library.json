@@ -33,6 +33,10 @@
   }, {
     "jar" : "com.google.guava:guava:28.2-jre"
   }, {
+    "jar" : "com.zaxxer:HikariCP:3.4.5"
+  }, {
+    "jar" : "com.h2database:h2:1.4.200"
+  }, {
     "jar" : "javax.servlet:javax.servlet-api:3.1.0"
   }, {
     "jar" : "org.eclipse.jetty:jetty-continuation:9.4.15.v20190215"
@@ -52,10 +56,6 @@
     "jar" : "org.eclipse.jetty:jetty-webapp:9.4.15.v20190215"
   }, {
     "jar" : "org.eclipse.jetty:jetty-xml:9.4.15.v20190215"
-  }, {
-    "jar" : "com.zaxxer:HikariCP:3.4.5"
-  }, {
-    "jar" : "com.h2database:h2:1.4.200"
   }, {
     "jar" : "com.ibm.db2.jcc:db2jcc:db2jcc4"
   }, {

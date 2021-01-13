@@ -16,7 +16,7 @@ goto end
 
 :okHome
 set LIB=%RAINBOW_HOME%\lib
-set CLASSPATH=%LIB%\core.jar
+set CLASSPATH=%LIB%\core*.jar
 set MET_ARG=-Xms512m -Xmx1024m
 
 echo CLASSPATH=%CLASSPATH%

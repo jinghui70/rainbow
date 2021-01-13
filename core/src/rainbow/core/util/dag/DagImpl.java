@@ -5,6 +5,7 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -14,12 +15,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class DagImpl<T> implements Dag<T> {
 
-	private Map<T, Vertex<T>> map = new HashMap<>();
+	private Map<T, Vertex<T>> map = Collections.emptyMap();
 
 	private List<T> dfsListCache;
 
@@ -49,6 +51,12 @@ public class DagImpl<T> implements Dag<T> {
 
 	private Vertex<T> doAddVertex(T t) {
 		checkNotNull(t);
+		if (map.isEmpty()) {
+			if (t instanceof Comparable)
+				map = new TreeMap<>();
+			else
+				map = new HashMap<>();
+		}
 		Vertex<T> result = map.get(t);
 		if (result == null) {
 			result = new Vertex<T>(t);
