@@ -10,7 +10,7 @@ branches:
 
 script:
   - cd rainbow
-  - export VERSION=v5.0.$TRAVIS_BUILD_NUMBER.$(date +'%Y%m%d%H%M%S')
+  - export VERSION=v5.0.$TRAVIS_BUILD_NUMBER.$(date +'%Y%m%d%H%M')
   - ant deploy
 before_deploy:
   - git config --local user.name "jinghui70"
@@ -22,6 +22,7 @@ deploy:
   file:
     - ../dist/dev.zip
     - ../dist/deploy.zip
+    - ../dist/workspace.zip
   skip_cleanup: true
   on:
     branch: master

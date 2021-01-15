@@ -82,10 +82,8 @@
 				<include name="corelib.xml" />
 			</fileset>
 		</copy>
-		<zip destfile="${dist}/dev.zip" basedir="${dist}/dev" />
-		<!--
-		<delete dir="${dist}/dev" />
-		-->	
+		<zip destfile="${dist}/dev-${version}.zip" basedir="${dist}/dev" />
+
 		<!-- 处理deploy版本 -->
 		<copy todir="${dist}/deploy/bin" >
 			<fileset dir="bin" />
@@ -93,10 +91,7 @@
 		<delete>
 			<fileset dir="${dist}/deploy/bundle" includes="*.dev.jar" />
 		</delete>
-		<zip destfile="${dist}/deploy.zip" basedir="${dist}/deploy" />
-		<!--
-		<delete dir="${dist}/deploy" />
-		-->
+		<zip destfile="${dist}/deploy-${version}.zip" basedir="${dist}/deploy" />
 		
 		<!-- 处理workspace -->
 		<copy todir="${dist}/workspace" preservelastmodified="true">
@@ -104,6 +99,7 @@
 		</copy>
 		<copy todir="${dist}/workspace/rainbow/conf" file="conf/core.json" />
 		<echo file="${dist}/workspace/rainbow/rainbow.version">${version}</echo>
+		<copy todir="${dist}/workspace/rainbow" file="${dist}/dev-${version}.zip" />
 		<zip destfile="${dist}/workspace.zip" basedir="${dist}/workspace" />
 
 	</target>

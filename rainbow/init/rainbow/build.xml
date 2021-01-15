@@ -12,25 +12,41 @@
 		</fileset>
 	</path>
 
-	<target name="init">
+	<target name="clear">
 		<delete dir="${dist}" />
 		<mkdir dir="${dev}" />
 		<mkdir dir="${deploy}" />
 		<mkdir dir="${build}" />
-		<ant antfile="corelib.xml" />
 	</target>
 
-	<target name="UpdateRainbow">
+	<target name="cleanBundle">
+		<delete dir="bundle">
+			<fileset dir="bundle">
+				<include name="db.db2.jar" />
+				<include name="db.oracle.jar" />
+				<include name="db.mysql.jar" />
+			</fileset>
+		</delete>
+	</target>
+
+	<target name="UpdateRainbow" description="update rainbow">
 		<loadresource property="rainbowVersion">
 			<file file="rainbow.version" />
 		</loadresource>
-		<get dest="./dev-${rainbowVersion}.zip" src="https://github.com/jinghui70/rainbow/releases/download/${rainbowVersion}/dev.zip" httpusecaches="false" skipexisting="true" />
+		<get dest="." src="https://github.com/jinghui70/rainbow/releases/download/${rainbowVersion}/dev-${rainbowVersion}.zip" skipexisting="true" />
+		<echo>done</echo>
 		<delete dir="bundle" />
 		<delete file="lib/core.jar" />
-		<unzip src="dev-${rainbowVersion}.zip" dest="." />
+		<unzip src="dev-${rainbowVerion}.zip" dest="." />
+		<antcall target="cleanBundle" />
+		<delete>
+			<fileset dir=".">
+				<include name="*.zip" />
+				<exclude name="dev-${rainbowVersion}.zip" />
+			</fileset>
+		</delete>
 	</target>
-
-	<target name="UpgradeRainbow">
+	<target name="getLastRainbowVersion">
 		<loadresource property="u">
 			<url url="https://api.github.com/repos/jinghui70/rainbow/releases/latest" />
 			<filterchain>
@@ -41,7 +57,8 @@
 	</target>
 
 	<!-- 更新并下载library，更新RainbowLibraray，需重启Eclispe生效 -->
-	<target name="EclipseLibrary" depends="init" description="set eclipse user library">
+	<target name="EclipseLibrary" description="set eclipse user library">
+		<ant antfile="corelib.xml" />
 		<java classname="rainbow.core.ant.LibraryWorker">
 			<arg value="eclipse" />
 			<classpath>
@@ -58,6 +75,11 @@
 				<path refid="classpath" />
 			</classpath>
 		</java>
+	</target>
+
+	<target name="init" depends="UpdateRainbow, EclipseClasspath, EclipseLibrary" description="first time to initialize dev enviroment">
+	</target>
+	<target name="UpgradeRainbow" depends="getLastRainbowVersion, UpdateRainbow, EclipseLibrary" description="upgrade rainbow to the last version">
 	</target>
 
 	<target name="bundles">
