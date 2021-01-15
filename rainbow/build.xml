@@ -100,7 +100,7 @@
 		<copy todir="${dist}/workspace/rainbow/conf" file="conf/core.json" />
 		<echo file="${dist}/workspace/rainbow/rainbow.version">${version}</echo>
 		<copy todir="${dist}/workspace/rainbow" file="${dist}/dev-${version}.zip" />
-		<zip destfile="${dist}/workspace.zip" basedir="${dist}/workspace" />
+		<zip destfile="${dist}/workspace.zip" basedir="${dist}/workspace" defaultexcludes="no" />
 
 	</target>
 </project>
