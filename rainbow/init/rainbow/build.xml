@@ -20,7 +20,7 @@
 	</target>
 
 	<target name="cleanBundle">
-		<delete dir="bundle">
+		<delete>
 			<fileset dir="bundle">
 				<include name="db.db2.jar" />
 				<include name="db.oracle.jar" />
@@ -37,7 +37,7 @@
 		<echo>done</echo>
 		<delete dir="bundle" />
 		<delete file="lib/core.jar" />
-		<unzip src="dev-${rainbowVerion}.zip" dest="." />
+		<unzip src="dev-${rainbowVersion}.zip" dest="." />
 		<antcall target="cleanBundle" />
 		<delete>
 			<fileset dir=".">
