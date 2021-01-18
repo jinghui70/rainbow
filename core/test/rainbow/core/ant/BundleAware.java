@@ -60,7 +60,7 @@ public class BundleAware {
 				.collect(Collectors.joining(","));
 		Properties p = new Properties();
 		p.put("BUNDLES", bundles);
-		Path file = Paths.get("../dist").resolve("bundles.properties");
+		Path file = Paths.get("..", "dist").resolve("bundles.properties");
 		System.out.println(file.toAbsolutePath());
 		System.out.println(bundles);
 		try (BufferedWriter writer = Files.newBufferedWriter(file)) {
