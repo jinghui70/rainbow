@@ -108,7 +108,7 @@ public class Worker {
 	}
 
 	private void writeUnit(PrintWriter writer, Unit unit) {
-		if (!Utils.isNullOrEmpty(unit.getTables())) {
+		if (Utils.hasContent(unit.getTables())) {
 			unit.getTables().forEach(table -> {
 				writer.println("\t\t<entity>");
 				writer.append("\t\t\t<name>").append(table.getName()).println("</name>");
@@ -131,7 +131,7 @@ public class Worker {
 					writer.println("\t\t\t\t</column>");
 				});
 				writer.println("\t\t\t</columns>");
-				if (!Utils.isNullOrEmpty(table.getIndexes())) {
+				if (Utils.hasContent(table.getIndexes())) {
 					writer.println("\t\t\t<indexes>");
 					table.getIndexes().forEach(index -> {
 						writer.println("\t\t\t\t<index>");
@@ -155,7 +155,7 @@ public class Worker {
 				writer.println("\t\t</entity>");
 			});
 		}
-		if (!Utils.isNullOrEmpty(unit.getUnits())) {
+		if (Utils.hasContent(unit.getUnits())) {
 			unit.getUnits().forEach(child -> writeUnit(writer, child));
 		}
 	}

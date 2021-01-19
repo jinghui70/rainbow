@@ -84,7 +84,7 @@ public class Bundle implements Comparable<Bundle> {
 		Set<String> result = new HashSet<String>();
 		if (hasFather())
 			result.add(data.getFather());
-		if (!Utils.isNullOrEmpty(data.getRequires()))
+		if (Utils.hasContent(data.getRequires()))
 			result.addAll(data.getRequires());
 		return result;
 	}

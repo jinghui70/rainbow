@@ -33,7 +33,7 @@ public class DatabaseUtils {
 		hikariConfig.setUsername(config.getUsername());
 		hikariConfig.setPassword(config.getPassword());
 		Map<String, Object> property = config.getProperty();
-		if (!Utils.isNullOrEmpty(property)) {
+		if (Utils.hasContent(property)) {
 			property.forEach((key, value) -> hikariConfig.addDataSourceProperty(key, value));
 		}
 		return new HikariDataSource(hikariConfig);
@@ -91,7 +91,7 @@ public class DatabaseUtils {
 			unit.getTables().forEach(e -> {
 				Entity entity = model.get(e.getName());
 				// linkField
-				if (!Utils.isNullOrEmpty(e.getLinkFields()))
+				if (Utils.hasContent(e.getLinkFields()))
 					e.getLinkFields().forEach(link -> {
 						entity.addLink(new Link(model, entity, link));
 					});

@@ -69,7 +69,7 @@ public class ModelInfo {
 		Entity entity = dao.getEntity(table.getName());
 		EntityNode result = new EntityNode(table.getName(), table.getLabel());
 
-		if (!Utils.isNullOrEmpty(table.getTags())) {
+		if (Utils.hasContent(table.getTags())) {
 			List<String> tags = new ArrayList<String>(table.getTags().size());
 			tags.addAll(table.getTags().keySet());
 			Collections.sort(tags);
@@ -88,7 +88,7 @@ public class ModelInfo {
 	private ColumnNode convertColumn(Column column) {
 		ColumnNode result = new ColumnNode(column.getName(), column.getName());
 		result.setType(column.getType());
-		if (!Utils.isNullOrEmpty(column.getTags())) {
+		if (Utils.hasContent(column.getTags())) {
 			List<String> tags = new ArrayList<String>(column.getTags().size());
 			tags.addAll(column.getTags().keySet());
 			Collections.sort(tags);

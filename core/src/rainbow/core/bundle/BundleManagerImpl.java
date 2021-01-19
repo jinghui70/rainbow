@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -187,7 +188,8 @@ public final class BundleManagerImpl implements BundleManager, DisposableBean {
 		List<Context> parentContexts = null;
 		Collection<Bundle> parents = dag.getPredecessor(bundle);
 		if (!parents.isEmpty()) {
-			parentContexts = parents.stream().map(p -> p.getActivator().getContext()).collect(Collectors.toList());
+			parentContexts = parents.stream().map(p -> p.getActivator().getContext()).filter(Objects::nonNull)
+					.collect(Collectors.toList());
 		}
 		bundle.setActivator(activator);
 		activator.start(mBeanServer, parentContexts);

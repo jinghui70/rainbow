@@ -63,7 +63,7 @@ public class QueryAnalyzer {
 			fields.add(SelectField.parse("pid:__p", entity));
 		}
 
-		if (!Utils.isNullOrEmpty(info.getConditions())) {
+		if (Utils.hasContent(info.getConditions())) {
 			conditions = info.getConditions().stream().map(s -> {
 				if (s.trim().charAt(0) == '[') {
 					List<Condition> cs = JSON.parseList(s, Condition.class);
@@ -140,7 +140,7 @@ public class QueryAnalyzer {
 			if (isLinkSql())
 				sql.append("A.");
 			sql.append("ORDERNUM");
-		} else if (!Utils.isNullOrEmpty(info.getOrders())) {
+		} else if (Utils.hasContent(info.getOrders())) {
 			info.getOrders().forEach(o -> {
 				QueryField field = null;
 				String desc = null;

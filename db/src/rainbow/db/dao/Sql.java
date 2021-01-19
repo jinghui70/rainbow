@@ -188,7 +188,7 @@ public class Sql extends StringBuilderX implements ISql {
 		StringBuilder sb = new StringBuilder(getSql());
 		sb.append("\n\r");
 		int i = 1;
-		if (!Utils.isNullOrEmpty(params)) {
+		if (Utils.hasContent(params)) {
 			sb.append("params:\n\r");
 			for (Object param : params) {
 				sb.append("[").append(i++).append("] ").append(param.toString()).append("\n\r");

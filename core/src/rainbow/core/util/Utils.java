@@ -49,7 +49,7 @@ public abstract class Utils {
 	 * 检查一个字符串是不是为 null或者为空
 	 */
 	public static boolean isNullOrEmpty(String str) {
-		return str == null ? true : str.isEmpty();
+		return str == null || str.isEmpty();
 	}
 
 	/**
@@ -59,7 +59,17 @@ public abstract class Utils {
 	 * @return {@code true} 如果==null or isEmpty()
 	 */
 	public static boolean isNullOrEmpty(Collection<?> c) {
-		return c == null ? true : c.isEmpty();
+		return c == null || c.isEmpty();
+	}
+
+	/**
+	 * 检查输入的容器对象是不是有内容
+	 * 
+	 * @param c
+	 * @return
+	 */
+	public static boolean hasContent(Collection<?> c) {
+		return c != null && !c.isEmpty();
 	}
 
 	/**
@@ -69,7 +79,17 @@ public abstract class Utils {
 	 * @return
 	 */
 	public static boolean isNullOrEmpty(Map<?, ?> map) {
-		return map == null ? true : map.isEmpty();
+		return map == null || map.isEmpty();
+	}
+
+	/**
+	 * 检查一个Map是不是有内容
+	 * 
+	 * @param c
+	 * @return
+	 */
+	public static boolean hasContent(Map<?, ?> map) {
+		return map != null && !map.isEmpty();
 	}
 
 	/**

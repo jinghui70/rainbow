@@ -25,9 +25,10 @@ public class ProjectBundleLoader extends JarBundleLoader {
 	@Override
 	public List<Bundle> loadBundle(Set<String> bundles) throws IOException {
 		List<Bundle> result = super.loadBundle(bundles);
-		Path dir = Paths.get("../");
 		bundles.addAll(Utils.transform(result, b -> b.getId()));
 
+		Path dir = Paths.get("..");
+		System.out.println(dir.toAbsolutePath().toString());
 		Iterator<Path> i = Files.list(dir).filter(f -> Files.isDirectory(f)).filter(f -> !f.startsWith(".")).iterator();
 		while (i.hasNext()) {
 			Path root = i.next().resolve("bin");

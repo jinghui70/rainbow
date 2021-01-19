@@ -30,11 +30,10 @@ public class Context {
 
 	private Map<String, Bean> beans;
 
-	private List<Context> parents;
+	private List<Context> parents = Collections.emptyList();
 
 	public Context() {
 		this.beans = new HashMap<String, Bean>();
-		this.parents = Collections.emptyList();
 	}
 
 	/**
@@ -44,14 +43,11 @@ public class Context {
 	 */
 	public Context(Map<String, Bean> beans) {
 		this.beans = beans;
-		this.parents = Collections.emptyList();
 	}
 
 	public Context(Map<String, Bean> beans, List<Context> parents) {
 		this.beans = beans;
-		if (parents == null)
-			this.parents = Collections.emptyList();
-		else
+		if (Utils.hasContent(parents))
 			this.parents = parents;
 	}
 

@@ -7,11 +7,11 @@ import java.util.List;
 import rainbow.core.util.Utils;
 
 public class IfPart implements Part {
-	
+
 	private String name;
-	
+
 	private List<Part> trueParts;
-	
+
 	private List<Part> falseParts;
 
 	public String getName() {
@@ -33,7 +33,7 @@ public class IfPart implements Part {
 	public void setFalseParts(List<Part> falseParts) {
 		this.falseParts = falseParts;
 	}
-	
+
 	public IfPart(String name) {
 		this.name = name;
 	}
@@ -41,7 +41,7 @@ public class IfPart implements Part {
 	@Override
 	public void output(Writer writer, ValueProvider vp) throws IOException {
 		List<Part> parts = vp.ifValue(name) ? trueParts : falseParts;
-		if (!Utils.isNullOrEmpty(parts))
+		if (Utils.hasContent(parts))
 			for (Part child : parts)
 				child.output(writer, vp);
 	}

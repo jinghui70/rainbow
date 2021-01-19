@@ -218,7 +218,7 @@ public class Select extends Where<Select> implements ISelect {
 		if (!cnd.isEmpty()) {
 			cnd.initField(this::createField);
 		}
-		if (!Utils.isNullOrEmpty(orderBy))
+		if (Utils.hasContent(orderBy))
 			orderBy.forEach(o -> o.initField(this::createField));
 	}
 

@@ -38,7 +38,7 @@ public class SwitchPart implements Part {
 	public void output(Writer writer, ValueProvider vp) throws IOException {
 		String key = vp.getSwitchKey(name);
 		List<Part> parts = map.get(key);
-		if (!Utils.isNullOrEmpty(parts))
+		if (Utils.hasContent(parts))
 			for (Part child : parts)
 				child.output(writer, vp);
 	}

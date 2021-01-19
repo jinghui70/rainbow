@@ -46,7 +46,7 @@ public class LinkQueryAnalyzer extends QueryInfo {
 		link.getTargetColumns().forEach(c -> {
 			sql.append(c.getCode()).append("=?").addParam(Utils.NULL_STR).appendTemp(" AND ");
 		});
-		if (!Utils.isNullOrEmpty(info.getConditions())) {
+		if (Utils.hasContent(info.getConditions())) {
 			// 先做翻译
 			info.getConditions().stream().map(s -> {
 				if (s.trim().charAt(0) == '[') {

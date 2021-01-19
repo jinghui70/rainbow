@@ -33,7 +33,7 @@ public class BundleAware {
 
 	}
 
-	public static Dag<Bundle> loadBundleDag(List<Bundle> bundles) {
+	private static Dag<Bundle> loadBundleDag(List<Bundle> bundles) {
 		Map<String, Bundle> map = bundles.stream().collect(Collectors.toMap(Bundle::getId, Function.identity()));
 		Dag<Bundle> dag = new DagImpl<Bundle>();
 		for (Bundle bundle : bundles) {
@@ -54,7 +54,7 @@ public class BundleAware {
 	}
 
 	public static void main(String[] args) throws IOException {
-		String bundles = loadBundleDag(loadBundle()).dfsList().stream() //
+		String bundles = loadBundleDag().dfsList().stream() //
 				.filter(b -> b.getClassLoader() instanceof ProjectClassLoader) //
 				.map(Bundle::getId) //
 				.collect(Collectors.joining(","));
