@@ -3,7 +3,6 @@
 	<property name="src" location="src" />
 	<property name="test" location="test" />
 	<property name="build" location="${dist}/build" />
-	<property name="dest" value="bundle" />
 	<basename property="project" file="${basedir}" />
 
 	<available file="test" type="dir" property="test.present" />

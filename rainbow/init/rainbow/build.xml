@@ -2,47 +2,38 @@
 	<property environment="env" />
 	<property name="version" value="${env.VERSION}" />
 	<property name="dist" location="../dist" />
-	<property name="dev" location="${dist}/dev" />
-	<property name="deploy" location="${dist}/deploy" />
-	<property name="build" location="${dist}/build" />
 
-	<path id="classpath">
-		<fileset dir="lib">
-			<include name="**/*.jar" />
-		</fileset>
-	</path>
+	<macrodef name="cleanBundle">
+		<attribute name="bundleDir" />
+		<sequential>
+			<delete>
+				<fileset dir="@{bundleDir}">
+					<include name="db.db2.jar" />
+					<include name="db.oracle.jar" />
+					<include name="db.mysql.jar" />
+				</fileset>
+			</delete>
+		</sequential>
+	</macrodef>
 
-	<target name="clear">
-		<delete dir="${dist}" />
-		<mkdir dir="${dev}" />
-		<mkdir dir="${deploy}" />
-		<mkdir dir="${build}" />
-	</target>
-
-	<target name="cleanBundle">
-		<delete>
-			<fileset dir="bundle">
-				<include name="db.db2.jar" />
-				<include name="db.oracle.jar" />
-				<include name="db.mysql.jar" />
-			</fileset>
-		</delete>
-	</target>
-
+	<!-- 更新Rainbow -->
 	<target name="UpdateRainbow" description="update rainbow">
+		<!-- 获取Rainbow版本并下载 -->
 		<loadresource property="rainbowVersion">
 			<file file="rainbow.version" />
 		</loadresource>
 		<get dest="." src="https://github.com/jinghui70/rainbow/releases/download/${rainbowVersion}/dev-${rainbowVersion}.zip" skipexisting="true" />
-		<echo>done</echo>
+		<get dest="." src="https://github.com/jinghui70/rainbow/releases/download/${rainbowVersion}/deploy-${rainbowVersion}.zip" skipexisting="true" />
+		<!-- 展开开发包 -->
 		<delete dir="bundle" />
 		<delete file="lib/core.jar" />
 		<unzip src="dev-${rainbowVersion}.zip" dest="." />
-		<antcall target="cleanBundle" />
+		<cleanBundle bundleDir="bundle" />
 		<delete>
 			<fileset dir=".">
 				<include name="*.zip" />
 				<exclude name="dev-${rainbowVersion}.zip" />
+				<exclude name="deploy-${rainbowVersion}.zip" />
 			</fileset>
 		</delete>
 	</target>
@@ -62,7 +53,7 @@
 		<java classname="rainbow.core.ant.LibraryWorker">
 			<arg value="eclipse" />
 			<classpath>
-				<path refid="classpath" />
+				<fileset dir="lib" includes="*.jar" />
 			</classpath>
 		</java>
 		<echo>请重新启动Eclispe</echo>
@@ -72,53 +63,62 @@
 	<target name="EclipseClasspath" description="set classpath">
 		<java classname="rainbow.core.ant.ClassPathMaker">
 			<classpath>
-				<path refid="classpath" />
+				<fileset dir="lib" includes="*.jar" />
 			</classpath>
 		</java>
 	</target>
 
-	<target name="init" depends="UpdateRainbow, EclipseClasspath, EclipseLibrary" description="first time to initialize dev enviroment">
+	<target name="init" depends="UpdateRainbow, EclipseLibrary" description="first time to initialize dev enviroment">
 	</target>
 	<target name="UpgradeRainbow" depends="getLastRainbowVersion, UpdateRainbow, EclipseLibrary" description="upgrade rainbow to the last version">
 	</target>
 
+
+	<target name="clear">
+		<delete dir="${dist}" />
+		<mkdir dir="${dist}"/>
+	</target>
+	<target name="downloadJar">
+		<ant antfile="corelib.xml" />
+		<java classname="rainbow.core.ant.LibraryWorker">
+			<classpath>
+				<fileset dir="lib" includes="*.jar" />
+			</classpath>
+		</java>
+	</target>
 	<target name="bundles">
 		<java classname="rainbow.core.ant.BundleAware">
 			<classpath>
-				<path refid="classpath" />
+				<fileset dir="lib" includes="*.jar" />
 			</classpath>
 		</java>
 		<property file="${dist}/bundles.properties">
 		</property>
 		<echo>${BUNDLES}</echo>
-		<delete file="${dist}/bundles.properties">
-		</delete>
+		<delete file="${dist}/bundles.properties" />
 	</target>
 
-	<!-- 发布版本 -->
-	<target name="deploy" depends="init, bundles" description="deploy">
-		<java classname="rainbow.core.ant.LibraryWorker">
-			<classpath>
-				<pathelement location="${dev}/lib/core.jar" />
-				<path refid="classpath" />
-			</classpath>
-		</java>
-		<mkdir dir="${dist}/deploy/bundle" />
+	<target name="build-deploy" depends="clear, UpdateRainbow, downloadJar, bundles">
+		<unzip src="deploy-${rainbowVersion}.zip" dest="${dist}/deploy" />
+		<cleanBundle bundleDir="${dist}/deploy/bundle" />
 		<subant target="build_deploy" genericantfile="build_bundle.xml" inheritall="true" failonerror="true">
 			<filelist dir="../" files="${BUNDLES}" />
 		</subant>
-		<copy todir="${dist}/deploy">
-			<fileset dir=".">
-				<include name="build_bundle.xml" />
-				<include name="corelib.xml" />
+		<copy todir="${dist}/deploy/lib">
+			<fileset dir="lib">
+				<include name="*.jar" />
+				<exclude name="core.jar" />
 			</fileset>
 		</copy>
-		<!-- init -->
-		<copy todir="${dist}/dev">
-			<fileset dir=".">
-				<include name="bin" />
-				<include name="conf/core.json" />
+		<!-- 配置 -->
+		<copy todir="${dist}/deploy/conf" includeEmptyDirs="no">
+			<fileset dir="conf">
+				<exclude name="**/*.dev" />
+				<exclude name="**/*.dev/**" />
 			</fileset>
 		</copy>
 	</target>
+
+	<target name="deploy" depends="build-deploy" description="deploy" />
+
 </project>

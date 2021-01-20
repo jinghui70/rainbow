@@ -55,11 +55,10 @@
 		<property file="${dist}/bundles.properties">
 		</property>
 		<echo>${BUNDLES}</echo>
-		<delete file="${dist}/bundles.properties">
-		</delete>
+		<delete file="${dist}/bundles.properties" />
 	</target>
 
-	<target name="build" depends="init, bundles" description="deploy">
+	<target name="build" depends="init, bundles">
 		<java classname="rainbow.core.ant.LibraryWorker">
 			<classpath>
 				<pathelement location="${dev}/lib/core.jar" />
@@ -67,6 +66,7 @@
 			</classpath>
 		</java>
 		<ant antfile="../core/build.xml" target="build_deploy" useNativeBasedir="true" />
+		<ant antfile="../bootstrap/build.xml" target="build" useNativeBasedir="true" />
 		<mkdir dir="${dist}/dev/bundle" />
 		<mkdir dir="${dist}/deploy/bundle" />
 		<subant target="build" genericantfile="build_bundle.xml" inheritall="true" failonerror="true">
@@ -74,7 +74,7 @@
 		</subant>
 	</target>
 
-	<target name="deploy" depends="build">
+	<target name="deploy" depends="build" description="deploy">
 		<!-- 处理dev版本-->
 		<copy todir="${dist}/dev">
 			<fileset dir=".">
@@ -85,22 +85,21 @@
 		<zip destfile="${dist}/dev-${version}.zip" basedir="${dist}/dev" />
 
 		<!-- 处理deploy版本 -->
-		<copy todir="${dist}/deploy/bin" >
+		<copy todir="${dist}/deploy/bin">
 			<fileset dir="bin" />
 		</copy>
 		<delete>
 			<fileset dir="${dist}/deploy/bundle" includes="*.dev.jar" />
 		</delete>
 		<zip destfile="${dist}/deploy-${version}.zip" basedir="${dist}/deploy" />
-		
+
 		<!-- 处理workspace -->
 		<copy todir="${dist}/workspace" preservelastmodified="true">
-			<fileset dir="init" includes="**/*.*" defaultexcludes="no"/>
+			<fileset dir="init" includes="**/*.*" defaultexcludes="no" />
 		</copy>
 		<copy todir="${dist}/workspace/rainbow/conf" file="conf/core.json" />
 		<echo file="${dist}/workspace/rainbow/rainbow.version">${version}</echo>
 		<copy todir="${dist}/workspace/rainbow" file="${dist}/dev-${version}.zip" />
 		<zip destfile="${dist}/workspace.zip" basedir="${dist}/workspace" defaultexcludes="no" />
-
 	</target>
 </project>

@@ -1,0 +1,17 @@
+<project name="bootstrap" basedir="." default="build">
+
+	<property name="src" location="src"/>
+	<property name="dist" location="../dist"/>
+	<property name="build" location="${dist}/build"/>
+
+	<target name="build">
+		<delete dir="${build}" />
+		<mkdir dir="${build}" />
+		<javac srcdir="${src}" destdir="${build}" encoding="UTF-8" includeAntRuntime="no">
+			<compilerarg value="-Xlint:deprecation"/>
+		</javac>
+		<jar jarfile="${dist}/deploy/lib/bootstrap.jar" basedir="${build}"/>
+		<delete dir="${build}" />
+	</target>
+	
+</project>

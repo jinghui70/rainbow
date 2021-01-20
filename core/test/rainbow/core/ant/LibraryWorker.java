@@ -110,6 +110,8 @@ public class LibraryWorker {
 	 * @param names
 	 */
 	private void clear(Path path, Set<String> names) {
+		if (!Files.exists(path))
+			return;
 		try {
 			Files.list(path).filter(Files::isRegularFile).forEach(p -> {
 				if (!names.contains(p.getFileName().toString())) {

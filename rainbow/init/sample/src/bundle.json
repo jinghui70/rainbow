@@ -1,0 +1,8 @@
+{
+	"id": "sample",
+	"desc": "样例插件",
+	"requires": [
+		"db",
+		"service"
+	]
+}
