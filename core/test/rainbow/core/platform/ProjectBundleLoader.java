@@ -18,18 +18,13 @@ import rainbow.core.util.json.JSON;
 
 public class ProjectBundleLoader extends JarBundleLoader {
 
-	public ProjectBundleLoader() {
-		super(Paths.get("bundle"));
-	}
-
 	@Override
 	public List<Bundle> loadBundle(Set<String> bundles) throws IOException {
 		List<Bundle> result = super.loadBundle(bundles);
 		bundles.addAll(Utils.transform(result, b -> b.getId()));
 
 		Path dir = Paths.get("..");
-		System.out.println(dir.toAbsolutePath().toString());
-		Iterator<Path> i = Files.list(dir).filter(f -> Files.isDirectory(f)).filter(f -> !f.startsWith(".")).iterator();
+		Iterator<Path> i = Files.list(dir).filter(Files::isDirectory).filter(f -> !f.startsWith(".")).iterator();
 		while (i.hasNext()) {
 			Path root = i.next().resolve("bin");
 			Path dataFile = root.resolve("bundle.json");
@@ -42,6 +37,7 @@ public class ProjectBundleLoader extends JarBundleLoader {
 						BundleClassLoader classLoader = new ProjectClassLoader(root);
 						result.add(new Bundle(data, classLoader));
 						bundles.add(data.getId());
+						logger.info("find developing bundle: {}", data.getId());
 					} else
 						logger.error("project name not match with bundle id: {}", data.getId());
 				}

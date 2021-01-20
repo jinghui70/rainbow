@@ -22,14 +22,9 @@ public class JarBundleLoader implements BundleLoader {
 
 	protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-	private Path bundleDir;
-
-	public JarBundleLoader(Path bundleDir) {
-		this.bundleDir = bundleDir;
-	}
-
 	@Override
 	public List<Bundle> loadBundle(Set<String> bundles) throws IOException {
+		Path bundleDir = Platform.getHome().resolve("bundle");
 		if (!Files.exists(bundleDir) || !Files.isDirectory(bundleDir)) {
 			return new ArrayList<Bundle>();
 		}
@@ -60,6 +55,7 @@ public class JarBundleLoader implements BundleLoader {
 					logger.error("duplicated bundle {} found: {}", data.getId(), file);
 					throw new RuntimeException();
 				}
+				logger.info("find bundle: {}", data.getId());
 				bundles.add(data.getId());
 				return new Bundle(data, classLoader);
 			} catch (Throwable e) {

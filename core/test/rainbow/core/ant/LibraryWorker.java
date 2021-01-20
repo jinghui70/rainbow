@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import rainbow.core.bundle.Bundle;
 import rainbow.core.bundle.Jar;
 import rainbow.core.util.dag.Dag;
 import rainbow.core.util.json.JSON;
@@ -43,7 +42,7 @@ public class LibraryWorker {
 		this.rainbow = rainbow;
 	}
 
-	private LibraryFile readLibraryFile() {
+	private LibraryFile readLibraryFile() throws IOException {
 		Path file = Paths.get("library.json");
 		if (!Files.exists(file)) {
 			return generateLibraryFile();
@@ -51,7 +50,7 @@ public class LibraryWorker {
 		return JSON.parseObject(file, LibraryFile.class);
 	}
 
-	private LibraryFile getLibraryFile() {
+	private LibraryFile getLibraryFile() throws IOException {
 		if (libraryFile == null)
 			libraryFile = readLibraryFile();
 		return libraryFile;
@@ -62,8 +61,8 @@ public class LibraryWorker {
 	 * 
 	 * @throws IOException
 	 */
-	public LibraryFile generateLibraryFile() {
-		Dag<Bundle> dag = BundleAware.loadBundleDag();
+	public LibraryFile generateLibraryFile() throws IOException {
+		Dag<BundleDataX> dag = BundleAware.loadBundleDag();
 		LibraryFileMaker maker = new LibraryFileMaker();
 		return maker.make(dag);
 	}
@@ -73,7 +72,7 @@ public class LibraryWorker {
 	 * 
 	 * @throws IOException
 	 */
-	public void download() {
+	public void download() throws IOException {
 		logger.info("downloading dependencies...");
 		LibraryFile file = getLibraryFile();
 		Path libPath = Paths.get("lib");

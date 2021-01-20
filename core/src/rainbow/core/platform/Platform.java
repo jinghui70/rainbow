@@ -110,7 +110,8 @@ public final class Platform {
 			bundleLoader = (BundleLoader) clazz.getDeclaredConstructor().newInstance();
 			dev = true;
 		} catch (ClassNotFoundException e) {
-			bundleLoader = new JarBundleLoader(Platform.getHome().resolve("bundle")); // 生产环境
+			// 生产环境
+			bundleLoader = new JarBundleLoader();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException
 				| NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException("create bundleloader failed", e);

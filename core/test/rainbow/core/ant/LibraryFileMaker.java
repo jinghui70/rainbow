@@ -17,7 +17,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Objects;
 
-import rainbow.core.bundle.Bundle;
 import rainbow.core.bundle.Jar;
 import rainbow.core.util.Utils;
 import rainbow.core.util.dag.Dag;
@@ -30,7 +29,7 @@ public class LibraryFileMaker {
 	private Map<String, Jar> oldMap;
 	private Map<String, Jar> libMap;
 
-	public LibraryFile make(Dag<Bundle> dag) {
+	public LibraryFile make(Dag<BundleDataX> dag) {
 		libMap = new HashMap<>();
 		libs = new ArrayList<>();
 		logger.info("read library.json");
@@ -41,8 +40,8 @@ public class LibraryFileMaker {
 		libraryFile.getRuntime().stream().forEach(j -> oldMap.put(j.id(), j));
 
 		readCoreLib();
-		for (Bundle bundle : dag.dfsList()) {
-			List<Jar> bundlelibs = bundle.getData().getLibs();
+		for (BundleDataX bundle : dag.dfsList()) {
+			List<Jar> bundlelibs = bundle.getLibs();
 			if (Utils.isNullOrEmpty(bundlelibs))
 				continue;
 			logger.info("read libs of {}", bundle.getId());

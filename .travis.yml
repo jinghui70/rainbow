@@ -12,15 +12,17 @@ script:
   - cd rainbow
   - export VERSION=v5.0.$TRAVIS_BUILD_NUMBER.$(date +'%Y%m%d%H%M')
   - ant deploy
-# before_deploy:
-#   - git config --local user.name "jinghui70"
-#   - git config --local user.email "jinghui70@gmail.com"
-#   - git tag $VERSION
-# deploy:
-#   provider: releases
-#   api_key: $GITHUB_TOKEN
-#   file_glob: true
-#   file: ../dist/*.zip
-#   skip_cleanup: true
-#   on:
-#     branch: master
+
+before_deploy:
+  - git config --local user.name "jinghui70"
+  - git config --local user.email "jinghui70@gmail.com"
+  - git tag $VERSION
+
+deploy:
+  provider: releases
+  api_key: $GITHUB_TOKEN
+  file_glob: true
+  file: ../dist/*.zip
+  skip_cleanup: true
+  on:
+    branch: master

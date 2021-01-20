@@ -8,19 +8,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import rainbow.core.bundle.Bundle;
-import rainbow.core.platform.ProjectClassLoader;
 import rainbow.core.util.dag.Dag;
 
 public class ClassPathMaker {
 
-	private void make(Bundle bundle, Set<Bundle> ancestors, boolean rainbow) {
+	private void make(BundleDataX bundle, Set<BundleDataX> ancestors, boolean rainbow) {
 		System.out.println("generating classpath of " + bundle.getId());
 		Path root = Paths.get("../").resolve(bundle.getId());
-		List<Bundle> p = new ArrayList<>();
-		List<Bundle> j = new ArrayList<>();
-		for (Bundle b : ancestors) {
-			if (b.getClassLoader() instanceof ProjectClassLoader)
+		List<BundleDataX> p = new ArrayList<>();
+		List<BundleDataX> j = new ArrayList<>();
+		for (BundleDataX b : ancestors) {
+			if (b.isDev())
 				p.add(b);
 			else
 				j.add(b);
@@ -34,13 +32,13 @@ public class ClassPathMaker {
 		}
 		if (rainbow)
 			lines.add("\t<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/core\"/>");
-		for (Bundle b : p) {
+		for (BundleDataX b : p) {
 			lines.add(String.format("\t<classpathentry combineaccessrules=\"false\" kind=\"src\" path=\"/%s\"/>",
 					b.getId()));
 		}
 		lines.add("\t<classpathentry kind=\"con\" path=\"org.eclipse.jdt.launching.JRE_CONTAINER\"/>");
 		lines.add("\t<classpathentry kind=\"con\" path=\"org.eclipse.jdt.USER_LIBRARY/Rainbow Library\"/>");
-		for (Bundle b : j) {
+		for (BundleDataX b : j) {
 			lines.add(String.format("\t<classpathentry kind=\"lib\" path=\"/rainbow/bundle/%s.jar\"/>", b.getId()));
 		}
 		lines.add("\t<classpathentry kind=\"output\" path=\"bin\"/>");
@@ -53,15 +51,15 @@ public class ClassPathMaker {
 		}
 	}
 
-	public void makeAll(boolean core) {
-		Dag<Bundle> dag = BundleAware.loadBundleDag();
+	public void makeAll(boolean rainbow) throws IOException {
+		Dag<BundleDataX> dag = BundleAware.loadBundleDag();
 		dag.dfsList().forEach(bundle -> {
-			if (bundle.getClassLoader() instanceof ProjectClassLoader)
-				make(bundle, dag.getAncestors(bundle), core);
+			if (bundle.isDev())
+				make(bundle, dag.getAncestors(bundle), rainbow);
 		});
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		ClassPathMaker maker = new ClassPathMaker();
 		maker.makeAll(args.length > 0);
 	}
