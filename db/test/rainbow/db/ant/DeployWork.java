@@ -32,11 +32,11 @@ public class DeployWork implements Runnable {
 	@Parameters(description = "model file name")
 	String modelFile;
 
-	@Parameters(index = "1..*", description = "init data dir")
-	List<Path> dataDirs;
-
-	@Option(names = { "-d", "--database" })
+	@Parameters(index = "1", description = "database type")
 	String database;
+
+	@Parameters(index = "2..*", description = "init data dir")
+	List<Path> dataDirs;
 
 	@Override
 	public void run() {

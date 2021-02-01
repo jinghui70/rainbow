@@ -119,36 +119,35 @@
 	</target>
 
 	<target name="MakeDevelopDatabase" description="Make develop database">
-		<java classname="rainbow.db.ant.DevDatabaseWork">
+		<java classname="rainbow.db.ant.DevWork">
 			<classpath>
 				<fileset dir="lib" includes="**/*.jar" />
 				<fileset dir="bundle" includes="db*.jar" />
 			</classpath>
-			<arg value="数据源配置名" />
+			<!-- 数据源配置名 -->
+			<arg value="demo" />
+			<!--
 			<arg value="初始化数据目录1" />
 			<arg value="初始化数据目录2" />
+			-->
 		</java>
 	</target>
 
 	<target name="deploy-database" description="Make deploy database">
 		<mkdir dir="${dist}/db" />
-		<java classname="rainbow.db.ant.DatabaseWork">
+		<java classname="rainbow.db.ant.DeployWork">
 			<classpath>
 				<fileset dir="lib" includes="**/*.jar" />
 				<fileset dir="bundle" includes="db*.jar" />
 			</classpath>
-			<arg value="demo" />
-			<!-- arg value="初始化数据目录" -->
-			<arg value="-t ${dist}/db" />
-		</java>
-		<java classname="rainbow.db.ant.DatabaseWork">
-			<classpath>
-				<fileset dir="lib" includes="**/*.jar" />
-				<fileset dir="bundle" includes="db*.jar" />
-			</classpath>
-			<arg value="demo" />
-			<!-- arg value="初始化数据目录" -->
-			<arg value="-o ${dist}/db" />
+			<!-- 模型文件名 -->
+			<arg value="demo.rdmx" />
+			<!-- 数据库类型 -->
+			<arg value="H2" />
+			<!--
+			<arg value="初始化数据目录1" />
+			<arg value="初始化数据目录2" />
+			-->
 		</java>
 	</target>
 

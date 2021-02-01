@@ -31,7 +31,7 @@ public class ModelPublisher implements Runnable {
 	}
 
 	public static Template getTemplate(String databaseType) {
-		return Engine.use().getTemplate(new ClassPathSource("rainbow/db/template", databaseType + "tpl"));
+		return Engine.use().getTemplate(new ClassPathSource("rainbow/db/template", databaseType + ".tpl"));
 	}
 
 	public static void publish(Model model, boolean drop, String databaseType, Path outputFile) {

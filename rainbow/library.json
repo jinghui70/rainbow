@@ -16,9 +16,6 @@
     "jar" : "org.opentest4j:opentest4j:1.2.0"
   }, {
     "jar" : "info.picocli:picocli:4.6.1"
-  }, {
-    "jar" : "com.jfinal:enjoy:4.9.06",
-    "source" : true
   } ],
   "runtime" : [ {
     "jar" : "org.slf4j:slf4j-api:1.7.30"
@@ -36,6 +33,9 @@
     "jar" : "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3"
   }, {
     "jar" : "com.google.guava:guava:28.2-jre"
+  }, {
+    "jar" : "com.jfinal:enjoy:4.9.06",
+    "source" : true
   }, {
     "jar" : "com.zaxxer:HikariCP:3.4.5"
   }, {

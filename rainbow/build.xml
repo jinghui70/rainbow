@@ -97,7 +97,9 @@
 		<copy todir="${dist}/workspace" preservelastmodified="true">
 			<fileset dir="init" includes="**/*.*" defaultexcludes="no" />
 		</copy>
-		<copy todir="${dist}/workspace/rainbow/conf" dir="conf" />
+		<copy todir="${dist}/workspace/rainbow/conf">
+			<fileset dir="conf" />
+		</copy>
 		<echo file="${dist}/workspace/rainbow/rainbow.version">${version}</echo>
 		<copy todir="${dist}/workspace/rainbow" file="${dist}/dev-${version}.zip" />
 		<copy todir="${dist}/workspace/rainbow" file="${dist}/deploy-${version}.zip" />
