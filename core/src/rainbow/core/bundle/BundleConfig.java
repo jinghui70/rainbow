@@ -42,7 +42,8 @@ public class BundleConfig {
 	public BundleConfig(Path configFile, Path configPath) {
 		this.configFile = configFile;
 		this.configPath = configPath;
-		root = JSON.parseObject(configFile);
+		if (configFile != null)
+			root = JSON.parseObject(configFile);
 	}
 
 	@SuppressWarnings("unchecked")

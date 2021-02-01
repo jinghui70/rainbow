@@ -1,10 +1,9 @@
-{
-	
-	model: "demo.rdmx",
-	type: "H2",
-	jdbcUrl: "jdbc:h2:~/db/DEMO;AUTO_SERVER=TRUE;IFEXISTS=FALSE",
-	username: "Io9vgV+91ODACa4Q24AC9A==",
-	cipher: "default",
-	encrypted: true,
-	password: null
+{	
+	"model": "demo.rdmx",
+	"type": "H2",
+	"jdbcUrl": "jdbc:h2:~/db/DEMO;AUTO_SERVER=TRUE;IFEXISTS=FALSE",
+	"username": "Io9vgV+91ODACa4Q24AC9A==",
+	"cipher": "default",
+	"encrypted": true,
+	"password": null
 }

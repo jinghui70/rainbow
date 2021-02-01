@@ -5,6 +5,7 @@ import static rainbow.core.util.Preconditions.checkNotNull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,21 +44,26 @@ public class DaoManagerImpl extends ConfigAwareObject
 
 	private Map<String, Dao> daoMap;
 
-	private List<String> daoNames;
+	private List<String> daoNames = Collections.emptyList();
 
 	private String defaultDao;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		Path path = bundleConfig.getConfigPath();
-		daoNames = Files.list(path).map(Path::getFileName).map(Path::toString).filter(s -> s.endsWith(".json"))
-				.map(s -> Utils.substringBefore(s, ".json")).collect(Collectors.toList());
-		int size = daoNames.size();
-		if (size == 1)
-			defaultDao = daoNames.get(0);
-		if (size > 0) {
-			daoMap = new HashMap<>(size);
-			logger.info("{} db config found: {}", size, daoNames);
+		if (Files.exists(path)) {
+			daoNames = Files.list(path).map(Path::getFileName) //
+					.map(Path::toString) //
+					.filter(s -> s.endsWith(".json")) //
+					.map(s -> Utils.substringBefore(s, ".json")) //
+					.collect(Collectors.toList());
+			int size = daoNames.size();
+			if (size == 1)
+				defaultDao = daoNames.get(0);
+			if (size > 0) {
+				daoMap = new HashMap<>(size);
+				logger.info("{} db config found: {}", size, daoNames);
+			}
 		}
 	}
 

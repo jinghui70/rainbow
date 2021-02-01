@@ -97,9 +97,10 @@
 		<copy todir="${dist}/workspace" preservelastmodified="true">
 			<fileset dir="init" includes="**/*.*" defaultexcludes="no" />
 		</copy>
-		<copy todir="${dist}/workspace/rainbow/conf" file="conf/core.json" />
+		<copy todir="${dist}/workspace/rainbow/conf" dir="conf" />
 		<echo file="${dist}/workspace/rainbow/rainbow.version">${version}</echo>
 		<copy todir="${dist}/workspace/rainbow" file="${dist}/dev-${version}.zip" />
+		<copy todir="${dist}/workspace/rainbow" file="${dist}/deploy-${version}.zip" />
 		<zip destfile="${dist}/workspace.zip" basedir="${dist}/workspace" defaultexcludes="no" />
 	</target>
 </project>

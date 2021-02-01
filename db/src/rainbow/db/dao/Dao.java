@@ -9,6 +9,7 @@ import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.PureColumn;
 import rainbow.db.database.Dialect;
 import rainbow.db.jdbc.JdbcTemplate;
+import rainbow.db.model.Table;
 
 /**
  * 类说明 ：DB访问器接口，封装了对一个DataSource的所有访问。一个DataSource只能有一个Dao实例。
@@ -208,7 +209,7 @@ public interface Dao extends Closeable {
 	 * @param tableName
 	 * @param columns
 	 */
-	void createTable(String tableName, List<? extends PureColumn> columns);
+	void createTable(Table table);
 
 	/**
 	 * 删表

@@ -3,6 +3,7 @@ package rainbow.db.dao.model;
 import java.util.Map;
 
 import rainbow.core.model.object.INameObject;
+import rainbow.core.util.Utils;
 import rainbow.core.util.converter.Converters;
 import rainbow.db.model.DataType;
 import rainbow.db.model.Field;
@@ -84,8 +85,10 @@ public class Column extends PureColumn implements INameObject {
 	}
 
 	public Column(Field src) {
-		this.name = src.getName();
 		this.code = src.getCode();
+		this.name = src.getName();
+		if (Utils.isNullOrEmpty(name))
+			this.name = this.code;
 		this.key = src.isKey();
 		this.mandatory = src.isMandatory();
 		this.length = src.getLength();

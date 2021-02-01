@@ -6,9 +6,7 @@ import rainbow.core.util.Utils;
 @Bean
 public class HelloServiceImpl implements HelloService {
 
-	public String hello(String name) {
-		if (Utils.isNullOrEmpty(name))
-			return "hello world!";
+	public String sayHello(String name) {
 		return "hello " + name + "!";
 	}
 }

@@ -2,6 +2,6 @@ package sample;
 
 public interface HelloService {
 
-	String hello(String name);
+	String sayHello(String name);
 
 }

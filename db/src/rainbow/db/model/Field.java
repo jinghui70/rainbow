@@ -13,7 +13,7 @@ public class Field extends BaseObject {
 	private boolean key;
 
 	private boolean mandatory;
-	
+
 	private Map<String, String> tags;
 
 	public DataType getType() {

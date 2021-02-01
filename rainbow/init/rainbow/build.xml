@@ -76,7 +76,7 @@
 
 	<target name="clear">
 		<delete dir="${dist}" />
-		<mkdir dir="${dist}"/>
+		<mkdir dir="${dist}" />
 	</target>
 	<target name="downloadJar">
 		<ant antfile="corelib.xml" />
@@ -110,7 +110,6 @@
 				<exclude name="core.jar" />
 			</fileset>
 		</copy>
-		<!-- 配置 -->
 		<copy todir="${dist}/deploy/conf" includeEmptyDirs="no">
 			<fileset dir="conf">
 				<exclude name="**/*.dev" />
@@ -119,6 +118,40 @@
 		</copy>
 	</target>
 
-	<target name="deploy" depends="build-deploy" description="deploy" />
+	<target name="MakeDevelopDatabase" description="Make develop database">
+		<java classname="rainbow.db.ant.DevDatabaseWork">
+			<classpath>
+				<fileset dir="lib" includes="**/*.jar" />
+				<fileset dir="bundle" includes="db*.jar" />
+			</classpath>
+			<arg value="数据源配置名" />
+			<arg value="初始化数据目录1" />
+			<arg value="初始化数据目录2" />
+		</java>
+	</target>
+
+	<target name="deploy-database" description="Make deploy database">
+		<mkdir dir="${dist}/db" />
+		<java classname="rainbow.db.ant.DatabaseWork">
+			<classpath>
+				<fileset dir="lib" includes="**/*.jar" />
+				<fileset dir="bundle" includes="db*.jar" />
+			</classpath>
+			<arg value="demo" />
+			<!-- arg value="初始化数据目录" -->
+			<arg value="-t ${dist}/db" />
+		</java>
+		<java classname="rainbow.db.ant.DatabaseWork">
+			<classpath>
+				<fileset dir="lib" includes="**/*.jar" />
+				<fileset dir="bundle" includes="db*.jar" />
+			</classpath>
+			<arg value="demo" />
+			<!-- arg value="初始化数据目录" -->
+			<arg value="-o ${dist}/db" />
+		</java>
+	</target>
+
+	<target name="deploy" depends="build-deploy,deploy-database" description="deploy" />
 
 </project>

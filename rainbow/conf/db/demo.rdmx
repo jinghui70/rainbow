@@ -1,6 +1,6 @@
 {
-	"label": "未命名",
-	"name": "Unkown",
+	"label": "示例数据库",
+	"name": "demo",
 	"tableTags": [
 		{
 			"name": "对象",

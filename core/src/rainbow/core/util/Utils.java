@@ -513,16 +513,20 @@ public abstract class Utils {
 	}
 
 	/**
-	 * 流转为字符串
+	 * Convert the input stream to a string and closes the stream
 	 * 
 	 * @param inputStream
 	 * @return
 	 * @throws IOException
 	 */
 	public static String streamToString(InputStream inputStream) throws IOException {
-		ByteArrayOutputStream result = new ByteArrayOutputStream();
-		copy(inputStream, result);
-		return result.toString(StandardCharsets.UTF_8.name());
+		try {
+			ByteArrayOutputStream result = new ByteArrayOutputStream();
+			copy(inputStream, result);
+			return result.toString(StandardCharsets.UTF_8.name());
+		} finally {
+			inputStream.close();
+		}
 	}
 
 	public static long copy(InputStream source, OutputStream sink) throws IOException {

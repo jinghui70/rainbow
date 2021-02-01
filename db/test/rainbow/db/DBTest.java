@@ -8,12 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.Map;
 
 import rainbow.core.util.json.JSON;
 import rainbow.db.dao.memory.MemoryDao;
-import rainbow.db.dao.model.Entity;
-import rainbow.db.database.DatabaseUtils;
 import rainbow.db.model.Model;
 
 public final class DBTest {
@@ -24,8 +21,7 @@ public final class DBTest {
 	public static MemoryDao createMemoryDao(Object source) throws IOException, SQLException {
 		try (InputStream is = sourceToInputStream(source)) {
 			Model model = JSON.parseObject(is, Model.class);
-			Map<String, Entity> entityMap = DatabaseUtils.resolveModel(model);
-			return new MemoryDao(entityMap);
+			return new MemoryDao(model);
 		}
 	}
 

@@ -48,7 +48,7 @@ public class Entity extends NameObject {
 
 	public void setColumns(List<Column> columns) {
 		this.columns = columns;
-		this.keys = this.columns.stream().filter(c -> c.isKey()).collect(Collectors.toList());
+		this.keys = this.columns.stream().filter(Column::isKey).collect(Collectors.toList());
 		this.columnMap = this.columns.stream().collect(Collectors.toMap(Column::getName, Function.identity()));
 	}
 
@@ -120,8 +120,11 @@ public class Entity extends NameObject {
 	}
 
 	public Entity(Table src) {
-		this.name = src.getName();
 		this.code = src.getCode();
+		this.name = src.getName();
+		if (Utils.isNullOrEmpty(name)) {
+			this.name = this.code;
+		}
 		this.label = src.getLabel();
 		setColumns(Utils.transform(src.getFields(), Column::new));
 		this.tags = src.getTags();

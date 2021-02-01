@@ -14,6 +14,11 @@
     "jar" : "org.apiguardian:apiguardian-api:1.1.0"
   }, {
     "jar" : "org.opentest4j:opentest4j:1.2.0"
+  }, {
+    "jar" : "info.picocli:picocli:4.6.1"
+  }, {
+    "jar" : "com.jfinal:enjoy:4.9.06",
+    "source" : true
   } ],
   "runtime" : [ {
     "jar" : "org.slf4j:slf4j-api:1.7.30"
@@ -22,8 +27,7 @@
   }, {
     "jar" : "ch.qos.logback:logback-core:1.2.3"
   }, {
-    "jar" : "com.fasterxml.jackson.core:jackson-core:2.11.3",
-    "source" : true
+    "jar" : "com.fasterxml.jackson.core:jackson-core:2.11.3"
   }, {
     "jar" : "com.fasterxml.jackson.core:jackson-annotations:2.11.3"
   }, {

@@ -1,12 +1,14 @@
 package rainbow.db.database;
 
-import java.util.Collection;
 import java.util.List;
 
+import com.jfinal.template.Template;
+
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.PureColumn;
 import rainbow.db.model.Field;
+import rainbow.db.model.Model;
+import rainbow.db.model.Table;
 
 /**
  * 数据库方言接口
@@ -73,12 +75,19 @@ public interface Dialect {
 	String clearTable(String tableName);
 
 	/**
+	 * 转DDL的模版
+	 * 
+	 * @return
+	 */
+	Template getTemplate();
+
+	/**
 	 * 转换一组实体为DDL字符串
 	 * 
 	 * @param entities
 	 * @return
 	 */
-	String toDDL(Collection<Entity> entities);
+	String toDDL(Model model, boolean drop);
 
 	/**
 	 * 转换一个实体为DDL字符串
@@ -86,16 +95,7 @@ public interface Dialect {
 	 * @param entity
 	 * @return
 	 */
-	String toDDL(Entity entity);
-
-	/**
-	 * 生成建表语句
-	 * 
-	 * @param tableName
-	 * @param columns
-	 * @return
-	 */
-	String toDDL(String tableName, List<? extends PureColumn> columns);
+	String toDDL(Table table);
 
 	/**
 	 * 删除表的语句

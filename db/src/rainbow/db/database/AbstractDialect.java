@@ -1,15 +1,21 @@
 package rainbow.db.database;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
+
+import com.jfinal.template.Engine;
+import com.jfinal.template.Template;
 
 import rainbow.core.model.exception.AppException;
 import rainbow.core.util.StringBuilderX;
+import rainbow.core.util.Utils;
 import rainbow.db.dao.Dao;
-import rainbow.db.dao.model.Entity;
 import rainbow.db.dao.model.PureColumn;
 import rainbow.db.model.Field;
+import rainbow.db.model.Model;
+import rainbow.db.model.Table;
 
 /**
  * 数据库方言接口
@@ -18,6 +24,8 @@ import rainbow.db.model.Field;
  * 
  */
 public abstract class AbstractDialect implements Dialect {
+
+	protected Template template;
 
 	@Override
 	public String getTableListSql() {
@@ -34,72 +42,52 @@ public abstract class AbstractDialect implements Dialect {
 		return "TRUNCATE TABLE " + tableName;
 	}
 
-	@Override
-	public String toDDL(Collection<Entity> entities) {
-		StringBuilderX ddl = new StringBuilderX();
-		entities.forEach(entity -> {
-			toDDL(ddl, entity.getCode(), entity.getColumns());
-			ddl.append(";\n");
-		});
-		return ddl.toString();
-	}
-
-	@Override
-	public String toDDL(Entity entity) {
-		return toDDL(entity.getCode(), entity.getColumns());
-	}
-
 	/**
-	 * 生成建表语句
+	 * 生成DDL的模版内容 模版参数:
 	 * 
-	 * @param tableName
-	 * @param columns
+	 * table: 仅输出一张表，
+	 * 
+	 * model: 输出整个model
+	 * 
+	 * drop: boolean, 输出model时是否输出drop table
+	 * 
 	 * @return
 	 */
 	@Override
-	public String toDDL(String tableName, List<? extends PureColumn> columns) {
-		StringBuilderX ddl = new StringBuilderX();
-		toDDL(ddl, tableName, columns);
-		return ddl.toString();
+	public String toDDL(Model model, boolean drop) {
+		return getTemplate().renderToString(Map.of("model", model, "drop", drop));
 	}
 
-	protected void toDDL(StringBuilderX ddl, String tableName, List<? extends PureColumn> columns) {
-		ddl.append("CREATE TABLE ").append(tableName).append("(");
-		List<PureColumn> keys = new ArrayList<PureColumn>();
-		for (PureColumn column : columns) {
-			column2DDL(ddl, column);
-			ddl.appendTempComma();
-			if (column.isKey())
-				keys.add(column);
-		}
-		if (keys.isEmpty()) {
-			ddl.clearTemp();
-		} else {
-			ddl.append("PRIMARY KEY(");
-			for (PureColumn c : keys) {
-				ddl.append(c.getCode()).appendTempComma();
+	@Override
+	public String toDDL(Table table) {
+		return getTemplate().renderToString(Map.of("table", table));
+	}
+
+	@Override
+	public Template getTemplate() {
+		if (template == null) {
+			try {
+				template = createTemplate();
+			} catch (IOException e) {
+				throw new RuntimeException("failed to create DDL template", e);
 			}
-			ddl.clearTemp();
-			ddl.append(")");
 		}
-		ddl.append(")");
+		return template;
 	}
 
-	protected void column2DDL(StringBuilderX sb, PureColumn column) {
-		sb.append(column.getCode()).append(" ").append(column.getType());
-		switch (column.getType()) {
-		case CHAR:
-		case VARCHAR:
-			sb.append("(").append(column.getLength()).append(")");
-			break;
-		case NUMERIC:
-			sb.append("(").append(column.getLength()).append(",").append(column.getPrecision()).append(")");
-			break;
-		default:
-			break;
-		}
-		if (column.isMandatory())
-			sb.append(" NOT NULL");
+	synchronized Template createTemplate() throws IOException {
+		if (template != null)
+			return template;
+		InputStream is = getTemplateStream();
+		if (is == null)
+			return DatabaseUtils.dialect("H2").getTemplate();
+		String str = Utils.streamToString(is);
+		return Engine.use().getTemplateByString(str, false);
+	}
+
+	protected InputStream getTemplateStream() {
+		return getClass().getClassLoader()
+				.getResourceAsStream("rainbow/db/template/" + getClass().getSimpleName() + ".tpl");
 	}
 
 	@Override
@@ -141,4 +129,20 @@ public abstract class AbstractDialect implements Dialect {
 		return sb.toString();
 	}
 
+	protected void column2DDL(StringBuilderX sb, PureColumn column) {
+		sb.append(column.getCode()).append(" ").append(column.getType());
+		switch (column.getType()) {
+		case CHAR:
+		case VARCHAR:
+			sb.append("(").append(column.getLength()).append(")");
+			break;
+		case NUMERIC:
+			sb.append("(").append(column.getLength()).append(",").append(column.getPrecision()).append(")");
+			break;
+		default:
+			break;
+		}
+		if (column.isMandatory())
+			sb.append(" NOT NULL");
+	}
 }

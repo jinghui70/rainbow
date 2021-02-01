@@ -25,6 +25,7 @@ import rainbow.db.database.Dialect;
 import rainbow.db.jdbc.ColumnMapRowMapper;
 import rainbow.db.jdbc.DataAccessException;
 import rainbow.db.jdbc.JdbcTemplate;
+import rainbow.db.model.Table;
 
 public class DaoImpl implements Dao {
 
@@ -287,8 +288,8 @@ public class DaoImpl implements Dao {
 	}
 
 	@Override
-	public void createTable(String tableName, List<? extends PureColumn> columns) {
-		execSql(dialect.toDDL(tableName, columns));
+	public void createTable(Table table) {
+		execSql(dialect.toDDL(table));
 	}
 
 	@Override
