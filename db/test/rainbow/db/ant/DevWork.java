@@ -91,9 +91,11 @@ public class DevWork implements Runnable {
 			throw new RuntimeException(e.getMessage());
 		}
 		for (String line : lines) {
-			Map<String, Object> map = JSON.parseObject(line);
-			neo.init(map);
-			dao.insert(neo);
+			if (Utils.hasContent(line) && !line.startsWith("//")) {
+				Map<String, Object> map = JSON.parseObject(line);
+				neo.init(map);
+				dao.insert(neo);
+			}
 		}
 	}
 

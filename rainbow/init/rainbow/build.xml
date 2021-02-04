@@ -132,15 +132,28 @@
 			-->
 		</java>
 	</target>
+	<target name="MakeInitDataFile" description="Make init datafile">
+		<java classname="rainbow.db.ant.InitDataFile">
+			<classpath>
+				<fileset dir="lib" includes="**/*.jar" />
+				<fileset dir="bundle" includes="db*.jar" />
+			</classpath>
+			<!-- conf/db目录下的模型文件名 -->
+			<arg value="demo.rdmx" />
+			<!--初始化数据目录 -->
+			<arg value="conf/db.dev/initdata" />
+		</java>
+	</target>
 
-	<target name="deploy-database" description="Make deploy database">
+	<!-- Make deploy database -->
+	<target name="deploy-database">
 		<mkdir dir="${dist}/db" />
 		<java classname="rainbow.db.ant.DeployWork">
 			<classpath>
 				<fileset dir="lib" includes="**/*.jar" />
 				<fileset dir="bundle" includes="db*.jar" />
 			</classpath>
-			<!-- 模型文件名 -->
+			<!-- conf/db目录下的模型文件名 -->
 			<arg value="demo.rdmx" />
 			<!-- 数据库类型 -->
 			<arg value="H2" />
