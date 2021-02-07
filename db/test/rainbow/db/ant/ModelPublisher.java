@@ -1,11 +1,13 @@
 package rainbow.db.ant;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
 import com.jfinal.template.source.ClassPathSource;
@@ -14,6 +16,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import rainbow.core.util.Utils;
 import rainbow.db.database.DatabaseUtils;
 import rainbow.db.model.Model;
 
@@ -21,12 +24,12 @@ import rainbow.db.model.Model;
 public class ModelPublisher implements Runnable {
 
 	public static void publish(Model model, boolean drop, Template template, Path outputFile) {
-		Map<String, Object> map = Map.of("model", model, "drop", drop);
+		Map<String, Object> map = ImmutableMap.of("model", model, "drop", drop);
 		template.render(map, outputFile.toFile());
 	}
 
 	public static void publish(Model model, boolean drop, Template template, Writer writer) {
-		Map<String, Object> map = Map.of("model", model, "drop", drop);
+		Map<String, Object> map = ImmutableMap.of("model", model, "drop", drop);
 		template.render(map, writer);
 	}
 
@@ -62,10 +65,10 @@ public class ModelPublisher implements Runnable {
 	@Override
 	public void run() {
 		Model model = DatabaseUtils.loadModel(modelFile);
-		try {
-			String tmpstr = Files.readString(templateFile);
+		try (InputStream is = Files.newInputStream(templateFile)) {
+			String tmpstr = Utils.streamToString(is);
 			Template template = Engine.use().getTemplateByString(tmpstr, false);
-			template.render(Map.of("model", model, "drop", drop), outputFile.toFile());
+			template.render(ImmutableMap.of("model", model, "drop", drop), outputFile.toFile());
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

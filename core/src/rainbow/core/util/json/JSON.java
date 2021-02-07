@@ -1,5 +1,7 @@
 package rainbow.core.util.json;
 
+import static rainbow.core.util.Preconditions.checkNotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -165,7 +167,8 @@ public class JSON {
 					break;
 				if (token.equals(JsonToken.FIELD_NAME)) {
 					String name = parser.currentName();
-					JavaType jt = mapper.constructType(typeMap.get(name));
+					Type type = checkNotNull(typeMap.get(name), "type of '{}' not exist", name);
+					JavaType jt = mapper.constructType(type);
 					parser.nextToken();
 					result.put(name, mapper.readValue(parser, jt));
 				}

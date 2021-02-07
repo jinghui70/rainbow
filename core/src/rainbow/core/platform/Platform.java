@@ -6,7 +6,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.registry.LocateRegistry;
-import java.util.Map;
 import java.util.Objects;
 
 import javax.management.MBeanServer;
@@ -16,6 +15,8 @@ import javax.management.remote.JMXServiceURL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableMap;
 
 import rainbow.core.bundle.BundleConfig;
 import rainbow.core.bundle.BundleManager;
@@ -59,7 +60,7 @@ public final class Platform {
 
 	private JMXConnectorServer cs;
 
-	private Context context = new Context(Map.of( //
+	private Context context = new Context(ImmutableMap.of( //
 			"mBeanServer", Bean.singleton(ManagementFactory.getPlatformMBeanServer(), MBeanServer.class), //
 			"bundleLoader", Bean.singleton(BundleLoader.class), //
 			"bundleManager", Bean.singleton(BundleManagerImpl.class) //

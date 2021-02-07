@@ -3,8 +3,8 @@ package rainbow.db.database;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
 
@@ -55,12 +55,12 @@ public abstract class AbstractDialect implements Dialect {
 	 */
 	@Override
 	public String toDDL(Model model, boolean drop) {
-		return getTemplate().renderToString(Map.of("model", model, "drop", drop));
+		return getTemplate().renderToString(ImmutableMap.of("model", model, "drop", drop));
 	}
 
 	@Override
 	public String toDDL(Table table) {
-		return getTemplate().renderToString(Map.of("table", table));
+		return getTemplate().renderToString(ImmutableMap.of("table", table));
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package rainbow.db.ant;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -11,6 +12,7 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
+import rainbow.core.util.Utils;
 import rainbow.db.database.DataSourceConfig;
 import rainbow.db.database.DatabaseUtils;
 import rainbow.db.jdbc.JdbcTemplate;
@@ -44,8 +46,8 @@ public class ExecSql implements Runnable {
 		for (Path file : sqlFiles) {
 			System.out.println("executing file: " + file.getFileName());
 			String sql;
-			try {
-				sql = Files.readString(file);
+			try (InputStream is = Files.newInputStream(file)) {
+				sql = Utils.streamToString(is);
 				j.execute(sql);
 			} catch (IOException e) {
 				e.printStackTrace();

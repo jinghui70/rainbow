@@ -88,7 +88,7 @@ public abstract class BundleClassLoader extends ClassLoader {
 		if (i != -1) {
 			String pkgname = name.substring(0, i);
 			// Check if package already loaded.
-			Package pkg = getDefinedPackage(pkgname);
+			Package pkg = getPackage(pkgname); // getDefinedPackage(pkgname);
 			if (pkg == null) {
 				definePackage(pkgname, null, null, null, null, null, null, null);
 			}

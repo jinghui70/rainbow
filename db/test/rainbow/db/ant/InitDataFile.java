@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableMap;
 import com.jfinal.template.Engine;
 import com.jfinal.template.Template;
 import com.jfinal.template.source.ClassPathSource;
@@ -58,7 +59,7 @@ public class InitDataFile implements Runnable {
 			Path file = output.resolve(t.getName() + ".json");
 			if (Files.isRegularFile(file))
 				throw new RuntimeException(file.getFileName().toString() + " already exist!");
-			template.render(Map.of("table", t), file.toFile());
+			template.render(ImmutableMap.of("table", t), file.toFile());
 		}
 	}
 

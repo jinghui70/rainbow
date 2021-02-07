@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import javax.sql.DataSource;
 
+import com.google.common.collect.ImmutableMap;
 import com.jfinal.template.Template;
 
 import picocli.CommandLine;
@@ -60,7 +61,7 @@ public class DevWork implements Runnable {
 		DataSource dataSource = DatabaseUtils.createDataSource(config);
 		DaoImpl dao = new DaoImpl(dataSource, null, // DDL用不到dialect
 				DatabaseUtils.resolveModel(model));
-		String ddl = template.renderToString(Map.of("model", model, "drop", true));
+		String ddl = template.renderToString(ImmutableMap.of("model", model, "drop", true));
 		dao.execSql(ddl);
 		if (Utils.hasContent(dataDirs))
 			insertPreset(dao);
@@ -68,6 +69,8 @@ public class DevWork implements Runnable {
 
 	private void insertPreset(Dao dao) {
 		for (Path dir : dataDirs) {
+			if (Files.notExists(dir))
+				continue;
 			System.out.println("load preset data under " + dir.getFileName());
 			try {
 				Files.list(dir).filter(f -> f.getFileName().toString().endsWith(".json")).sorted()

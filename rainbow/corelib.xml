@@ -10,7 +10,7 @@
 		<sequential>
 			<mkdir dir="lib/@{flag}"/>
 			<local name="g"/>
-			<pathconvert property="g">
+			<pathconvert dirsep="/" property="g">
 				<unpackagemapper from="*" to="*"/>
 				<string>@{group}</string>
 			</pathconvert>
