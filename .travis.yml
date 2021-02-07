@@ -1,10 +1,6 @@
-dist: focal
+dist: Trusty
 language: java
 
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
 jdk:
   - oraclejdk8
 
