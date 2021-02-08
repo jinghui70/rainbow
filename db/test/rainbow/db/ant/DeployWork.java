@@ -63,7 +63,7 @@ public class DeployWork implements Runnable {
 			for (Path p : dataDirs) {
 				System.out.println("processing preset data under " + p.getFileName());
 				Files.list(p).filter(f -> f.getFileName().toString().endsWith(".json")).sorted().forEach(f -> {
-					String entityName = Utils.substringBefore(file.getFileName().toString(), ".json");
+					String entityName = Utils.substringBefore(f.getFileName().toString(), ".json");
 					System.out.print("processing ");
 					System.out.println(entityName);
 					Entity entity = Objects.requireNonNull(entityMap.get(entityName));
@@ -84,37 +84,39 @@ public class DeployWork implements Runnable {
 		List<String> lines = Files.readAllLines(file);
 		List<String> values = new ArrayList<String>();
 		for (String line : lines) {
-			Map<String, Object> map = JSON.parseObject(line);
-			NeoBean neo = new NeoBean(entity, map);
-			values.clear();
-			StringBuilderX sql = new StringBuilderX("insert into ").append(entity.getCode()).append("(");
-			for (Column column : entity.getColumns()) {
-				Object v = neo.getObject(column);
-				if (v != null) {
-					sql.append(column.getCode());
-					sql.appendTempComma();
-					switch (column.getType()) {
-					case DOUBLE:
-					case INT:
-					case NUMERIC:
-					case LONG:
-					case SMALLINT:
-						values.add(v.toString());
-						break;
-					case BLOB:
-						throw new RuntimeException("not support byte");
-					default:
-						values.add("'" + v.toString() + "'");
-						break;
+			if (Utils.hasContent(line) && !line.startsWith("//")) {
+				Map<String, Object> map = JSON.parseObject(line);
+				NeoBean neo = new NeoBean(entity, map);
+				values.clear();
+				StringBuilderX sql = new StringBuilderX("insert into ").append(entity.getCode()).append("(");
+				for (Column column : entity.getColumns()) {
+					Object v = neo.getObject(column);
+					if (v != null) {
+						sql.append(column.getCode());
+						sql.appendTempComma();
+						switch (column.getType()) {
+						case DOUBLE:
+						case INT:
+						case NUMERIC:
+						case LONG:
+						case SMALLINT:
+							values.add(v.toString());
+							break;
+						case BLOB:
+							throw new RuntimeException("not support byte");
+						default:
+							values.add("'" + v.toString() + "'");
+							break;
+						}
 					}
 				}
+				sql.clearTemp().append(") values(");
+				for (String v : values) {
+					sql.append(v).appendTempComma();
+				}
+				sql.clearTemp().append(");");
+				writer.println(sql.toString());
 			}
-			sql.clearTemp().append(") values(");
-			for (String v : values) {
-				sql.append(v).appendTempComma();
-			}
-			sql.clearTemp().append(");");
-			writer.println(sql.toString());
 		}
 	}
 
